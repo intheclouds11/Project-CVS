@@ -1,0 +1,35 @@
+using System;
+using UnityEngine;
+
+public abstract class BaseEnemy : MonoBehaviour
+{
+    public bool canTarget = true;
+
+    public Health Health { get; protected set; }
+    protected PlayerController _player;
+
+
+    protected virtual void Awake()
+    {
+        Health = GetComponent<Health>();
+        Health.Died += OnDied;
+    }
+
+    protected void Start()
+    {
+        EnemyManager.Instance.RegisterEnemy(this);
+    }
+
+    protected virtual void Update()
+    {
+        if (!_player)
+        {
+            _player = GameManager.Instance.Player1;
+        }
+    }
+
+    protected void OnDied(GameObject obj)
+    {
+        gameObject.SetActive(false);
+    }
+}
