@@ -887,7 +887,7 @@ MonoBehaviour:
   _attackMoveSpeedCooldown: 0.1
   _knockbackTime: 0.2
   _knockbackSmoothing: 35
-  _dashSmoothing: 20
+  _dashSmoothing: 10
   _dashMaxDistance: 2.5
   _dashTime: 0.35
   _rotationTransform: {fileID: 8673189364770339060}

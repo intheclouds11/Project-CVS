@@ -225,9 +225,9 @@ public class PlayerController : MonoBehaviour
 
         while (startTime + _dashTime >= Time.time)
         {
-            var targetPosition = Vector3.Lerp(Rb.position, targetPos, _dashSmoothing * Time.deltaTime);
+            var targetPosition = Vector3.Lerp(Rb.position, targetPos, _dashSmoothing * Time.fixedDeltaTime);
             Rb.MovePosition(targetPosition);
-            yield return null;
+            yield return new WaitForFixedUpdate();
         }
 
         _isDashing = false;
