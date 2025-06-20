@@ -841,7 +841,7 @@ Camera:
   far clip plane: 5000
   field of view: 70
   orthographic: 1
-  orthographic size: 4.5
+  orthographic size: 5.05
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -6267,7 +6267,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TrackerSettings:
     BindingMode: 4
-    PositionDamping: {x: 1, y: 1, z: 1}
+    PositionDamping: {x: 4, y: 4, z: 4}
     AngularDampingMode: 0
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
@@ -6297,7 +6297,7 @@ MonoBehaviour:
     CustomLookAtTarget: 1
   Lens:
     FieldOfView: 70
-    OrthographicSize: 4.5
+    OrthographicSize: 5.05
     NearClipPlane: 0.1
     FarClipPlane: 5000
     Dutch: 0

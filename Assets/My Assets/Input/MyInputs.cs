@@ -134,7 +134,7 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
-                    ""initialStateCheck"": false
+                    ""initialStateCheck"": true
                 },
                 {
                     ""name"": ""Activate Ability"",
@@ -326,7 +326,7 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""302e6c86-bdff-4236-99b4-0fdef791e22c"",
                     ""path"": ""<Gamepad>/rightTrigger"",
-                    ""interactions"": """",
+                    ""interactions"": ""Press"",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Dash"",

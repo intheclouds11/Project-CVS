@@ -48,7 +48,7 @@
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 },
                 {
                     "name": "Activate Ability",
@@ -240,7 +240,7 @@
                     "name": "",
                     "id": "302e6c86-bdff-4236-99b4-0fdef791e22c",
                     "path": "<Gamepad>/rightTrigger",
-                    "interactions": "",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": "",
                     "action": "Dash",

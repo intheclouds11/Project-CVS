@@ -18,7 +18,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float _knockbackTime = 0.2f;
     [SerializeField]
-    private float _knockbackSmoothing = 5f;
+    private float _knockbackSmoothing = 35f;
+    [SerializeField]
+    private float _dashSmoothing = 20f;
     [SerializeField]
     private float _dashMaxDistance = 2.5f;
     [SerializeField]
@@ -173,9 +175,9 @@ public class PlayerController : MonoBehaviour
 
     private void HandleRotation()
     {
-        if (!_playerAttack.AttackInputHeld || _rotateDirection.magnitude <= 0f || _rotateDirection.magnitude <= 0.7f) return;
+        if (!_playerAttack.AttackInputHeld) return;
 
-        if (_inputManager.Scheme == InputManager.ControlScheme.Gamepad)
+        if (_inputManager.Scheme == InputManager.ControlScheme.Gamepad && _inputManager.IsAiming())
         {
             var lookAtRotation = Quaternion.LookRotation(_rotateDirection);
             _rotationTransform.localRotation = lookAtRotation;
@@ -191,13 +193,36 @@ public class PlayerController : MonoBehaviour
     {
         if (_dashWasPressed)
         {
-            // _isDashing = true;
+            if (_isDashing)
+            {
+                // buffer next dash
+            }
+
+            StartCoroutine(DashCoroutine());
             _dashParticleSystem.Play();
         }
 
         if (_isDashing)
         {
         }
+    }
+    
+    private IEnumerator DashCoroutine()
+    {
+        _isDashing = true;
+
+        Vector3 dashDir = _rotationTransform.forward * _dashMaxDistance;
+        var targetPos = Rb.position + dashDir;
+        float startTime = Time.time;
+
+        while (startTime + _dashTime >= Time.time)
+        {
+            var targetPosition = Vector3.Lerp(Rb.position, targetPos, _dashSmoothing * Time.deltaTime);
+            Rb.MovePosition(targetPosition);
+            yield return null;
+        }
+
+        _isDashing = false;
     }
 
     private void OnPlayerAttack(bool critAttack)

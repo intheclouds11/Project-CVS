@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class PlayerAttack : MonoBehaviour
@@ -9,11 +10,11 @@ public class PlayerAttack : MonoBehaviour
     [field: SerializeField]
     public float PlayerCritKnockbackDistance { get; private set; } = 0.8f;
     [SerializeField]
-    private float _critAttackChargeTime = 0.6f;
+    private float _critChargeTime = 0.4f;
     [SerializeField]
-    private float _critAttackGraceTime = 0.1f;
+    private float _critGraceTime = 0.1f;
     [SerializeField]
-    private AudioClip _chargingAttackSFX;
+    private AudioClip _chargingSFX;
     [SerializeField]
     private Slider _chargeMeter;
     [SerializeField]
@@ -24,6 +25,10 @@ public class PlayerAttack : MonoBehaviour
     private Transform _projectileSpawnPoint;
     [SerializeField]
     private GameObject _projectilePrefab;
+    [SerializeField]
+    private AudioClip _basicSFX;
+    [SerializeField]
+    private AudioClip _critSFX;
     
     public event Action<bool> Attacked;
     public bool AttackInputHeld { get; private set; }
@@ -36,9 +41,9 @@ public class PlayerAttack : MonoBehaviour
     {
         _inputManager = InputManager.Instance;
         _player = FindAnyObjectByType<PlayerController>();
-        _chargeMeter.maxValue = _critAttackChargeTime + _critAttackGraceTime;
+        _chargeMeter.maxValue = _critChargeTime + _critGraceTime;
         _critRange.maxValue = _chargeMeter.maxValue;
-        _critRange.value = _critAttackGraceTime;
+        _critRange.value = _critGraceTime;
         _chargeMeterCanvasGroup.alpha = 0.25f;
     }
 
@@ -49,14 +54,14 @@ public class PlayerAttack : MonoBehaviour
         CheckInput();
         HandleChargeAttack();
     }
-
+    
     private void CheckInput()
     {
         if (_inputManager.AttackWasPressed)
         {
             AttackInputHeld = true;
         }
-        else if (_inputManager.AttackWasReleased)
+        else if (AttackInputHeld && _inputManager.AttackWasReleased)
         {
             AttackInputHeld = false;
             Attack();
@@ -67,8 +72,8 @@ public class PlayerAttack : MonoBehaviour
     {
         if (AttackInputHeld)
         {
-            _chargeMeter.value += Time.deltaTime;
             _attackHeldTime += Time.deltaTime;
+            _chargeMeter.value += Time.deltaTime;
             _chargeMeterCanvasGroup.alpha = 1f;
         }
         else
@@ -81,14 +86,14 @@ public class PlayerAttack : MonoBehaviour
     private void Attack()
     {
         bool critAttack = false;
-        if (_attackHeldTime >= _critAttackChargeTime && _attackHeldTime <= _critAttackChargeTime + _critAttackGraceTime)
+        if (_attackHeldTime >= _critChargeTime && _attackHeldTime <= _critChargeTime + _critGraceTime)
         {
-            Debug.Log($"Crit attack!");
+            // AudioManager.Instance.PlaySound(transform, _critSFX);
             critAttack = true;
         }
         else
         {
-            Debug.Log($"Basic attack..");
+            // AudioManager.Instance.PlaySound(transform, _basicSFX);
         }
 
         _attackHeldTime = 0f;

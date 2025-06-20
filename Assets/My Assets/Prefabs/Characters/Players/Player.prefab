@@ -887,8 +887,9 @@ MonoBehaviour:
   _attackMoveSpeedCooldown: 0.1
   _knockbackTime: 0.2
   _knockbackSmoothing: 35
+  _dashSmoothing: 20
   _dashMaxDistance: 2.5
-  _dashTime: 0.5
+  _dashTime: 0.35
   _rotationTransform: {fileID: 8673189364770339060}
   _lookAt: {fileID: 2451761307776542671}
   _dashParticleSystem: {fileID: 198064705231385314, guid: 3e4e9c6a4ac7e10418454a21dd359975, type: 3}
@@ -908,14 +909,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <PlayerBasicKnockbackDistance>k__BackingField: 0.3
   <PlayerCritKnockbackDistance>k__BackingField: 0.6
-  _critAttackChargeTime: 0.4
-  _critAttackGraceTime: 0.1
-  _chargingAttackSFX: {fileID: 8300000, guid: 025e58e63097d8744adac7c91c9516bf, type: 3}
+  _critChargeTime: 0.4
+  _critGraceTime: 0.1
+  _chargingSFX: {fileID: 0}
   _chargeMeter: {fileID: 5014963689756114707}
   _critRange: {fileID: 6769001076037924196}
   _chargeMeterCanvasGroup: {fileID: 1835432341648244895}
   _projectileSpawnPoint: {fileID: 8964516455089631635}
   _projectilePrefab: {fileID: 3904565489924947698, guid: 8ed770000db2d6c4e9ab175ff2f907b6, type: 3}
+  _basicSFX: {fileID: 0}
+  _critSFX: {fileID: 0}
 --- !u!114 &1889821891905050348
 MonoBehaviour:
   m_ObjectHideFlags: 0
