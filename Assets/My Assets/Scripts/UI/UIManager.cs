@@ -19,7 +19,7 @@ public class UIManager : MonoBehaviour
 
     private void Update()
     {
-        if (CanShowPauseScreen() && InputManager.instance.pauseMenuInputPressed)
+        if (CanShowPauseScreen() && InputManager.Instance.PauseWasPressed)
         {
             PauseMenu.Instance.OnPauseButtonPressed();
         }

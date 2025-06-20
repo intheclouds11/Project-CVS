@@ -36,7 +36,7 @@ public class Health : MonoBehaviour
 
     private void OnDied()
     {
-        AudioManager.PlaySound(transform, _diedSfx);
+        AudioManager.Instance.PlaySound(transform, _diedSfx);
         Instantiate(_diedVfx, transform.position, transform.rotation);
         Died?.Invoke(gameObject);
     }

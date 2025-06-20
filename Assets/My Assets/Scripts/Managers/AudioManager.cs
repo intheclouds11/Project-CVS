@@ -18,7 +18,7 @@ public class AudioManager : MonoBehaviour
     /// Returns index of AudioSource that allows classes to control the AudioSource via AudioManager.
     /// </summary>
     /// <returns></returns>
-    public static int PlaySound(Transform tr, AudioClip clip, bool follow = true, bool loop = false)
+    public int PlaySound(Transform tr, AudioClip clip, bool follow = true, bool loop = false)
     {
         for (int i = 0; i < _audioSources.Count; i++)
         {
@@ -36,14 +36,11 @@ public class AudioManager : MonoBehaviour
         return -1;
     }
 
-    public void StopSound(int index, bool detach = true)
+    public void StopSound(int index)
     {
         var audioSource = _audioSources[index];
-        if (detach)
-        {
-            audioSource.transform.parent = transform;
-            audioSource.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-        }
+        audioSource.transform.parent = transform;
+        audioSource.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 
         audioSource.Stop();
     }

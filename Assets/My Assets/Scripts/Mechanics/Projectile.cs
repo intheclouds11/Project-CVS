@@ -49,7 +49,7 @@ public class Projectile : MonoBehaviour
             gameObject.tag = "EnemyProjectile";
         }
 
-        AudioManager.PlaySound(transform, _fireSfx);
+        AudioManager.Instance.PlaySound(transform, _fireSfx);
         Vector3 forceToAdd = transform.forward * _speed;
         GetComponent<Rigidbody>().AddForce(forceToAdd, ForceMode.Impulse);
     }
@@ -78,7 +78,7 @@ public class Projectile : MonoBehaviour
         
         if (IsDeflected)
         {
-            AudioManager.PlaySound(transform, _deflectedSfx);
+            AudioManager.Instance.PlaySound(transform, _deflectedSfx);
             IsDeflected = false;
             isPlayerProjectile = true;
             yield break;
@@ -137,6 +137,6 @@ public class Projectile : MonoBehaviour
             Instantiate(_splashVfxPrefab, transform.position, _splashVfxPrefab.transform.rotation);
         }
 
-        AudioManager.PlaySound(transform, _impactSfx);
+        AudioManager.Instance.PlaySound(transform, _impactSfx);
     }
 }

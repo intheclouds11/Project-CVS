@@ -1,6 +1,6 @@
-using System;
 using System.Collections;
 using Unity.Cinemachine;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -12,35 +12,49 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float _moveSpeed = 2.5f;
     [SerializeField]
-    private float _rotateSmoothing = 3f;
+    private float _attackMoveSpeedMultiplier = 0.5f;
     [SerializeField]
-    private float _gravity = 3f;
+    private float _attackMoveSpeedCooldown = 0.5f;
+    [SerializeField]
+    private float _knockbackTime = 0.2f;
+    [SerializeField]
+    private float _knockbackSmoothing = 5f;
+    [SerializeField]
+    private float _dashMaxDistance = 2.5f;
+    [SerializeField]
+    private float _dashTime = 0.5f;
+
+    [Header("Transforms")]
     [SerializeField]
     private Transform _rotationTransform;
     [SerializeField]
     private Transform _lookAt;
-    public Transform GetLookAtTransform() => _lookAt;
+
+    [Header("FX")]
     [SerializeField]
-    private Transform _projectileSpawnPoint;
+    private ParticleSystem _dashParticleSystem;
     [SerializeField]
-    private GameObject _projectilePrefab;
+    private AudioClip _dashSFX;
 
     public Health Health { get; protected set; }
+    public Rigidbody Rb { get; private set; }
 
     private bool _allowForward;
     private bool _allowBackward;
-    private Vector3 _mouseHitPosition;
-    private bool _mouseHitting;
-    private Rigidbody _rb;
     private InputManager _inputManager;
-    private CinemachineCamera virtualCamera;
-    private Vector3 _moveInput;
-    private Vector3 _rotateInput;
+    private CinemachineCamera _virtualCamera;
+    private PlayerAttack _playerAttack;
+    private Vector2 _moveInput;
+    private Vector3 _rotateDirection;
+    private bool _dashWasPressed;
+    private bool _isDashing;
     private bool _isGrounded;
+    private bool _applyingKnockback;
+    private float _lastAttackTime;
 
     [Header("Debug")]
     [SerializeField]
-    private bool showMouseDebugSphere = true;
+    private bool showMouseAimDirection = true;
 
 
     private void Awake()
@@ -49,22 +63,24 @@ public class PlayerController : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;
         Health = GetComponent<Health>();
         Health.Died += OnDied;
-        _rb = GetComponent<Rigidbody>();
+        Rb = GetComponent<Rigidbody>();
+        _playerAttack = GetComponent<PlayerAttack>();
+        _playerAttack.Attacked += OnPlayerAttack;
     }
 
     private void Start()
     {
-        _inputManager = InputManager.instance;
-        virtualCamera = FindAnyObjectByType<CinemachineCamera>();
-        virtualCamera.Follow = _lookAt; // Set follower
+        _inputManager = InputManager.Instance;
+        _virtualCamera = FindAnyObjectByType<CinemachineCamera>();
+        _virtualCamera.Follow = _lookAt; // Set follower
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
     {
-        virtualCamera = FindAnyObjectByType<CinemachineCamera>();
-        if (virtualCamera)
+        _virtualCamera = FindAnyObjectByType<CinemachineCamera>();
+        if (_virtualCamera)
         {
-            virtualCamera.Follow = _lookAt; // Set follower
+            _virtualCamera.Follow = _lookAt;
         }
     }
 
@@ -73,11 +89,6 @@ public class PlayerController : MonoBehaviour
         if (PauseMenu.Instance.gameObject.activeSelf) return;
 
         CheckInputs();
-
-        if (_inputManager.fireWasPressed)
-        {
-            Fire();
-        }
     }
 
     private void FixedUpdate()
@@ -85,43 +96,40 @@ public class PlayerController : MonoBehaviour
         if (PauseMenu.Instance.gameObject.activeSelf) return;
 
         CheckMovementCollision();
-        Move();
-        Rotate();
+
+        if (!_isDashing)
+        {
+            HandleMovement();
+        }
+
+        HandleRotation();
+        HandleDash();
     }
 
     private void CheckInputs()
     {
-        CheckMouseHitResult();
-        _moveInput = new Vector3(_inputManager.translation.x, 0f, _inputManager.translation.y);
-        if (_inputManager.controlScheme == InputManager.ControlScheme.Gamepad)
-        {
-            _rotateInput = new Vector3(_inputManager.direction.x, 0f, _inputManager.direction.y);
-        }
-        else if (_inputManager.controlScheme == InputManager.ControlScheme.MouseKeyboard)
-        {
-            _rotateInput = _mouseHitPosition - _rb.position;
-        }
-    }
+        _moveInput = _inputManager.Translation;
 
-    private void CheckMouseHitResult()
-    {
-        var pointerPosition = Mouse.current.position.ReadValue();
-        var ray = Camera.main.ScreenPointToRay(pointerPosition);
+        if (_inputManager.Scheme == InputManager.ControlScheme.Gamepad)
+        {
+            _rotateDirection = new Vector3(_inputManager.Direction.x, 0f, _inputManager.Direction.y);
+        }
+        else if (_inputManager.Scheme == InputManager.ControlScheme.MouseKeyboard)
+        {
+            // Get playerToCursorDirection
+            Vector3 playerScreenPos = Camera.main.WorldToScreenPoint(transform.position);
+            Vector3 mouseScreenPos = Input.mousePosition;
+            Vector3 playerToCursorDirection = (mouseScreenPos - playerScreenPos).normalized;
+            _rotateDirection = playerToCursorDirection;
+        }
 
-        if (Physics.Raycast(ray, out var hit, Mathf.Infinity, ~LayerMask.GetMask("Friendly")))
-        {
-            _mouseHitting = true;
-            _mouseHitPosition = hit.point;
-        }
-        else
-        {
-            _mouseHitting = false;
-        }
+        _dashWasPressed = _inputManager.DashWasPressed;
     }
 
     private void CheckMovementCollision()
     {
-        if (Physics.BoxCast(_lookAt.position, transform.localScale * 0.1f, transform.forward, out var hitFwd, Quaternion.identity,
+        if (Physics.BoxCast(_lookAt.position, transform.localScale * 0.1f, _rotationTransform.forward, out var hitFwd,
+                Quaternion.identity,
                 0.1f))
         {
             _allowForward = false;
@@ -131,7 +139,8 @@ public class PlayerController : MonoBehaviour
             _allowForward = true;
         }
 
-        if (Physics.BoxCast(_lookAt.position, transform.localScale * 0.1f, -transform.forward, out var hitBwd, Quaternion.identity,
+        if (Physics.BoxCast(_lookAt.position, transform.localScale * 0.1f, -_rotationTransform.forward, out var hitBwd,
+                Quaternion.identity,
                 0.2f))
         {
             _allowBackward = false;
@@ -142,41 +151,78 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void Move()
+    private void HandleMovement()
     {
-        if (_moveInput != Vector3.zero && (_allowForward || _allowBackward))
+        if (_applyingKnockback) return;
+
+        float moveSpeed = !_playerAttack.AttackInputHeld ? _moveSpeed : _moveSpeed * _attackMoveSpeedMultiplier;
+
+        if (_lastAttackTime + _attackMoveSpeedCooldown >= Time.time)
         {
-            Vector3 moveDirection = _rb.rotation * _moveInput;
-            Vector3 targetPos = _rb.position + moveDirection * (_moveSpeed * Time.fixedDeltaTime);
-            _rb.MovePosition(targetPos);
+            return;
+        }
+
+        if (_moveInput != Vector2.zero && (_allowForward || _allowBackward))
+        {
+            var moveDirection = new Vector3(_moveInput.x, 0f, _moveInput.y);
+            Vector3 targetPos = Rb.position + moveDirection * (moveSpeed * Time.fixedDeltaTime);
+            Rb.MovePosition(targetPos);
+            if (!_playerAttack.AttackInputHeld) _rotationTransform.rotation = Quaternion.LookRotation(moveDirection);
         }
     }
 
-    private void Rotate()
+    private void HandleRotation()
     {
-        if (_inputManager.controlScheme == InputManager.ControlScheme.Gamepad && _rotateInput.magnitude > 0.7f)
-        {
-            var lookAtRotation = Quaternion.LookRotation(_rotateInput);
-            _rotationTransform.localRotation = Quaternion.RotateTowards(_rotationTransform.localRotation, lookAtRotation,
-                _rotateSmoothing * Time.fixedDeltaTime);
-        }
-        else if (_inputManager.controlScheme == InputManager.ControlScheme.MouseKeyboard)
-        {
-            Debug.DrawRay(_rb.position, _rotateInput, Color.red);
+        if (!_playerAttack.AttackInputHeld || _rotateDirection.magnitude <= 0f || _rotateDirection.magnitude <= 0.7f) return;
 
-            var directionYaw = new Vector3(_rotateInput.x, 0f, _rotateInput.z);
-            var lookAtRotation = Quaternion.LookRotation(directionYaw);
-            _rotationTransform.rotation =
-                Quaternion.RotateTowards(_rotationTransform.rotation, lookAtRotation, _rotateSmoothing * Time.fixedDeltaTime);
+        if (_inputManager.Scheme == InputManager.ControlScheme.Gamepad)
+        {
+            var lookAtRotation = Quaternion.LookRotation(_rotateDirection);
+            _rotationTransform.localRotation = lookAtRotation;
+        }
+        else if (_inputManager.Scheme == InputManager.ControlScheme.MouseKeyboard)
+        {
+            float angle = Mathf.Atan2(_rotateDirection.y, _rotateDirection.x) * Mathf.Rad2Deg;
+            _rotationTransform.rotation = Quaternion.Euler(0f, -angle + 90f, 0f);
         }
     }
 
-    private void Fire()
+    private void HandleDash()
     {
-        _rb.AddForce(-_projectileSpawnPoint.forward * 1.5f, ForceMode.Impulse);
+        if (_dashWasPressed)
+        {
+            // _isDashing = true;
+            _dashParticleSystem.Play();
+        }
 
-        var projectile = Instantiate(_projectilePrefab, _projectileSpawnPoint.position, _projectileSpawnPoint.rotation);
-        projectile.GetComponent<SawBlade>().isPlayerProjectile = true;
+        if (_isDashing)
+        {
+        }
+    }
+
+    private void OnPlayerAttack(bool critAttack)
+    {
+        StartCoroutine(KnockbackCoroutine(critAttack));
+        _lastAttackTime = Time.time;
+    }
+
+    private IEnumerator KnockbackCoroutine(bool critAttack)
+    {
+        _applyingKnockback = true;
+
+        var amount = critAttack ? _playerAttack.PlayerCritKnockbackDistance : _playerAttack.PlayerBasicKnockbackDistance;
+        Vector3 knockbackDir = -_rotationTransform.forward * amount;
+        var targetPos = Rb.position + knockbackDir;
+        float startTime = Time.time;
+
+        while (startTime + _knockbackTime >= Time.time)
+        {
+            var targetPosition = Vector3.Lerp(Rb.position, targetPos, _knockbackSmoothing * Time.deltaTime);
+            Rb.MovePosition(targetPosition);
+            yield return null;
+        }
+
+        _applyingKnockback = false;
     }
 
     private void OnDied(GameObject deadObj)
@@ -186,8 +232,8 @@ public class PlayerController : MonoBehaviour
 
     public void Respawn(Vector3 position, Quaternion rotation, bool controllable)
     {
-        _rb.position = position;
-        _rb.rotation = rotation;
+        Rb.position = position;
+        Rb.rotation = rotation;
         enabled = controllable;
         Health.OnRespawn();
     }
@@ -195,10 +241,10 @@ public class PlayerController : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if (showMouseDebugSphere && _mouseHitting)
+        if (showMouseAimDirection)
         {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(_mouseHitPosition, 0.2f);
+            // Gizmos.color = Color.red;
+            // Gizmos.DrawWireSphere(_mouseHitPosition, 0.2f);
         }
     }
 }

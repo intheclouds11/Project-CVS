@@ -23,6 +23,8 @@ public class PlayerSpawnPoint : MonoBehaviour
         {
             _player.GetComponent<PlayerController>().Respawn(transform.position, transform.rotation, true);
         }
+        
+        gameObject.SetActive(false);
     }
 
     public GameObject Spawn()
