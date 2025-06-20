@@ -18,7 +18,7 @@ public class AudioManager : MonoBehaviour
     /// Returns index of AudioSource that allows classes to control the AudioSource via AudioManager.
     /// </summary>
     /// <returns></returns>
-    public int PlaySound(Transform tr, AudioClip clip, bool follow = true, bool loop = false)
+    public int PlaySound(Transform tr, AudioClip clip, bool follow = true, bool loop = false, float volume = 1f, float pitch = 1f)
     {
         for (int i = 0; i < _audioSources.Count; i++)
         {
@@ -26,6 +26,8 @@ public class AudioManager : MonoBehaviour
             if (!audioSource.isPlaying)
             {
                 audioSource.loop = loop;
+                audioSource.volume = volume;
+                audioSource.pitch = pitch;
                 audioSource.transform.position = tr.position;
                 if (follow) audioSource.gameObject.GetComponent<Follower>().SetTarget(tr);
                 audioSource.PlayOneShot(clip);

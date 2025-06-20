@@ -30,7 +30,7 @@ public class SawBlade : MonoBehaviour
 
     private void Start()
     {
-        AudioManager.Instance.PlaySound(transform, _launchSfx);
+        AudioManager.Instance.PlaySound(transform, _launchSfx, true, false, 0.6f);
         Invoke(nameof(PlayLoopAudio), 0.1f);
 
         Vector3 forceToAdd = transform.forward * _speed;
@@ -39,7 +39,7 @@ public class SawBlade : MonoBehaviour
 
     private void PlayLoopAudio()
     {
-        _loopAudioSourceIndex = AudioManager.Instance.PlaySound(transform, _bladeSpinLoopSfx, true, true);
+        _loopAudioSourceIndex = AudioManager.Instance.PlaySound(transform, _bladeSpinLoopSfx, true, true, 0.6f);
     }
 
     private void OnTriggerEnter(Collider other)

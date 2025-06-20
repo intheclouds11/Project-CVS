@@ -5,16 +5,12 @@ using UnityEngine.UI;
 
 public class PlayerAttack : MonoBehaviour
 {
-    [field: SerializeField]
-    public float PlayerBasicKnockbackDistance { get; private set; } = 0.2f;
-    [field: SerializeField]
-    public float PlayerCritKnockbackDistance { get; private set; } = 0.8f;
+    [field: SerializeField] public float PlayerBasicKnockbackDistance { get; private set; } = 0.2f;
+    [field: SerializeField] public float PlayerCritKnockbackDistance { get; private set; } = 0.8f;
     [SerializeField]
     private float _critChargeTime = 0.4f;
     [SerializeField]
     private float _critGraceTime = 0.1f;
-    [SerializeField]
-    private AudioClip _chargingSFX;
     [SerializeField]
     private Slider _chargeMeter;
     [SerializeField]
@@ -26,15 +22,18 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField]
     private GameObject _projectilePrefab;
     [SerializeField]
+    private AudioClip _chargingSFX;
+    [SerializeField]
     private AudioClip _basicSFX;
     [SerializeField]
     private AudioClip _critSFX;
-    
+
     public event Action<bool> Attacked;
     public bool AttackInputHeld { get; private set; }
     private PlayerController _player;
     private InputManager _inputManager;
     private float _attackHeldTime;
+    private bool _enteredCritThreshold;
 
 
     private void Awake()
@@ -54,18 +53,35 @@ public class PlayerAttack : MonoBehaviour
         CheckInput();
         HandleChargeAttack();
     }
-    
+
     private void CheckInput()
     {
         if (_inputManager.AttackWasPressed)
         {
             AttackInputHeld = true;
         }
-        else if (AttackInputHeld && _inputManager.AttackWasReleased)
+        else if (AttackInputHeld)
         {
-            AttackInputHeld = false;
-            Attack();
+            if (!_enteredCritThreshold && WithinCritThreshold())
+            {
+                _enteredCritThreshold = true;
+                OnEnteredCritThreshold();
+            }
+
+            if (_inputManager.AttackWasReleased)
+            {
+                AttackInputHeld = false;
+                _enteredCritThreshold = false;
+                Attack();
+            }
         }
+    }
+
+    private void OnEnteredCritThreshold()
+    {
+        // Debug.Log($"Entered crit threshold");
+        AudioManager.Instance.PlaySound(transform, _chargingSFX);
+        // todo: visual indicator (flash like PO)
     }
 
     private void HandleChargeAttack()
@@ -86,18 +102,23 @@ public class PlayerAttack : MonoBehaviour
     private void Attack()
     {
         bool critAttack = false;
-        if (_attackHeldTime >= _critChargeTime && _attackHeldTime <= _critChargeTime + _critGraceTime)
+        if (WithinCritThreshold())
         {
-            // AudioManager.Instance.PlaySound(transform, _critSFX);
+            AudioManager.Instance.PlaySound(transform, _critSFX, true, false, 1.4f, 1.3f);
             critAttack = true;
         }
         else
         {
-            // AudioManager.Instance.PlaySound(transform, _basicSFX);
+            AudioManager.Instance.PlaySound(transform, _basicSFX, true, false, 1.4f);
         }
 
         _attackHeldTime = 0f;
         Instantiate(_projectilePrefab, _projectileSpawnPoint.position, _projectileSpawnPoint.rotation);
         Attacked?.Invoke(critAttack);
+    }
+
+    private bool WithinCritThreshold()
+    {
+        return _attackHeldTime >= _critChargeTime && _attackHeldTime <= _critChargeTime + _critGraceTime;
     }
 }

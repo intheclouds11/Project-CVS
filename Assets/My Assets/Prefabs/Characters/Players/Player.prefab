@@ -882,7 +882,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05e437abce6d6dd4ea87dadebe0e8705, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveSpeed: 2.5
+  _moveSpeed: 3
   _attackMoveSpeedMultiplier: 0.5
   _attackMoveSpeedCooldown: 0.1
   _knockbackTime: 0.2
@@ -911,14 +911,14 @@ MonoBehaviour:
   <PlayerCritKnockbackDistance>k__BackingField: 0.6
   _critChargeTime: 0.4
   _critGraceTime: 0.1
-  _chargingSFX: {fileID: 0}
   _chargeMeter: {fileID: 5014963689756114707}
   _critRange: {fileID: 6769001076037924196}
   _chargeMeterCanvasGroup: {fileID: 1835432341648244895}
   _projectileSpawnPoint: {fileID: 8964516455089631635}
   _projectilePrefab: {fileID: 3904565489924947698, guid: 8ed770000db2d6c4e9ab175ff2f907b6, type: 3}
-  _basicSFX: {fileID: 0}
-  _critSFX: {fileID: 0}
+  _chargingSFX: {fileID: 8300000, guid: 025e58e63097d8744adac7c91c9516bf, type: 3}
+  _basicSFX: {fileID: 8300000, guid: 3c7fcea88ae1ee34083baf2d5064e691, type: 3}
+  _critSFX: {fileID: 8300000, guid: 3c7fcea88ae1ee34083baf2d5064e691, type: 3}
 --- !u!114 &1889821891905050348
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2162,7 +2162,7 @@ Transform:
   m_GameObject: {fileID: 4952987608243422309}
   serializedVersion: 2
   m_LocalRotation: {x: -0.0000003427267, y: 0.000000029802322, z: -0.00000023841858, w: 1}
-  m_LocalPosition: {x: 0, y: 1.369, z: 0.654}
+  m_LocalPosition: {x: -0, y: 0.72, z: 0.65}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []

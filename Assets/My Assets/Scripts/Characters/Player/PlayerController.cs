@@ -46,13 +46,16 @@ public class PlayerController : MonoBehaviour
     private InputManager _inputManager;
     private CinemachineCamera _virtualCamera;
     private PlayerAttack _playerAttack;
-    private Vector2 _moveInput;
+    private Vector3 _movementDirection;
     private Vector3 _rotateDirection;
     private bool _dashWasPressed;
     private bool _isDashing;
     private bool _isGrounded;
     private bool _applyingKnockback;
     private float _lastAttackTime;
+    private Coroutine _knockbackCoroutine;
+    private float _dashInputBufferTime = 0.2f;
+    private float _dashBufferTimer;
 
     [Header("Debug")]
     [SerializeField]
@@ -99,18 +102,14 @@ public class PlayerController : MonoBehaviour
 
         CheckMovementCollision();
 
-        if (!_isDashing)
-        {
-            HandleMovement();
-        }
-
+        HandleMovement();
         HandleRotation();
         HandleDash();
     }
 
     private void CheckInputs()
     {
-        _moveInput = _inputManager.Translation;
+        _movementDirection = new Vector3(_inputManager.Translation.x, 0f, _inputManager.Translation.y);
 
         if (_inputManager.Scheme == InputManager.ControlScheme.Gamepad)
         {
@@ -118,14 +117,16 @@ public class PlayerController : MonoBehaviour
         }
         else if (_inputManager.Scheme == InputManager.ControlScheme.MouseKeyboard)
         {
-            // Get playerToCursorDirection
-            Vector3 playerScreenPos = Camera.main.WorldToScreenPoint(transform.position);
+            Vector3 playerScreenPos = Camera.main.WorldToScreenPoint(_lookAt.position);
             Vector3 mouseScreenPos = Input.mousePosition;
             Vector3 playerToCursorDirection = (mouseScreenPos - playerScreenPos).normalized;
             _rotateDirection = playerToCursorDirection;
         }
 
-        _dashWasPressed = _inputManager.DashWasPressed;
+        if (_inputManager.DashWasPressed)
+        {
+            _dashBufferTimer = _dashInputBufferTime;
+        }
     }
 
     private void CheckMovementCollision()
@@ -155,7 +156,7 @@ public class PlayerController : MonoBehaviour
 
     private void HandleMovement()
     {
-        if (_applyingKnockback) return;
+        if (_applyingKnockback || _isDashing) return;
 
         float moveSpeed = !_playerAttack.AttackInputHeld ? _moveSpeed : _moveSpeed * _attackMoveSpeedMultiplier;
 
@@ -164,12 +165,11 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (_moveInput != Vector2.zero && (_allowForward || _allowBackward))
+        if (_movementDirection != Vector3.zero && (_allowForward || _allowBackward))
         {
-            var moveDirection = new Vector3(_moveInput.x, 0f, _moveInput.y);
-            Vector3 targetPos = Rb.position + moveDirection * (moveSpeed * Time.fixedDeltaTime);
+            Vector3 targetPos = Rb.position + _movementDirection * (moveSpeed * Time.fixedDeltaTime);
             Rb.MovePosition(targetPos);
-            if (!_playerAttack.AttackInputHeld) _rotationTransform.rotation = Quaternion.LookRotation(moveDirection);
+            if (!_playerAttack.AttackInputHeld) _rotationTransform.rotation = Quaternion.LookRotation(_movementDirection);
         }
     }
 
@@ -191,28 +191,36 @@ public class PlayerController : MonoBehaviour
 
     private void HandleDash()
     {
-        if (_dashWasPressed)
+        if (_dashBufferTimer > 0f)
         {
-            if (_isDashing)
+            if (!_isDashing)
             {
-                // buffer next dash
+                StartCoroutine(DashCoroutine());
+                _dashBufferTimer = 0f;
             }
-
-            StartCoroutine(DashCoroutine());
-            _dashParticleSystem.Play();
         }
-
-        if (_isDashing)
+        else
         {
+            _dashBufferTimer -= Time.fixedDeltaTime;
         }
     }
-    
+
     private IEnumerator DashCoroutine()
     {
-        _isDashing = true;
+        if (_knockbackCoroutine != null)
+        {
+            StopCoroutine(_knockbackCoroutine);
+            _knockbackCoroutine = null;
+            _applyingKnockback = false;
+        }
 
-        Vector3 dashDir = _rotationTransform.forward * _dashMaxDistance;
-        var targetPos = Rb.position + dashDir;
+        _isDashing = true;
+        _dashParticleSystem.Play();
+        AudioManager.Instance.PlaySound(transform, _dashSFX);
+
+        var dir = _movementDirection == Vector3.zero ? _rotationTransform.forward : _movementDirection;
+        Vector3 dashVector = dir * _dashMaxDistance;
+        var targetPos = Rb.position + dashVector;
         float startTime = Time.time;
 
         while (startTime + _dashTime >= Time.time)
@@ -227,7 +235,8 @@ public class PlayerController : MonoBehaviour
 
     private void OnPlayerAttack(bool critAttack)
     {
-        StartCoroutine(KnockbackCoroutine(critAttack));
+        if (_knockbackCoroutine != null) StopCoroutine(_knockbackCoroutine);
+        _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(critAttack));
         _lastAttackTime = Time.time;
     }
 
@@ -248,6 +257,7 @@ public class PlayerController : MonoBehaviour
         }
 
         _applyingKnockback = false;
+        _knockbackCoroutine = null;
     }
 
     private void OnDied(GameObject deadObj)
