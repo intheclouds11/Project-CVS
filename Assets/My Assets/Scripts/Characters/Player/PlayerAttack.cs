@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class PlayerAttack : MonoBehaviour
 {
+    [SerializeField]
+    private float _attackBufferTime = 0.3f;
     [field: SerializeField] public float PlayerBasicKnockbackDistance { get; private set; } = 0.2f;
     [field: SerializeField] public float PlayerCritKnockbackDistance { get; private set; } = 0.8f;
     [SerializeField]
@@ -14,9 +16,13 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField]
     private Slider _chargeMeter;
     [SerializeField]
-    private Slider _critRange;
+    private Canvas _chargeMeterCanvas;
     [SerializeField]
-    private CanvasGroup _chargeMeterCanvasGroup;
+    private ParticleSystem _chargeParticle;
+    [SerializeField]
+    private ParticleSystem _critParticle;
+    [SerializeField]
+    private Slider _critRange;
     [SerializeField]
     private Transform _projectileSpawnPoint;
     [SerializeField]
@@ -28,50 +34,59 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField]
     private AudioClip _critSFX;
 
+    private CanvasGroup _chargeMeterCanvasGroup;
     public event Action<bool> Attacked;
     public bool AttackInputHeld { get; private set; }
-    private PlayerController _player;
     private InputManager _inputManager;
     private float _attackHeldTime;
     private bool _enteredCritThreshold;
+    private float _attackCooldownTime;
 
 
     private void Awake()
     {
         _inputManager = InputManager.Instance;
-        _player = FindAnyObjectByType<PlayerController>();
         _chargeMeter.maxValue = _critChargeTime + _critGraceTime;
         _critRange.maxValue = _chargeMeter.maxValue;
         _critRange.value = _critGraceTime;
+        _chargeMeterCanvasGroup = _chargeMeterCanvas.GetComponent<CanvasGroup>();
         _chargeMeterCanvasGroup.alpha = 0.25f;
     }
 
     private void Update()
     {
-        if (PauseMenu.Instance.gameObject.activeSelf) return;
+        if (PauseScreen.Instance.gameObject.activeSelf) return;
 
         CheckInput();
         HandleChargeAttack();
     }
 
+    // TODO attack input buffer
     private void CheckInput()
     {
-        if (_inputManager.AttackWasPressed)
+        if (_attackCooldownTime > 0)
         {
-            AttackInputHeld = true;
+            _attackCooldownTime -= Time.deltaTime;
         }
-        else if (AttackInputHeld)
+        else
         {
-            if (!_enteredCritThreshold && WithinCritThreshold())
+            if (_inputManager.AttackHeld)
             {
-                _enteredCritThreshold = true;
-                OnEnteredCritThreshold();
+                AttackInputHeld = true;
+
+                if (!_enteredCritThreshold && WithinCritThreshold())
+                {
+                    _enteredCritThreshold = true;
+                    _chargeParticle.Play();
+                    OnEnteredCritThreshold();
+                }
             }
 
-            if (_inputManager.AttackWasReleased)
+            if (AttackInputHeld && _inputManager.AttackWasReleased)
             {
                 AttackInputHeld = false;
                 _enteredCritThreshold = false;
+                _chargeParticle.Stop();
                 Attack();
             }
         }
@@ -94,31 +109,39 @@ public class PlayerAttack : MonoBehaviour
         }
         else
         {
-            _chargeMeter.value = 0f;
             _chargeMeterCanvasGroup.alpha = 0.25f;
+            _chargeMeter.value = 0f;
         }
     }
 
     private void Attack()
     {
+        _attackCooldownTime = _attackBufferTime;
         bool critAttack = false;
         if (WithinCritThreshold())
         {
-            AudioManager.Instance.PlaySound(transform, _critSFX, true, false, 1.4f, 1.3f);
+            _critParticle.Play();
+            AudioManager.Instance.PlaySound(transform, _critSFX, true, false, 1.8f, 1.2f);
             critAttack = true;
         }
         else
         {
-            AudioManager.Instance.PlaySound(transform, _basicSFX, true, false, 1.4f);
+            AudioManager.Instance.PlaySound(transform, _basicSFX, true, false, 1.5f, 0.9f);
         }
 
         _attackHeldTime = 0f;
-        Instantiate(_projectilePrefab, _projectileSpawnPoint.position, _projectileSpawnPoint.rotation);
+        var projectile = Instantiate(_projectilePrefab, _projectileSpawnPoint.position, _projectileSpawnPoint.rotation);
+        projectile.GetComponent<SawBlade>().SetIsCritAttack(critAttack);
         Attacked?.Invoke(critAttack);
     }
 
     private bool WithinCritThreshold()
     {
         return _attackHeldTime >= _critChargeTime && _attackHeldTime <= _critChargeTime + _critGraceTime;
+    }
+
+    public void ToggleChargeHUD()
+    {
+        _chargeMeterCanvas.enabled = !_chargeMeterCanvas.enabled;
     }
 }

@@ -18,9 +18,6 @@ public class GameManager : MonoBehaviour
 
     public GameState CurrentState { get; private set; } = GameState.StartMenu;
 
-    [SerializeField]
-    private float _playerRespawnTime = 2f;
-
     public static GameManager Instance;
     public PlayerController Player1 { get; private set; }
 
@@ -87,19 +84,11 @@ public class GameManager : MonoBehaviour
             UIManager.Instance.ShowEndScreen();
         }
     }
-
+    
     private void OnPlayerDied(GameObject deadObj)
     {
-        StartCoroutine(OnPlayerDiedCoroutine());
-    }
-    
-    private IEnumerator OnPlayerDiedCoroutine()
-    {
-        HUD.Instance.GetLoseUI.SetActive(true);
-        yield return new WaitForSeconds(_playerRespawnTime);
-
-        HUD.Instance.GetLoseUI.SetActive(false);
-        UIManager.Instance.ShowEndScreen();
+        CurrentState = GameState.GameOver;
+        UIManager.Instance.ShowRespawnScreen();
     }
 
     public void OnReturnToMainMenu()

@@ -14,10 +14,8 @@ public class EnemyTurret : BaseEnemy
     private float _lastFireTime;
     
 
-    protected override void Update()
+    private void Update()
     {
-        base.Update();
-
         if (canTarget && Health.CurrentHealth > 0 && _player && _player.Health.CurrentHealth > 0)
         {
             if (InFiringRange())

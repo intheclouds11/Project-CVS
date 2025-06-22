@@ -5,11 +5,13 @@ using UnityEngine.SceneManagement;
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
-    
+
     [SerializeField]
     private GameObject _pauseMenu;
     [SerializeField]
     private GameObject _endScreen;
+    [SerializeField]
+    private GameObject _respawnScreen;
 
 
     private void Awake()
@@ -21,7 +23,12 @@ public class UIManager : MonoBehaviour
     {
         if (CanShowPauseScreen() && InputManager.Instance.PauseWasPressed)
         {
-            PauseMenu.Instance.OnPauseButtonPressed();
+            PauseScreen.Instance.OnPauseButtonPressed();
+        }
+
+        if (InputManager.Instance.ToggleChargeHUDWasPressed)
+        {
+            GameManager.Instance.Player1.PlayerAttack.ToggleChargeHUD();
         }
     }
 
@@ -30,16 +37,21 @@ public class UIManager : MonoBehaviour
         return !_endScreen.activeSelf && SceneManager.GetActiveScene().name != "MainMenu";
     }
 
+    public void ShowRespawnScreen()
+    {
+        _respawnScreen.SetActive(true);
+    }
+
     public void ShowEndScreen()
     {
         _endScreen.SetActive(true);
     }
-    
+
     public void Button_ResumeGame()
     {
-        PauseMenu.Instance.ResumeGame();
+        PauseScreen.Instance.ResumeGame();
     }
-    
+
     public void Button_ReturnToMainMenu()
     {
         GameManager.Instance.OnReturnToMainMenu();
@@ -50,8 +62,9 @@ public class UIManager : MonoBehaviour
 
         if (_pauseMenu.activeSelf)
         {
-            PauseMenu.Instance.ResumeGame();
+            PauseScreen.Instance.ResumeGame();
         }
+
         SceneManager.LoadScene("MainMenu");
     }
 

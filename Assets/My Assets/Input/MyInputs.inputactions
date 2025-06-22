@@ -112,6 +112,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Toggle Charge HUD",
+                    "type": "Button",
+                    "id": "7b1a8019-d583-4779-85ef-8de1448ad0f9",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -398,6 +407,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "Activate Expression (Right)",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7e063a9d-34b7-417f-959b-d162239a1b0d",
+                    "path": "<Keyboard>/h",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Toggle Charge HUD",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "96736cb9-f439-4da9-b2f4-2210bfec91d3",
+                    "path": "<Gamepad>/leftShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Toggle Charge HUD",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

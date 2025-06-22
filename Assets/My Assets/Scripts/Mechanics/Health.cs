@@ -22,8 +22,8 @@ public class Health : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
-        if (damage <= 0 || GameManager.Instance.CurrentState is GameManager.GameState.Victory or GameManager.GameState.AwaitingWave
-                or GameManager.GameState.GameOver) return;
+        if (damage <= 0 || CurrentHealth <= 0 || GameManager.Instance.CurrentState is GameManager.GameState.Victory
+                or GameManager.GameState.AwaitingWave or GameManager.GameState.GameOver) return;
 
         CurrentHealth -= damage;
         DamageTaken?.Invoke();

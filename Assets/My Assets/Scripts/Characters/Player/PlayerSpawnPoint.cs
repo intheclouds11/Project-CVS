@@ -13,17 +13,17 @@ public class PlayerSpawnPoint : MonoBehaviour
     private void Start()
     {
         _player = FindAnyObjectByType<PlayerController>()?.gameObject;
-        
+
         if (!_player)
         {
             _player = Spawn();
-            PlayerSpawned?.Invoke();
         }
         else
         {
             _player.GetComponent<PlayerController>().Respawn(transform.position, transform.rotation, true);
         }
-        
+
+        PlayerSpawned?.Invoke();
         gameObject.SetActive(false);
     }
 

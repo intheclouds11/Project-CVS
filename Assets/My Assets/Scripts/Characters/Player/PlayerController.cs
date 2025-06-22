@@ -31,6 +31,8 @@ public class PlayerController : MonoBehaviour
     private Transform _rotationTransform;
     [SerializeField]
     private Transform _lookAt;
+    [SerializeField]
+    private Transform _playerModel;
 
     [Header("FX")]
     [SerializeField]
@@ -38,6 +40,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private AudioClip _dashSFX;
 
+    public PlayerAttack PlayerAttack { get; private set; }
     public Health Health { get; protected set; }
     public Rigidbody Rb { get; private set; }
 
@@ -45,7 +48,6 @@ public class PlayerController : MonoBehaviour
     private bool _allowBackward;
     private InputManager _inputManager;
     private CinemachineCamera _virtualCamera;
-    private PlayerAttack _playerAttack;
     private Vector3 _movementDirection;
     private Vector3 _rotateDirection;
     private bool _dashWasPressed;
@@ -69,8 +71,8 @@ public class PlayerController : MonoBehaviour
         Health = GetComponent<Health>();
         Health.Died += OnDied;
         Rb = GetComponent<Rigidbody>();
-        _playerAttack = GetComponent<PlayerAttack>();
-        _playerAttack.Attacked += OnPlayerAttack;
+        PlayerAttack = GetComponent<PlayerAttack>();
+        PlayerAttack.Attacked += OnPlayerAttack;
     }
 
     private void Start()
@@ -78,6 +80,7 @@ public class PlayerController : MonoBehaviour
         _inputManager = InputManager.Instance;
         _virtualCamera = FindAnyObjectByType<CinemachineCamera>();
         _virtualCamera.Follow = _lookAt; // Set follower
+        _virtualCamera.PreviousStateIsValid = false;
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
@@ -91,14 +94,14 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (PauseMenu.Instance.gameObject.activeSelf) return;
+        if (PauseScreen.Instance.gameObject.activeSelf) return;
 
         CheckInputs();
     }
 
     private void FixedUpdate()
     {
-        if (PauseMenu.Instance.gameObject.activeSelf) return;
+        if (PauseScreen.Instance.gameObject.activeSelf) return;
 
         CheckMovementCollision();
 
@@ -158,26 +161,27 @@ public class PlayerController : MonoBehaviour
     {
         if (_applyingKnockback || _isDashing) return;
 
-        float moveSpeed = !_playerAttack.AttackInputHeld ? _moveSpeed : _moveSpeed * _attackMoveSpeedMultiplier;
+        float moveSpeed = !PlayerAttack.AttackInputHeld ? _moveSpeed : _moveSpeed * _attackMoveSpeedMultiplier;
 
         if (_lastAttackTime + _attackMoveSpeedCooldown >= Time.time)
         {
+            // lerp return to base speed
             return;
         }
 
-        if (_movementDirection != Vector3.zero && (_allowForward || _allowBackward))
+        if (_inputManager.IsMovementActive() && (_allowForward || _allowBackward))
         {
             Vector3 targetPos = Rb.position + _movementDirection * (moveSpeed * Time.fixedDeltaTime);
             Rb.MovePosition(targetPos);
-            if (!_playerAttack.AttackInputHeld) _rotationTransform.rotation = Quaternion.LookRotation(_movementDirection);
+            if (!PlayerAttack.AttackInputHeld) _rotationTransform.rotation = Quaternion.LookRotation(_movementDirection);
         }
     }
 
     private void HandleRotation()
     {
-        if (!_playerAttack.AttackInputHeld) return;
+        if (!PlayerAttack.AttackInputHeld) return;
 
-        if (_inputManager.Scheme == InputManager.ControlScheme.Gamepad && _inputManager.IsAiming())
+        if (_inputManager.Scheme == InputManager.ControlScheme.Gamepad && _inputManager.IsDirectionActive())
         {
             var lookAtRotation = Quaternion.LookRotation(_rotateDirection);
             _rotationTransform.localRotation = lookAtRotation;
@@ -215,6 +219,8 @@ public class PlayerController : MonoBehaviour
         }
 
         _isDashing = true;
+        // ToggleMeshRenderers(false);
+        GetComponent<CapsuleCollider>().enabled = false;
         _dashParticleSystem.Play();
         AudioManager.Instance.PlaySound(transform, _dashSFX);
 
@@ -225,12 +231,23 @@ public class PlayerController : MonoBehaviour
 
         while (startTime + _dashTime >= Time.time)
         {
-            var targetPosition = Vector3.Lerp(Rb.position, targetPos, _dashSmoothing * Time.fixedDeltaTime);
+            var targetPosition = Vector3.MoveTowards(Rb.position, targetPos, _dashSmoothing * Time.fixedDeltaTime);
             Rb.MovePosition(targetPosition);
             yield return new WaitForFixedUpdate();
         }
 
+        // ToggleMeshRenderers(true);
+        GetComponent<CapsuleCollider>().enabled = true;
         _isDashing = false;
+    }
+
+    private void ToggleMeshRenderers(bool toggle)
+    {
+        var mrs = _playerModel.GetComponentsInChildren<SkinnedMeshRenderer>();
+        foreach (var meshRenderer in mrs)
+        {
+            meshRenderer.enabled = toggle;
+        }
     }
 
     private void OnPlayerAttack(bool critAttack)
@@ -244,14 +261,14 @@ public class PlayerController : MonoBehaviour
     {
         _applyingKnockback = true;
 
-        var amount = critAttack ? _playerAttack.PlayerCritKnockbackDistance : _playerAttack.PlayerBasicKnockbackDistance;
+        var amount = critAttack ? PlayerAttack.PlayerCritKnockbackDistance : PlayerAttack.PlayerBasicKnockbackDistance;
         Vector3 knockbackDir = -_rotationTransform.forward * amount;
         var targetPos = Rb.position + knockbackDir;
         float startTime = Time.time;
 
         while (startTime + _knockbackTime >= Time.time)
         {
-            var targetPosition = Vector3.Lerp(Rb.position, targetPos, _knockbackSmoothing * Time.deltaTime);
+            var targetPosition = Vector3.MoveTowards(Rb.position, targetPos, _knockbackSmoothing * Time.deltaTime);
             Rb.MovePosition(targetPosition);
             yield return null;
         }
@@ -263,16 +280,29 @@ public class PlayerController : MonoBehaviour
     private void OnDied(GameObject deadObj)
     {
         enabled = false;
+        PlayerAttack.enabled = false;
+        ToggleMeshRenderers(false);
     }
 
-    public void Respawn(Vector3 position, Quaternion rotation, bool controllable)
+    public void Respawn(Vector3 position, Quaternion rotation, bool canControl)
     {
+        enabled = canControl;
         Rb.position = position;
         Rb.rotation = rotation;
-        enabled = controllable;
+        StartCoroutine(ResetCamera());
+        PlayerAttack.enabled = canControl;
+        ToggleMeshRenderers(true);
         Health.OnRespawn();
     }
 
+    private IEnumerator ResetCamera()
+    {
+        var cinemachineFollow = _virtualCamera.GetComponent<CinemachineFollow>();
+        var origTrackerSettings = cinemachineFollow.TrackerSettings;
+        cinemachineFollow.TrackerSettings.PositionDamping = Vector3.zero;
+        yield return new WaitForSeconds(0.1f);
+        cinemachineFollow.TrackerSettings = origTrackerSettings;
+    }
 
     private void OnDrawGizmos()
     {

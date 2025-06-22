@@ -12,7 +12,18 @@ public abstract class BaseEnemy : MonoBehaviour
     protected virtual void Awake()
     {
         Health = GetComponent<Health>();
+    }
+
+    protected void OnEnable()
+    {
         Health.Died += OnDied;
+        PlayerSpawnPoint.PlayerSpawned += OnPlayerSpawned;
+    }
+
+    protected void OnDisable()
+    {
+        Health.Died -= OnDied;
+        PlayerSpawnPoint.PlayerSpawned -= OnPlayerSpawned;
     }
 
     protected void Start()
@@ -20,12 +31,9 @@ public abstract class BaseEnemy : MonoBehaviour
         EnemyManager.Instance.RegisterEnemy(this);
     }
 
-    protected virtual void Update()
+    private void OnPlayerSpawned()
     {
-        if (!_player)
-        {
-            _player = GameManager.Instance.Player1;
-        }
+        _player = GameManager.Instance.Player1;
     }
 
     protected void OnDied(GameObject obj)

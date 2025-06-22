@@ -155,15 +155,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3d4dd07ae22f5f4a82d813421604f6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _damage: 5
+  _baseDamage: 1
+  _critDamage: 3
   _speed: 10
+  _returnStartTime: 0.35
   _launchSfx: {fileID: 8300000, guid: fddac796930e0bf46a1e5cec7fab1522, type: 3}
   _bladeSpinLoopSfx: {fileID: 8300000, guid: 3623ceedba7853a468feb0ac4ac416e7, type: 3}
   _impactSfx: {fileID: 8300000, guid: 92aadb14cc314f54db316cc18b68fe36, type: 3}
   _impactVfx: {fileID: 9049631545069152736, guid: 6a0d9d4912f0e7b43b46b2a49721b4bb, type: 3}
-  hasSplashDamage: 0
-  splashRadius: 1.5
-  _splashVfxPrefab: {fileID: 0}
 --- !u!54 &7434762892271647052
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -205,16 +204,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ImpulseDefinition:
     ImpulseChannel: 1
-    ImpulseShape: 3
+    ImpulseShape: 1
     CustomImpulseShape:
       serializedVersion: 2
       m_Curve: []
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    ImpulseDuration: 0.2
-    ImpulseType: 1
-    DissipationRate: 0.365
+    ImpulseDuration: 0.1
+    ImpulseType: 0
+    DissipationRate: 0.305
     RawSignal: {fileID: 0}
     AmplitudeGain: 1
     FrequencyGain: 1
@@ -243,4 +242,4 @@ MonoBehaviour:
     DissipationMode: 2
     DissipationDistance: 15
     PropagationSpeed: 343
-  DefaultVelocity: {x: 0, y: -0.025, z: 0}
+  DefaultVelocity: {x: 0, y: -0.25, z: 0}
