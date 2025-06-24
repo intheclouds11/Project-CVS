@@ -7,8 +7,8 @@ public class PlayerAttack : MonoBehaviour
 {
     [SerializeField]
     private float _attackBufferTime = 0.3f;
-    [field: SerializeField] public float PlayerBasicKnockbackDistance { get; private set; } = 0.2f;
-    [field: SerializeField] public float PlayerCritKnockbackDistance { get; private set; } = 0.8f;
+    [field: SerializeField] public float PlayerBasicKnockbackAmount { get; private set; } = 0.2f;
+    [field: SerializeField] public float PlayerCritKnockbackAmount { get; private set; } = 0.8f;
     [SerializeField]
     private float _critChargeTime = 0.4f;
     [SerializeField]
@@ -26,7 +26,7 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField]
     private Transform _projectileSpawnPoint;
     [SerializeField]
-    private GameObject _projectilePrefab;
+    private GameObject _projectile;
     [SerializeField]
     private AudioClip _chargingSFX;
     [SerializeField]
@@ -34,23 +34,43 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField]
     private AudioClip _critSFX;
 
-    private CanvasGroup _chargeMeterCanvasGroup;
-    public event Action<bool> Attacked;
-    public bool AttackInputHeld { get; private set; }
-    private InputManager _inputManager;
+    private float _lastChargeAmount;
     private float _attackHeldTime;
+    private CanvasGroup _chargeMeterCanvasGroup;
     private bool _enteredCritThreshold;
     private float _attackCooldownTime;
+    private int _chargingSFXIndex;
+    private InputManager _inputManager;
+    private Health _health;
+
+    public event Action<bool> Attacked;
+    public bool AttackInputHeld { get; private set; }
 
 
     private void Awake()
     {
         _inputManager = InputManager.Instance;
+        _health = GetComponent<Health>();
+        _health.Died += OnDied;
+        
         _chargeMeter.maxValue = _critChargeTime + _critGraceTime;
         _critRange.maxValue = _chargeMeter.maxValue;
         _critRange.value = _critGraceTime;
         _chargeMeterCanvasGroup = _chargeMeterCanvas.GetComponent<CanvasGroup>();
         _chargeMeterCanvasGroup.alpha = 0.25f;
+    }
+
+    private void OnDied(GameObject obj)
+    {
+        enabled = false;
+        AttackInputHeld = false;
+        _chargeMeterCanvasGroup.alpha = 0f;
+        _chargeMeter.value = 0f;
+    }
+
+    public void OnRespawn()
+    {
+        enabled = true;
     }
 
     private void Update()
@@ -72,6 +92,11 @@ public class PlayerAttack : MonoBehaviour
         {
             if (_inputManager.AttackHeld)
             {
+                if (!AttackInputHeld)
+                {
+                    _chargingSFXIndex = AudioManager.Instance.PlaySound(transform, _chargingSFX, true, false, 0.7f);
+                }
+
                 AttackInputHeld = true;
 
                 if (!_enteredCritThreshold && WithinCritThreshold())
@@ -95,7 +120,6 @@ public class PlayerAttack : MonoBehaviour
     private void OnEnteredCritThreshold()
     {
         // Debug.Log($"Entered crit threshold");
-        AudioManager.Instance.PlaySound(transform, _chargingSFX);
         // todo: visual indicator (flash like PO)
     }
 
@@ -109,30 +133,39 @@ public class PlayerAttack : MonoBehaviour
         }
         else
         {
-            _chargeMeterCanvasGroup.alpha = 0.25f;
+            var newAlpha = _chargeMeterCanvasGroup.alpha - 0.5f * Time.deltaTime;
+            _chargeMeterCanvasGroup.alpha = Mathf.Clamp(newAlpha, 0f, 1);
             _chargeMeter.value = 0f;
         }
     }
 
     private void Attack()
     {
+        AudioManager.Instance.StopSound(_chargingSFXIndex);
         _attackCooldownTime = _attackBufferTime;
         bool critAttack = false;
         if (WithinCritThreshold())
         {
+            // _inputManager.Vibrate(0.8f, 0.8f, 0.25f);
             _critParticle.Play();
-            AudioManager.Instance.PlaySound(transform, _critSFX, true, false, 1.8f, 1.2f);
+            AudioManager.Instance.PlaySound(transform, _critSFX, true, false, 2f, 1.2f);
             critAttack = true;
         }
         else
         {
             AudioManager.Instance.PlaySound(transform, _basicSFX, true, false, 1.5f, 0.9f);
         }
+        
+        _lastChargeAmount = (_chargeMeter.value / _chargeMeter.maxValue);
+        _projectile.GetComponent<SawBlade>().SetProperties(_lastChargeAmount, critAttack);
+        
+        _projectile.transform.parent = null;
+        _projectile.transform.position = _projectileSpawnPoint.position;
+        _projectile.transform.rotation = _projectileSpawnPoint.rotation;
+        _projectile.gameObject.SetActive(true);
 
-        _attackHeldTime = 0f;
-        var projectile = Instantiate(_projectilePrefab, _projectileSpawnPoint.position, _projectileSpawnPoint.rotation);
-        projectile.GetComponent<SawBlade>().SetIsCritAttack(critAttack);
         Attacked?.Invoke(critAttack);
+        _attackHeldTime = 0f;
     }
 
     private bool WithinCritThreshold()

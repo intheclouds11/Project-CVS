@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -14,6 +15,8 @@ public class RespawnScreen : MonoBehaviour
     private float _fadeOutTime = 2f;
     [SerializeField]
     private Image _blackImage;
+    [SerializeField]
+    private TextMeshProUGUI _respawnText;
 
     private CanvasGroup _canvasGroup;
     private bool _startedRespawn;
@@ -23,6 +26,12 @@ public class RespawnScreen : MonoBehaviour
     private void Awake()
     {
         _canvasGroup = GetComponent<CanvasGroup>();
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
+    {
+        StartCoroutine(OnSceneLoadedCoroutine());
     }
 
     private void OnEnable()
@@ -30,6 +39,7 @@ public class RespawnScreen : MonoBehaviour
         _lastTimeShown = Time.time;
         _canvasGroup.alpha = 0f;
         _blackImage.color = new Color(_blackImage.color.r, _blackImage.color.g, _blackImage.color.b, 0f);
+        _respawnText.enabled = true;
     }
 
     private void Update()
@@ -56,11 +66,28 @@ public class RespawnScreen : MonoBehaviour
             yield return null;
         }
 
+        yield return new WaitForSeconds(1f);
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         GameManager.Instance.OnReturnToMainMenu();
         GameManager.Instance.GameStart();
+    }
 
-        gameObject.SetActive(false);
+    private IEnumerator OnSceneLoadedCoroutine()
+    {
+        GameManager.Instance.Player1.ResetCamera();
+        
+        yield return new WaitForSeconds(0.1f);
+        
+        // _respawnText.enabled = false;
+        // while (_canvasGroup.alpha > 0f)
+        // {
+        //     _canvasGroup.alpha -= Time.deltaTime / _fadeOutTime;
+        //     yield return null;
+        // }
+        
         _canvasGroup.alpha = 0f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        yield return null;
+        gameObject.SetActive(false);
     }
 }

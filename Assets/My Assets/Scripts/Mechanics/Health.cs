@@ -20,11 +20,21 @@ public class Health : MonoBehaviour
         CurrentHealth = _maxHealth;
     }
 
+    public bool IsAlive()
+    {
+        return CurrentHealth > 0;
+    }
+
     public void TakeDamage(float damage)
     {
         if (damage <= 0 || CurrentHealth <= 0 || GameManager.Instance.CurrentState is GameManager.GameState.Victory
                 or GameManager.GameState.AwaitingWave or GameManager.GameState.GameOver) return;
 
+        if (GetComponent<PlayerController>() && GameManager.Instance.GodMode)
+        {
+            return;
+        }
+        
         CurrentHealth -= damage;
         DamageTaken?.Invoke();
 

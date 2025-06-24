@@ -50,7 +50,7 @@ public class EnemyManager : MonoBehaviour
         bool clearedAllEnemies = true;
         foreach (var enemy in _activeEnemies)
         {
-            if (enemy.Health.CurrentHealth > 0)
+            if (enemy.Health.IsAlive())
             {
                 clearedAllEnemies = false;
                 break;

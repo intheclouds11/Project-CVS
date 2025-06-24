@@ -207,6 +207,15 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Toggle God Mode"",
+                    ""type"": ""Button"",
+                    ""id"": ""276d204b-8995-4bba-a535-327c15689e3f"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -517,11 +526,61 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
                     ""action"": ""Toggle Charge HUD"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3db64ff8-e8d3-4b51-86cc-c1acef5c6883"",
+                    ""path"": ""<Keyboard>/g"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Toggle God Mode"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""206c7dc4-9b5e-4943-9e35-1a21a7f2aacf"",
+                    ""path"": ""<Gamepad>/buttonWest"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Toggle God Mode"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
     ],
-    ""controlSchemes"": []
+    ""controlSchemes"": [
+        {
+            ""name"": ""Keyboard Mouse"",
+            ""bindingGroup"": ""Keyboard Mouse"",
+            ""devices"": [
+                {
+                    ""devicePath"": ""<Keyboard>"",
+                    ""isOptional"": false,
+                    ""isOR"": false
+                },
+                {
+                    ""devicePath"": ""<Mouse>"",
+                    ""isOptional"": false,
+                    ""isOR"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""Gamepad"",
+            ""bindingGroup"": ""Gamepad"",
+            ""devices"": [
+                {
+                    ""devicePath"": ""<Gamepad>"",
+                    ""isOptional"": false,
+                    ""isOR"": false
+                }
+            ]
+        }
+    ]
 }");
         // Player
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
@@ -538,6 +597,7 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
         m_Player_ActivateExpressionLeft = m_Player.FindAction("Activate Expression (Left)", throwIfNotFound: true);
         m_Player_ActivateExpressionRight = m_Player.FindAction("Activate Expression (Right)", throwIfNotFound: true);
         m_Player_ToggleChargeHUD = m_Player.FindAction("Toggle Charge HUD", throwIfNotFound: true);
+        m_Player_ToggleGodMode = m_Player.FindAction("Toggle God Mode", throwIfNotFound: true);
     }
 
     ~@MyInputs()
@@ -631,6 +691,7 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_ActivateExpressionLeft;
     private readonly InputAction m_Player_ActivateExpressionRight;
     private readonly InputAction m_Player_ToggleChargeHUD;
+    private readonly InputAction m_Player_ToggleGodMode;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -694,6 +755,10 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/ToggleChargeHUD".
         /// </summary>
         public InputAction @ToggleChargeHUD => m_Wrapper.m_Player_ToggleChargeHUD;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/ToggleGodMode".
+        /// </summary>
+        public InputAction @ToggleGodMode => m_Wrapper.m_Player_ToggleGodMode;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -759,6 +824,9 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
             @ToggleChargeHUD.started += instance.OnToggleChargeHUD;
             @ToggleChargeHUD.performed += instance.OnToggleChargeHUD;
             @ToggleChargeHUD.canceled += instance.OnToggleChargeHUD;
+            @ToggleGodMode.started += instance.OnToggleGodMode;
+            @ToggleGodMode.performed += instance.OnToggleGodMode;
+            @ToggleGodMode.canceled += instance.OnToggleGodMode;
         }
 
         /// <summary>
@@ -809,6 +877,9 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
             @ToggleChargeHUD.started -= instance.OnToggleChargeHUD;
             @ToggleChargeHUD.performed -= instance.OnToggleChargeHUD;
             @ToggleChargeHUD.canceled -= instance.OnToggleChargeHUD;
+            @ToggleGodMode.started -= instance.OnToggleGodMode;
+            @ToggleGodMode.performed -= instance.OnToggleGodMode;
+            @ToggleGodMode.canceled -= instance.OnToggleGodMode;
         }
 
         /// <summary>
@@ -842,6 +913,32 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
     /// Provides a new <see cref="PlayerActions" /> instance referencing this action map.
     /// </summary>
     public PlayerActions @Player => new PlayerActions(this);
+    private int m_KeyboardMouseSchemeIndex = -1;
+    /// <summary>
+    /// Provides access to the input control scheme.
+    /// </summary>
+    /// <seealso cref="UnityEngine.InputSystem.InputControlScheme" />
+    public InputControlScheme KeyboardMouseScheme
+    {
+        get
+        {
+            if (m_KeyboardMouseSchemeIndex == -1) m_KeyboardMouseSchemeIndex = asset.FindControlSchemeIndex("Keyboard Mouse");
+            return asset.controlSchemes[m_KeyboardMouseSchemeIndex];
+        }
+    }
+    private int m_GamepadSchemeIndex = -1;
+    /// <summary>
+    /// Provides access to the input control scheme.
+    /// </summary>
+    /// <seealso cref="UnityEngine.InputSystem.InputControlScheme" />
+    public InputControlScheme GamepadScheme
+    {
+        get
+        {
+            if (m_GamepadSchemeIndex == -1) m_GamepadSchemeIndex = asset.FindControlSchemeIndex("Gamepad");
+            return asset.controlSchemes[m_GamepadSchemeIndex];
+        }
+    }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Player" which allows adding and removing callbacks.
     /// </summary>
@@ -940,5 +1037,12 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnToggleChargeHUD(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Toggle God Mode" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnToggleGodMode(InputAction.CallbackContext context);
     }
 }

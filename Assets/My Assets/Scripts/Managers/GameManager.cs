@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
 
     public static GameManager Instance;
     public PlayerController Player1 { get; private set; }
+    public bool GodMode { get; private set; }
 
 
     private void Awake()
@@ -31,6 +32,15 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Confined;
+    }
+
+    private void Update()
+    {
+        if (InputManager.Instance.ToggleGodModeWasPressed)
+        {
+            GodMode = !GodMode;
+            Debug.Log($"GameManager: GodMode set to {GodMode}");
+        }
     }
 
     private void OnEnable()
@@ -98,7 +108,6 @@ public class GameManager : MonoBehaviour
         HUD.Instance.GetWinUI.SetActive(false);
         HUD.Instance.GetWaveCompleteUI.SetActive(false);
 
-        Player1?.Respawn(Vector3.zero, Quaternion.identity, false);
         EnemyManager.Instance.DeregisterAllEnemies();
     }
 }

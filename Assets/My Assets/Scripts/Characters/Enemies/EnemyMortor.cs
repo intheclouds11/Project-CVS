@@ -23,7 +23,7 @@ public class EnemyMortor : BaseEnemy
     
     private void Update()
     {
-        if (canTarget && Health.CurrentHealth > 0 && _player && _player.Health.CurrentHealth > 0)
+        if (canTarget && Health.IsAlive() && _player && _player.Health.IsAlive())
         {
             if (InFiringRange())
             {

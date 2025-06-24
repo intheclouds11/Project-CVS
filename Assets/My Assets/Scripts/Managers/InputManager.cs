@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Users;
@@ -6,12 +8,6 @@ using UnityEngine.Serialization;
 
 public class InputManager : MonoBehaviour
 {
-    public enum ControlScheme
-    {
-        MouseKeyboard,
-        Gamepad
-    }
-
     public static InputManager Instance;
 
     [Header("Gamepad Settings")]
@@ -30,13 +26,14 @@ public class InputManager : MonoBehaviour
     public bool InteractWasPressed { get; private set; }
     public bool RespawnWasPressed { get; private set; }
     public bool ToggleChargeHUDWasPressed { get; private set; }
+    public bool ToggleGodModeWasPressed { get; private set; }
     public bool OpenInventoryWasPressed { get; private set; }
     public bool ActivateExpressionUpWasPressed { get; private set; }
     public bool ActivateExpressionDownWasPressed { get; private set; }
     public bool ActivateExpressionLeftWasPressed { get; private set; }
     public bool ActivateExpressionRightWasPressed { get; private set; }
 
-    public ControlScheme Scheme { get; private set; }
+    public bool UsingGamepad { get; private set; }
     private MyInputs _inputs;
 
 
@@ -54,20 +51,23 @@ public class InputManager : MonoBehaviour
 
     private void Update()
     {
-        if (Gamepad.current != null && Gamepad.current.wasUpdatedThisFrame)
-            Scheme = ControlScheme.Gamepad;
+        if (IsGamepadInUse())
+            UsingGamepad = true;
         else if (Keyboard.current.wasUpdatedThisFrame || Mouse.current.leftButton.wasPressedThisFrame)
-            Scheme = ControlScheme.MouseKeyboard;
+            UsingGamepad = false;
 
+        // Shared actions
         Translation = _inputs.Player.Translation.ReadValue<Vector2>();
         PauseWasPressed = _inputs.Player.Pause.WasPerformedThisFrame();
         DashWasPressed = _inputs.Player.Dash.WasPerformedThisFrame();
         ActivateAbilityWasPressed = _inputs.Player.ActivateAbility.WasPerformedThisFrame();
         InteractWasPressed = _inputs.Player.Interact.WasPerformedThisFrame();
         ToggleChargeHUDWasPressed = _inputs.Player.ToggleChargeHUD.WasPerformedThisFrame();
+        ToggleGodModeWasPressed = _inputs.Player.ToggleGodMode.WasPerformedThisFrame();
 
-        if (Scheme == ControlScheme.Gamepad)
+        if (UsingGamepad)
         {
+            // Device specific
             AttackWasPressed = _inputs.Player.Direction.ReadValue<Vector2>().magnitude >= AimActiveThreshold;
             AttackHeld = AttackWasPressed;
             AttackWasReleased = _inputs.Player.Direction.ReadValue<Vector2>().magnitude <= AimReleaseThreshold;
@@ -76,6 +76,7 @@ public class InputManager : MonoBehaviour
         }
         else
         {
+            // Device specific
             AttackWasPressed = _inputs.Player.Attack.WasPerformedThisFrame();
             AttackHeld = _inputs.Player.Attack.IsPressed();
             AttackWasReleased = _inputs.Player.Attack.WasReleasedThisFrame();
@@ -91,5 +92,37 @@ public class InputManager : MonoBehaviour
     public bool IsMovementActive()
     {
         return Translation.magnitude >= MovementDeadzone;
+    }
+
+    public void Vibrate(float lowFreq, float highFreq, float duration)
+    {
+        StartCoroutine(VibrateCoroutine(lowFreq, highFreq, duration));
+    }
+
+    private IEnumerator VibrateCoroutine(float low, float high, float time)
+    {
+        var gamepad = Gamepad.current;
+        if (gamepad == null) yield break;
+
+        gamepad.SetMotorSpeeds(low, high);
+        gamepad.ResumeHaptics();
+        yield return new WaitForSeconds(time);
+        gamepad.PauseHaptics();
+        gamepad.SetMotorSpeeds(0, 0);
+    }
+
+    private bool IsGamepadInUse()
+    {
+        return Gamepad.current != null && (Gamepad.current.buttonNorth.wasPressedThisFrame ||
+                                           Gamepad.current.buttonSouth.wasPressedThisFrame ||
+                                           Gamepad.current.buttonWest.wasPressedThisFrame ||
+                                           Gamepad.current.buttonEast.wasPressedThisFrame ||
+                                           Gamepad.current.startButton.wasPressedThisFrame ||
+                                           Gamepad.current.selectButton.wasPressedThisFrame ||
+                                           Gamepad.current.dpad.ReadValue() != Vector2.zero ||
+                                           Gamepad.current.leftTrigger.IsActuated() ||
+                                           Gamepad.current.rightTrigger.IsActuated() ||
+                                           Gamepad.current.leftStick.IsActuated() ||
+                                           Gamepad.current.rightStick.IsActuated());
     }
 }

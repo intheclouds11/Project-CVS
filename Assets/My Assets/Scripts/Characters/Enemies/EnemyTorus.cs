@@ -22,7 +22,7 @@ public class EnemyTorus : BaseEnemy
             _chasePlayer = true;
         }
 
-        if (_chasePlayer && _player.Health.CurrentHealth > 0)
+        if (_chasePlayer && _player.Health.IsAlive())
         {
             transform.position = Vector3.MoveTowards(transform.position, _player.transform.position, _moveSpeed * Time.deltaTime);
         }

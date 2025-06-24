@@ -15,9 +15,9 @@ TagManager:
   - Player
   - WorldUI
   - Environment
-  - 
-  - 
-  - 
+  - Weapon
+  - NoCollision
+  - Enemy
   - 
   - 
   - 

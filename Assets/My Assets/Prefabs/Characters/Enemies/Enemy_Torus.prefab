@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7312698501997549328}
   - component: {fileID: 1714698826164707562}
   - component: {fileID: 7273781629282292764}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Enemy_Torus
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -64,7 +64,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d785fb0c3347e10428564414cc141033, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxHealth: 3
+  _maxHealth: 100
   _diedSfx: {fileID: 8300000, guid: 122f0dca8319dec46972e688151fc65b, type: 3}
   _diedVfx: {fileID: 9049631545069152736, guid: e2d4687b86076744fbdd2aa6777e932f, type: 3}
 --- !u!95 &1714698826164707562
@@ -104,7 +104,7 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -121,7 +121,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6692608903624908347}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -161,7 +161,7 @@ GameObject:
   - component: {fileID: 4179917420607630649}
   - component: {fileID: 2615365224268007411}
   - component: {fileID: 2605901332690343405}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -34255,7 +34255,7 @@ GameObject:
   - component: {fileID: 4806905760433655018}
   - component: {fileID: 4710659263694308771}
   - component: {fileID: 632431539045125836}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Torus_Low
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -54891,7 +54891,7 @@ GameObject:
   - component: {fileID: 5717153642992258544}
   - component: {fileID: 7537898096208183642}
   - component: {fileID: 9075307826066139105}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Torus_Top
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -75527,7 +75527,7 @@ GameObject:
   - component: {fileID: 8765089127702865214}
   - component: {fileID: 8665367342980873524}
   - component: {fileID: 1274926463732072960}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Torus_Mid
   m_TagString: Untagged
   m_Icon: {fileID: 0}

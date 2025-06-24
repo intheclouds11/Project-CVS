@@ -274,6 +274,7 @@ MonoBehaviour:
   _fadeInTime: 3
   _fadeOutTime: 2
   _blackImage: {fileID: 4491163672399033208}
+  _respawnText: {fileID: 7758380405056587244}
 --- !u!223 &4156924607240124351
 Canvas:
   m_ObjectHideFlags: 0

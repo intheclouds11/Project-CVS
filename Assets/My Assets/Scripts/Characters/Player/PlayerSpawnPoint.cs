@@ -20,7 +20,7 @@ public class PlayerSpawnPoint : MonoBehaviour
         }
         else
         {
-            _player.GetComponent<PlayerController>().Respawn(transform.position, transform.rotation, true);
+            _player.GetComponent<PlayerController>().Respawn(transform.position, Quaternion.identity, true);
         }
 
         PlayerSpawned?.Invoke();
@@ -29,6 +29,6 @@ public class PlayerSpawnPoint : MonoBehaviour
 
     public GameObject Spawn()
     {
-        return Instantiate(_playerPrefab, transform.position, transform.rotation);
+        return Instantiate(_playerPrefab, transform.position, Quaternion.identity);
     }
 }

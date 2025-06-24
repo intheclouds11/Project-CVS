@@ -16,9 +16,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float _attackMoveSpeedCooldown = 0.5f;
     [SerializeField]
-    private float _knockbackTime = 0.2f;
+    private float _knockbackDuration = 0.35f;
     [SerializeField]
-    private float _knockbackSmoothing = 35f;
+    private AnimationCurve _knockBackCurve;
     [SerializeField]
     private float _dashSmoothing = 20f;
     [SerializeField]
@@ -43,9 +43,8 @@ public class PlayerController : MonoBehaviour
     public PlayerAttack PlayerAttack { get; private set; }
     public Health Health { get; protected set; }
     public Rigidbody Rb { get; private set; }
+    public CharacterController Controller { get; private set; }
 
-    private bool _allowForward;
-    private bool _allowBackward;
     private InputManager _inputManager;
     private CinemachineCamera _virtualCamera;
     private Vector3 _movementDirection;
@@ -53,9 +52,10 @@ public class PlayerController : MonoBehaviour
     private bool _dashWasPressed;
     private bool _isDashing;
     private bool _isGrounded;
-    private bool _applyingKnockback;
     private float _lastAttackTime;
+    private bool _applyingKnockback;
     private Coroutine _knockbackCoroutine;
+    private float _knockbackTimer;
     private float _dashInputBufferTime = 0.2f;
     private float _dashBufferTimer;
 
@@ -71,6 +71,7 @@ public class PlayerController : MonoBehaviour
         Health = GetComponent<Health>();
         Health.Died += OnDied;
         Rb = GetComponent<Rigidbody>();
+        Controller = GetComponent<CharacterController>();
         PlayerAttack = GetComponent<PlayerAttack>();
         PlayerAttack.Attacked += OnPlayerAttack;
     }
@@ -102,9 +103,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         if (PauseScreen.Instance.gameObject.activeSelf) return;
-
-        CheckMovementCollision();
-
+        
         HandleMovement();
         HandleRotation();
         HandleDash();
@@ -114,11 +113,11 @@ public class PlayerController : MonoBehaviour
     {
         _movementDirection = new Vector3(_inputManager.Translation.x, 0f, _inputManager.Translation.y);
 
-        if (_inputManager.Scheme == InputManager.ControlScheme.Gamepad)
+        if (_inputManager.UsingGamepad)
         {
             _rotateDirection = new Vector3(_inputManager.Direction.x, 0f, _inputManager.Direction.y);
         }
-        else if (_inputManager.Scheme == InputManager.ControlScheme.MouseKeyboard)
+        else
         {
             Vector3 playerScreenPos = Camera.main.WorldToScreenPoint(_lookAt.position);
             Vector3 mouseScreenPos = Input.mousePosition;
@@ -129,31 +128,6 @@ public class PlayerController : MonoBehaviour
         if (_inputManager.DashWasPressed)
         {
             _dashBufferTimer = _dashInputBufferTime;
-        }
-    }
-
-    private void CheckMovementCollision()
-    {
-        if (Physics.BoxCast(_lookAt.position, transform.localScale * 0.1f, _rotationTransform.forward, out var hitFwd,
-                Quaternion.identity,
-                0.1f))
-        {
-            _allowForward = false;
-        }
-        else
-        {
-            _allowForward = true;
-        }
-
-        if (Physics.BoxCast(_lookAt.position, transform.localScale * 0.1f, -_rotationTransform.forward, out var hitBwd,
-                Quaternion.identity,
-                0.2f))
-        {
-            _allowBackward = false;
-        }
-        else
-        {
-            _allowBackward = true;
         }
     }
 
@@ -169,10 +143,10 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (_inputManager.IsMovementActive() && (_allowForward || _allowBackward))
+        if (_inputManager.IsMovementActive())
         {
-            Vector3 targetPos = Rb.position + _movementDirection * (moveSpeed * Time.fixedDeltaTime);
-            Rb.MovePosition(targetPos);
+            Vector3 move = _movementDirection * (moveSpeed * Time.fixedDeltaTime);
+            Controller.Move(move);
             if (!PlayerAttack.AttackInputHeld) _rotationTransform.rotation = Quaternion.LookRotation(_movementDirection);
         }
     }
@@ -181,12 +155,12 @@ public class PlayerController : MonoBehaviour
     {
         if (!PlayerAttack.AttackInputHeld) return;
 
-        if (_inputManager.Scheme == InputManager.ControlScheme.Gamepad && _inputManager.IsDirectionActive())
+        if (_inputManager.UsingGamepad && _inputManager.IsDirectionActive())
         {
             var lookAtRotation = Quaternion.LookRotation(_rotateDirection);
             _rotationTransform.localRotation = lookAtRotation;
         }
-        else if (_inputManager.Scheme == InputManager.ControlScheme.MouseKeyboard)
+        else
         {
             float angle = Mathf.Atan2(_rotateDirection.y, _rotateDirection.x) * Mathf.Rad2Deg;
             _rotationTransform.rotation = Quaternion.Euler(0f, -angle + 90f, 0f);
@@ -197,7 +171,7 @@ public class PlayerController : MonoBehaviour
     {
         if (_dashBufferTimer > 0f)
         {
-            if (!_isDashing)
+            if (!_isDashing && !_applyingKnockback)
             {
                 StartCoroutine(DashCoroutine());
                 _dashBufferTimer = 0f;
@@ -219,25 +193,28 @@ public class PlayerController : MonoBehaviour
         }
 
         _isDashing = true;
-        // ToggleMeshRenderers(false);
-        GetComponent<CapsuleCollider>().enabled = false;
+        ToggleMeshRenderers(false);
+        GetComponent<CapsuleCollider>().excludeLayers = LayerMask.GetMask("Enemy");
+        Controller.excludeLayers = LayerMask.GetMask("Enemy");
         _dashParticleSystem.Play();
         AudioManager.Instance.PlaySound(transform, _dashSFX);
 
         var dir = _movementDirection == Vector3.zero ? _rotationTransform.forward : _movementDirection;
         Vector3 dashVector = dir * _dashMaxDistance;
-        var targetPos = Rb.position + dashVector;
         float startTime = Time.time;
 
-        while (startTime + _dashTime >= Time.time)
+        while (startTime + _dashTime >= Time.time && Health.IsAlive())
         {
-            var targetPosition = Vector3.MoveTowards(Rb.position, targetPos, _dashSmoothing * Time.fixedDeltaTime);
-            Rb.MovePosition(targetPosition);
+            var t = _knockbackTimer / _knockbackDuration;
+            var curveValue = _knockBackCurve.Evaluate(t);
+            var move = dashVector * (curveValue * _dashSmoothing * Time.deltaTime);
+            Controller.Move(move);
             yield return new WaitForFixedUpdate();
         }
 
-        // ToggleMeshRenderers(true);
-        GetComponent<CapsuleCollider>().enabled = true;
+        ToggleMeshRenderers(true);
+        GetComponent<CapsuleCollider>().excludeLayers -= LayerMask.GetMask("Enemy");
+        Controller.excludeLayers -= LayerMask.GetMask("Enemy");
         _isDashing = false;
     }
 
@@ -261,18 +238,20 @@ public class PlayerController : MonoBehaviour
     {
         _applyingKnockback = true;
 
-        var amount = critAttack ? PlayerAttack.PlayerCritKnockbackDistance : PlayerAttack.PlayerBasicKnockbackDistance;
-        Vector3 knockbackDir = -_rotationTransform.forward * amount;
-        var targetPos = Rb.position + knockbackDir;
-        float startTime = Time.time;
+        var amount = critAttack ? PlayerAttack.PlayerCritKnockbackAmount : PlayerAttack.PlayerBasicKnockbackAmount;
+        Vector3 knockbackDir = -_rotationTransform.forward;
 
-        while (startTime + _knockbackTime >= Time.time)
+        while (_knockbackTimer < _knockbackDuration && Health.IsAlive())
         {
-            var targetPosition = Vector3.MoveTowards(Rb.position, targetPos, _knockbackSmoothing * Time.deltaTime);
-            Rb.MovePosition(targetPosition);
+            var t = _knockbackTimer / _knockbackDuration;
+            var curveValue = _knockBackCurve.Evaluate(t);
+            var move = knockbackDir * (curveValue * amount * Time.deltaTime);
+            Controller.Move(move);
+            _knockbackTimer += Time.deltaTime;
             yield return null;
         }
 
+        _knockbackTimer = 0f;
         _applyingKnockback = false;
         _knockbackCoroutine = null;
     }
@@ -280,22 +259,30 @@ public class PlayerController : MonoBehaviour
     private void OnDied(GameObject deadObj)
     {
         enabled = false;
+        _dashBufferTimer = 0f;
         PlayerAttack.enabled = false;
+        Controller.enabled = false;
         ToggleMeshRenderers(false);
     }
 
     public void Respawn(Vector3 position, Quaternion rotation, bool canControl)
     {
         enabled = canControl;
-        Rb.position = position;
-        Rb.rotation = rotation;
-        StartCoroutine(ResetCamera());
         PlayerAttack.enabled = canControl;
+        transform.position = position;
+        transform.rotation = rotation;
         ToggleMeshRenderers(true);
         Health.OnRespawn();
+        PlayerAttack.OnRespawn();
+        Controller.enabled = true;
     }
 
-    private IEnumerator ResetCamera()
+    public void ResetCamera()
+    {
+        StartCoroutine(ResetCameraCoroutine());
+    }
+
+    public IEnumerator ResetCameraCoroutine()
     {
         var cinemachineFollow = _virtualCamera.GetComponent<CinemachineFollow>();
         var origTrackerSettings = cinemachineFollow.TrackerSettings;
