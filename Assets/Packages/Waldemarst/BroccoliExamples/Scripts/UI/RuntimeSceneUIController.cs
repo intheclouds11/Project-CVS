@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using UnityEngine;
 using UnityEngine.UIElements;
-
+#if UNITY_EDITOR
 namespace Broccoli.Examples 
 {
     public class RuntimeSceneUIController : MonoBehaviour
@@ -86,3 +86,4 @@ namespace Broccoli.Examples
         }
     }
 }
+#endif

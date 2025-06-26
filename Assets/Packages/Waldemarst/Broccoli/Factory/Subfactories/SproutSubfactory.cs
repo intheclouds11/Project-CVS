@@ -13,8 +13,6 @@ using Broccoli.Generator;
 using Broccoli.Manager;
 using Broccoli.Utils;
 
-using UnityEditorInternal.Profiling.Memory.Experimental;
-
 namespace Broccoli.Factory
 {
     using Pipeline = Broccoli.Pipe.Pipeline;

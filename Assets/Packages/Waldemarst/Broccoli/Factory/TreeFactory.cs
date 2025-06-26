@@ -413,6 +413,8 @@ namespace Broccoli.Factory
 			TreeFactory treeFactory = go.AddComponent<Broccoli.Factory.TreeFactory> ();
 			return treeFactory;
 		}
+#if UNITY_EDITOR
+
 		/// <summary>
 		/// Loads a pipeline from an asset path.
 		/// </summary>
@@ -444,6 +446,7 @@ namespace Broccoli.Factory
 			}
 			return _localPipeline;
 		}
+#endif
 		/// <summary>
 		/// Spawns vegetation from a pipeline.
 		/// </summary>
