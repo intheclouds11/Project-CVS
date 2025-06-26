@@ -125,7 +125,7 @@ public class SawBlade : MonoBehaviour
     {
         Instantiate(_impactVfx, transform.position, Quaternion.LookRotation(-transform.forward));
 
-        AudioManager.Instance.PlaySound(transform, _impactSfx, true, false, 0.75f);
+        AudioManager.Instance.PlaySound(transform, _impactSfx, true, false, 0.4f);
     }
 
     public void OnAttack(float chargeAmount, bool crit)
