@@ -178,7 +178,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.327
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -230,6 +230,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 502844abb0b4cdd40bff79ce0e1575d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _target: {fileID: 0}
+  _offset: {x: 0, y: 0, z: 0}
+  _lookTowards: 0
 --- !u!1 &1699989920108139512
 GameObject:
   m_ObjectHideFlags: 0
@@ -320,7 +323,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.327
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -372,6 +375,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 502844abb0b4cdd40bff79ce0e1575d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _target: {fileID: 0}
+  _offset: {x: 0, y: 0, z: 0}
+  _lookTowards: 0
 --- !u!1 &2344751909982606138
 GameObject:
   m_ObjectHideFlags: 0
@@ -462,7 +468,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.327
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -514,6 +520,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 502844abb0b4cdd40bff79ce0e1575d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _target: {fileID: 0}
+  _offset: {x: 0, y: 0, z: 0}
+  _lookTowards: 0
 --- !u!1 &3431542558082808153
 GameObject:
   m_ObjectHideFlags: 0
@@ -604,7 +613,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.327
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -656,6 +665,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 502844abb0b4cdd40bff79ce0e1575d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _target: {fileID: 0}
+  _offset: {x: 0, y: 0, z: 0}
+  _lookTowards: 0
 --- !u!1 &3509928751747223906
 GameObject:
   m_ObjectHideFlags: 0
@@ -746,7 +758,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.327
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -798,6 +810,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 502844abb0b4cdd40bff79ce0e1575d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _target: {fileID: 0}
+  _offset: {x: 0, y: 0, z: 0}
+  _lookTowards: 0
 --- !u!1 &4471615573596146692
 GameObject:
   m_ObjectHideFlags: 0
@@ -888,7 +903,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.327
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -940,6 +955,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 502844abb0b4cdd40bff79ce0e1575d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _target: {fileID: 0}
+  _offset: {x: 0, y: 0, z: 0}
+  _lookTowards: 0
 --- !u!1 &5377768353604452114
 GameObject:
   m_ObjectHideFlags: 0
@@ -1030,7 +1048,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.327
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1082,6 +1100,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 502844abb0b4cdd40bff79ce0e1575d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _target: {fileID: 0}
+  _offset: {x: 0, y: 0, z: 0}
+  _lookTowards: 0
 --- !u!1 &6862934332333655658
 GameObject:
   m_ObjectHideFlags: 0
@@ -1172,7 +1193,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.327
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1224,6 +1245,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 502844abb0b4cdd40bff79ce0e1575d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _target: {fileID: 0}
+  _offset: {x: 0, y: 0, z: 0}
+  _lookTowards: 0
 --- !u!1 &7340680766598853934
 GameObject:
   m_ObjectHideFlags: 0
@@ -1314,7 +1338,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.327
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1366,6 +1390,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 502844abb0b4cdd40bff79ce0e1575d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _target: {fileID: 0}
+  _offset: {x: 0, y: 0, z: 0}
+  _lookTowards: 0
 --- !u!1 &7370095569702561922
 GameObject:
   m_ObjectHideFlags: 0
@@ -1456,7 +1483,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.327
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1508,6 +1535,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 502844abb0b4cdd40bff79ce0e1575d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _target: {fileID: 0}
+  _offset: {x: 0, y: 0, z: 0}
+  _lookTowards: 0
 --- !u!1 &8206491907831428563
 GameObject:
   m_ObjectHideFlags: 0
@@ -1598,7 +1628,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.327
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1650,6 +1680,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 502844abb0b4cdd40bff79ce0e1575d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _target: {fileID: 0}
+  _offset: {x: 0, y: 0, z: 0}
+  _lookTowards: 0
 --- !u!1 &8381211443218705395
 GameObject:
   m_ObjectHideFlags: 0
@@ -1740,7 +1773,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.327
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1792,3 +1825,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 502844abb0b4cdd40bff79ce0e1575d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _target: {fileID: 0}
+  _offset: {x: 0, y: 0, z: 0}
+  _lookTowards: 0

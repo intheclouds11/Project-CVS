@@ -24,9 +24,11 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField]
     private Slider _critRange;
     [SerializeField]
-    private Transform _projectileSpawnPoint;
+    private Transform _sawBladeSpawnPoint;
     [SerializeField]
-    private GameObject _projectile;
+    private Transform _sawBladePlayerParent;
+    [SerializeField]
+    private SawBlade _sawBlade;
     [SerializeField]
     private AudioClip _chargingSFX;
     [SerializeField]
@@ -41,7 +43,6 @@ public class PlayerAttack : MonoBehaviour
     private float _attackCooldownTime;
     private int _chargingSFXIndex;
     private InputManager _inputManager;
-    private Health _health;
 
     public event Action<bool> Attacked;
     public bool AttackInputHeld { get; private set; }
@@ -50,27 +51,12 @@ public class PlayerAttack : MonoBehaviour
     private void Awake()
     {
         _inputManager = InputManager.Instance;
-        _health = GetComponent<Health>();
-        _health.Died += OnDied;
-        
+
         _chargeMeter.maxValue = _critChargeTime + _critGraceTime;
         _critRange.maxValue = _chargeMeter.maxValue;
         _critRange.value = _critGraceTime;
         _chargeMeterCanvasGroup = _chargeMeterCanvas.GetComponent<CanvasGroup>();
         _chargeMeterCanvasGroup.alpha = 0.25f;
-    }
-
-    private void OnDied(GameObject obj)
-    {
-        enabled = false;
-        AttackInputHeld = false;
-        _chargeMeterCanvasGroup.alpha = 0f;
-        _chargeMeter.value = 0f;
-    }
-
-    public void OnRespawn()
-    {
-        enabled = true;
     }
 
     private void Update()
@@ -81,7 +67,6 @@ public class PlayerAttack : MonoBehaviour
         HandleChargeAttack();
     }
 
-    // TODO attack input buffer
     private void CheckInput()
     {
         if (_attackCooldownTime > 0)
@@ -94,12 +79,17 @@ public class PlayerAttack : MonoBehaviour
             {
                 if (!AttackInputHeld)
                 {
+                    // If crit stalling and attack held, return SawBlade to player
+                    if (_sawBlade.gameObject.activeSelf && _sawBlade.IsCritAttack)
+                    {
+                        _sawBlade.ReturnToPlayer();
+                        return;
+                    }
+
+                    AttackInputHeld = true;
                     _chargingSFXIndex = AudioManager.Instance.PlaySound(transform, _chargingSFX, true, false, 0.7f);
                 }
-
-                AttackInputHeld = true;
-
-                if (!_enteredCritThreshold && WithinCritThreshold())
+                else if (!_enteredCritThreshold && WithinCritThreshold())
                 {
                     _enteredCritThreshold = true;
                     _chargeParticle.Play();
@@ -155,14 +145,14 @@ public class PlayerAttack : MonoBehaviour
         {
             AudioManager.Instance.PlaySound(transform, _basicSFX, true, false, 1.5f, 0.9f);
         }
-        
+
         _lastChargeAmount = (_chargeMeter.value / _chargeMeter.maxValue);
-        _projectile.GetComponent<SawBlade>().SetProperties(_lastChargeAmount, critAttack);
-        
-        _projectile.transform.parent = null;
-        _projectile.transform.position = _projectileSpawnPoint.position;
-        _projectile.transform.rotation = _projectileSpawnPoint.rotation;
-        _projectile.gameObject.SetActive(true);
+        _sawBlade.OnAttack(_lastChargeAmount, critAttack);
+
+        _sawBlade.transform.parent = null;
+        _sawBlade.transform.position = _sawBladeSpawnPoint.position;
+        _sawBlade.transform.rotation = _sawBladeSpawnPoint.rotation;
+        _sawBlade.gameObject.SetActive(true);
 
         Attacked?.Invoke(critAttack);
         _attackHeldTime = 0f;
@@ -176,5 +166,19 @@ public class PlayerAttack : MonoBehaviour
     public void ToggleChargeHUD()
     {
         _chargeMeterCanvas.enabled = !_chargeMeterCanvas.enabled;
+    }
+    
+    public void OnDied()
+    {
+        enabled = false;
+        AttackInputHeld = false;
+        _chargeMeterCanvasGroup.alpha = 0f;
+        _chargeMeter.value = 0f;
+        _sawBlade.ResetToDefaultState();
+    }
+
+    public void OnRespawn()
+    {
+        enabled = true;
     }
 }

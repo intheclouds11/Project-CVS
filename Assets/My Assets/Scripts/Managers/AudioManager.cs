@@ -30,7 +30,8 @@ public class AudioManager : MonoBehaviour
                 audioSource.pitch = pitch;
                 audioSource.transform.position = tr.position;
                 if (follow) audioSource.gameObject.GetComponent<Follower>().SetTarget(tr);
-                audioSource.PlayOneShot(clip);
+                audioSource.clip = clip;
+                audioSource.Play();
                 return i;
             }
         }
@@ -40,6 +41,7 @@ public class AudioManager : MonoBehaviour
 
     public void StopSound(int index)
     {
+        if (index == -1) return;
         var audioSource = _audioSources[index];
         audioSource.transform.parent = transform;
         audioSource.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);

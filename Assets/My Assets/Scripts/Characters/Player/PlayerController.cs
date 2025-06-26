@@ -262,6 +262,7 @@ public class PlayerController : MonoBehaviour
         _dashBufferTimer = 0f;
         PlayerAttack.enabled = false;
         Controller.enabled = false;
+        PlayerAttack.OnDied();
         ToggleMeshRenderers(false);
     }
 
