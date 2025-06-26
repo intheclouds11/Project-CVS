@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="root">
+        <ui:Label text="Modify Pipeline" display-tooltip-when-elided="true" class="h1" />
+        <ui:Label text="info" display-tooltip-when-elided="true" name="infoLabel" class="info" />
+        <ui:Slider picking-mode="Ignore" label="Branch Girth" value="0.45" high-value="1.5" name="branchGirthSlider" low-value="0.05" />
+        <ui:Slider picking-mode="Ignore" label="Factory Scale" value="1" high-value="2.5" low-value="0.2" name="factoryScaleSlider" />
+        <ui:Button text="Switch SproutMappers" display-tooltip-when-elided="true" name="sproutMapperButton" />
+        <ui:Button text="Toggle Sprouts" display-tooltip-when-elided="true" name="toggleSproutsButton" />
+        <ui:Button text="Randomize Tree" display-tooltip-when-elided="true" name="randomizeButton" />
+        <ui:Slider picking-mode="Ignore" label="Camera" value="0" high-value="1" name="cameraPositionSlider" low-value="-1" />
+    </ui:VisualElement>
+</ui:UXML>

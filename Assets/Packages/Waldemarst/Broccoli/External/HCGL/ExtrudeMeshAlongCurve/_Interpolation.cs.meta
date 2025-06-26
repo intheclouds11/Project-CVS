@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: d1bca7363212aea4e9159c14cccf9575
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/External/HCGL/ExtrudeMeshAlongCurve/_Interpolation.cs
+  uploadId: 754994

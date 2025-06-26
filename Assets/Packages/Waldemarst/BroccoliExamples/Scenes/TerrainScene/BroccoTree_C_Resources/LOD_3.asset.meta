@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: de5f2bd7377972f8e94b1ea20d37a5c1
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 4300000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/BroccoliExamples/Scenes/TerrainScene/BroccoTree_C_Resources/LOD_3.asset
+  uploadId: 754994

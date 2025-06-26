@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 60afc96a8ee424780adb396c70cfc755
+timeCreated: 1513733415
+licenseType: Store
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Editor/Resources/Shaders/TreeCreatorBarkColored.shader
+  uploadId: 754994

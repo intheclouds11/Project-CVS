@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: ea27ad3adef9c43a2988255305279b5a
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 13804, guid: 0000000000000000e000000000000000, type: 0}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Editor/Resources/GUI/PipelineNodeView.uxml
+  uploadId: 754994

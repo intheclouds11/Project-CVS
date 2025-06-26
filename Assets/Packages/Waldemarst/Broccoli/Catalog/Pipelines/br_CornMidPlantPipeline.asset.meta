@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 89bbd38f8209b87b084bf5439e58d777
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Catalog/Pipelines/br_CornMidPlantPipeline.asset
+  uploadId: 754994

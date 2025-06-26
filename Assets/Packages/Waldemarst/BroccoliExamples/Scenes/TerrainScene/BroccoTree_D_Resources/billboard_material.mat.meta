@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9079c4d5c4418fbd981785b8c756bb8e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/BroccoliExamples/Scenes/TerrainScene/BroccoTree_D_Resources/billboard_material.mat
+  uploadId: 754994

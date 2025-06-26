@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2261061c3018269c4a0a5e15c5141e2b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Catalog/Pipelines/br_TomatoPlantPipeline.asset
+  uploadId: 754994

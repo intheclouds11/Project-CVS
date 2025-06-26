@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: dacb999d33fd241d7b51a8cc4abcbb2a
+timeCreated: 1498967998
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Base/BroccoliExtensionInfo.cs
+  uploadId: 754994

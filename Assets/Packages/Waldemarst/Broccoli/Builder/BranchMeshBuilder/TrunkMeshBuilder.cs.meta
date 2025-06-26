@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: dd968e69df435442d8f00806d3fa559d
+timeCreated: 1590610279
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Builder/BranchMeshBuilder/TrunkMeshBuilder.cs
+  uploadId: 754994

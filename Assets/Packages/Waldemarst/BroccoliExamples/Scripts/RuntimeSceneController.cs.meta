@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: c31f80e96e55a4b2d9d6141722e2b65d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/BroccoliExamples/Scripts/RuntimeSceneController.cs
+  uploadId: 754994

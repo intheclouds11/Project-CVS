@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: b8c58d5e7a16f49bb96e21e1b863aada
+timeCreated: 1624331876
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Catalog/Pipelines/br_lp_fern_01.asset
+  uploadId: 754994

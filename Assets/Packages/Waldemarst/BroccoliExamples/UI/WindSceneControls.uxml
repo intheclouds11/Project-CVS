@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="root">
+        <ui:Label text="Wind Controls" display-tooltip-when-elided="true" class="h1" />
+        <ui:Label name="windInfo" text="abc" class="info" />
+        <ui:Slider picking-mode="Ignore" label="Wind Force" value="0" high-value="1" name="windMainSlider" tooltip="Controls the wind main force to apply force to the vegetation" style="flex-grow: 1;" />
+        <ui:Slider picking-mode="Ignore" label="Wind Turbulence" value="0" high-value="1" name="windTurbulenceSlider" tabindex="1" style="flex-grow: 1;" />
+        <ui:Slider picking-mode="Ignore" label="Wind Direction" value="0" high-value="1" name="windDirectionSlider" tabindex="2" />
+        <ui:Slider picking-mode="Ignore" label="Camera" value="0" high-value="1" name="cameraPositionSlider" low-value="-1" />
+        <ui:Button text="Randomize Wind" display-tooltip-when-elided="true" name="randomizeButton" />
+    </ui:VisualElement>
+</ui:UXML>

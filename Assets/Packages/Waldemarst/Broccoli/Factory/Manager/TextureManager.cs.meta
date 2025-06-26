@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 42aaca0bc5b4441869087f02808a7f35
+timeCreated: 1497394399
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Factory/Manager/TextureManager.cs
+  uploadId: 754994

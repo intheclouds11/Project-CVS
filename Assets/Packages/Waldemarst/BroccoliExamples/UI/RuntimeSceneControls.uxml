@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="root">
+        <ui:Label text="Runtime Generator" display-tooltip-when-elided="true" />
+        <ui:Label text="Click on the surface of the planet to spawn new plants." display-tooltip-when-elided="true" />
+        <ui:Button text="Clear Vegetation" display-tooltip-when-elided="true" name="clearButton" />
+    </ui:VisualElement>
+</ui:UXML>

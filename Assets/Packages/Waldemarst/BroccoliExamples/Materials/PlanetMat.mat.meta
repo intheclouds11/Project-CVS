@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 5a8d4f9ea51917793b5c6a3e00cedef3
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/BroccoliExamples/Materials/PlanetMat.mat
+  uploadId: 754994

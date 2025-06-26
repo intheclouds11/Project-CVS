@@ -1,0 +1,39 @@
+#root {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  width: 320px;
+  color: rgba(0.9, 0.9, 0.9, 1);
+  background-color: rgba(0, 0, 0, 0.85); /* Semi-transparent background */
+  padding: 8px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  font-size: 11px;
+}
+
+#randomizeButton {
+   margin-top: 8px;
+}
+
+.h1 {
+    align-self: center;
+    color: rgba(200, 200, 200, 255);
+    -unity-font-style: bold;
+}
+
+.info {
+    align-self: center;
+    color: rgba(200, 200, 200, 255);
+}
+
+.unity-label {
+    color: rgba(200, 200, 200, 255);
+}
+
+.unity-button {
+    color: rgba(200, 200, 200, 255);
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 5px;
+}

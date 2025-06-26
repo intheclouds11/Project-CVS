@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: b2b6cc4dcb8e04f2b9c1a5f318207b58
+timeCreated: 1624428687
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Catalog/Pipelines/br_desert_saguaro_01.asset
+  uploadId: 754994

@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 94859e5d671be4f56b210255a1545532
+timeCreated: 1585875334
+licenseType: Store
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Editor/Resources/Shaders/BroccoColoredBranchFresnel.shader
+  uploadId: 754994

@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 96594325e6cd647b8890315b8e2d0e61
+timeCreated: 1486430993
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Pipe/Elements/LengthTransformElement.cs
+  uploadId: 754994

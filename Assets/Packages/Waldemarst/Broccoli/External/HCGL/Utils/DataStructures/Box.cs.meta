@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 7bea1e36c7d84c74aaa34f7103d62f21
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/External/HCGL/Utils/DataStructures/Box.cs
+  uploadId: 754994

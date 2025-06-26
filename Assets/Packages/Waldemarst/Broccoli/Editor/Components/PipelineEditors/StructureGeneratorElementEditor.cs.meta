@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 8ece18e87b1d48c6589b943f7c437639
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Editor/Components/PipelineEditors/StructureGeneratorElementEditor.cs
+  uploadId: 754994

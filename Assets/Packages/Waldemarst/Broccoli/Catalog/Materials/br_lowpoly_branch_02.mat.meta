@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d17ba43c08f3a436caf2ec9882a6ff32
+timeCreated: 1532119206
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Catalog/Materials/br_lowpoly_branch_02.mat
+  uploadId: 754994

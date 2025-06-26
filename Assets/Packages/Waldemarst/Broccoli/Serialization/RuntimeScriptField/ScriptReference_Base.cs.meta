@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: d587fc03dd3ba4dc3aea427a3d6ab1f9
+timeCreated: 1532481166
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Serialization/RuntimeScriptField/ScriptReference_Base.cs
+  uploadId: 754994

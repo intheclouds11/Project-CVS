@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: ee1fd1daf50d1925f97cc8f6be4547ae
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Factory/Processors/ISproutProcessor.cs
+  uploadId: 754994

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 29b1ca8a08ba612fb9bf8de77dc5f3e2
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Editor/Components/PipelineEditors/BranchBenderElementEditor.cs
+  uploadId: 754994

@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 770e367948b91433083364e8aedb2369
+timeCreated: 1514110870
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Pipe/Elements/BranchMapperElement.cs
+  uploadId: 754994

@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 70dc6f6b9b0844250b24daf2e12e8b04
+timeCreated: 1585845770
+licenseType: Store
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Editor/Resources/Shaders/BroccoColoredBranchPreviewMode.shader
+  uploadId: 754994

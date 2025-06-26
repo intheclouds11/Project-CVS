@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 948b1aed2275844d3892289fda2709d5
+timeCreated: 1533305878
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/BroccoliExamples/Scenes/03 RuntimeScene.unity
+  uploadId: 754994

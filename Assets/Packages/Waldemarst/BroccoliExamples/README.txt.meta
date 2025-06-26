@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 7b037f468c0ba4b04b9cf241e2c79659
+timeCreated: 1533552027
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/BroccoliExamples/README.txt
+  uploadId: 754994

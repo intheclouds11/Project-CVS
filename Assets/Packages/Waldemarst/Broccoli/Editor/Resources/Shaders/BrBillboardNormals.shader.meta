@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: b5babeb00dd23465ebf56b701b89d620
+timeCreated: 1530669538
+licenseType: Store
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Editor/Resources/Shaders/BrBillboardNormals.shader
+  uploadId: 754994

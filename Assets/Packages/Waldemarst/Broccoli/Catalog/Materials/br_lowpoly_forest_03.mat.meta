@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c12eac8855ff6447ba97bd98c0f2f8e3
+timeCreated: 1529395118
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Catalog/Materials/br_lowpoly_forest_03.mat
+  uploadId: 754994

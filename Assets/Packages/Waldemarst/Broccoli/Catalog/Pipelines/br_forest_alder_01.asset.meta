@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: d627fd6ffd49647e691b65144591dfeb
+timeCreated: 1613600739
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Catalog/Pipelines/br_forest_alder_01.asset
+  uploadId: 754994

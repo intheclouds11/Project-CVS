@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 55de6339a8f90e4cdbe00b47e56c5dbd
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Editor/Resources/Shaders/BrSproutLabAlbedo.shader
+  uploadId: 754994

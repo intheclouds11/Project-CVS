@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 95776d5b0928f4e858aaad4083099b85
+timeCreated: 1621564768
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Catalog/Shapes/CactusSaguaro.asset
+  uploadId: 754994

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6fb7c5fe6f25d96f8a63ba182996725b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/External/BCurve/Editor/BezierCurveUtils.cs
+  uploadId: 754994

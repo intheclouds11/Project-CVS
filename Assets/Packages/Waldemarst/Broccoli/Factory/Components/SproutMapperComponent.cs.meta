@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 155ba0ff803ad425d81a2d5dbd8b36b7
+timeCreated: 1497303235
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Factory/Components/SproutMapperComponent.cs
+  uploadId: 754994

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 311d0ed43b5dbaf45b0609a82c8eb0e7
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/External/HCGL/Utils/DataStructures/Half-edge/HalfEdgeData2.cs
+  uploadId: 754994

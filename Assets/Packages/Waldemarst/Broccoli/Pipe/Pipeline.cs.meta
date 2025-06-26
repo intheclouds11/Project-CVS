@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: c408808996a8a4812a415c43bab9974b
+timeCreated: 1484910122
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Pipe/Pipeline.cs
+  uploadId: 754994

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: be5943878e25eb172b320b60daf1d453
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 12388, guid: 0000000000000000e000000000000000, type: 0}
+  disableValidation: 0
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/BroccoliExamples/UI/UI Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss
+  uploadId: 754994

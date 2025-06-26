@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: a292342c4c83e8d71a4cd99a8489d839
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Builder/SproutMeshBuilder/PlaneSproutMeshBuilder.cs
+  uploadId: 754994

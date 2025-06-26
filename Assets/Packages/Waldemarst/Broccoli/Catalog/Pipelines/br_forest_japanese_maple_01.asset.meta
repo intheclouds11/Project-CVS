@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: bf16918e44e274a75993318c7d5841f2
+timeCreated: 1623922260
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Catalog/Pipelines/br_forest_japanese_maple_01.asset
+  uploadId: 754994

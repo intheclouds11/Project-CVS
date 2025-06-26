@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 1125aff39757df84db8e6f533b861997
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/External/HCGL/Triangulation/EarClipping/LinkedVertex.cs
+  uploadId: 754994

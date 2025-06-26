@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 1e2ebfd902e715d429c261ca4d4d085b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/External/HCGL/ExtrudeMeshAlongCurve/Curves/BezierLinear.cs
+  uploadId: 754994

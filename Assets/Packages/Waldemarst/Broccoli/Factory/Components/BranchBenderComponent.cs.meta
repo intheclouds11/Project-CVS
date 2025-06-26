@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 5776c49f0731d473fbb59bb3b4ea41e9
+timeCreated: 1491624688
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Factory/Components/BranchBenderComponent.cs
+  uploadId: 754994

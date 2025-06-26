@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: c545cef8a5e751780b99f511e1916db9
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.2
+  assetPath: Assets/Waldemarst/Broccoli/Editor/SproutLabEditor/SproutLabSettingsPanel.cs
+  uploadId: 754994
