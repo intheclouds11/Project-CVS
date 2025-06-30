@@ -24,6 +24,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Crit Special",
+                    "type": "Button",
+                    "id": "47a89c97-1c8b-4fcb-af9e-3f405c3eba15",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Direction",
                     "type": "Value",
                     "id": "56f9ee43-58d0-4263-8288-ae5487335188",
@@ -460,6 +469,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "Toggle God Mode",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c3e5d442-2aa9-4070-9cc8-4b4f6adcbe57",
+                    "path": "<Keyboard>/ctrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Crit Special",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4fe58497-5cd5-4bd8-97bb-b90cf47f5fa8",
+                    "path": "<Gamepad>/rightStickPress",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Crit Special",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

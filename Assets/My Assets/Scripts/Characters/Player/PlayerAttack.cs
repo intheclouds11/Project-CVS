@@ -36,27 +36,36 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField]
     private AudioClip _critSFX;
 
-    private float _lastChargeAmount;
     private float _attackHeldTime;
     private CanvasGroup _chargeMeterCanvasGroup;
     private bool _enteredCritThreshold;
     private float _attackCooldownTime;
+    private float _attackBufferTimer;
     private int _chargingSFXIndex;
     private InputManager _inputManager;
+    private PlayerAnimator _playerAnimator;
+    private bool _sawBladeReturned = true;
 
     public event Action<bool> Attacked;
-    public bool AttackInputHeld { get; private set; }
+    public bool AttackIsHeld { get; private set; }
 
 
     private void Awake()
     {
         _inputManager = InputManager.Instance;
+        _playerAnimator = GetComponentInChildren<PlayerAnimator>();
+        _sawBlade.ReturnedToPlayer += OnSawBladeReturnedToPlayer;
 
         _chargeMeter.maxValue = _critChargeTime + _critGraceTime;
         _critRange.maxValue = _chargeMeter.maxValue;
         _critRange.value = _critGraceTime;
         _chargeMeterCanvasGroup = _chargeMeterCanvas.GetComponent<CanvasGroup>();
         _chargeMeterCanvasGroup.alpha = 0.25f;
+    }
+
+    private void OnSawBladeReturnedToPlayer()
+    {
+        _sawBladeReturned = true;
     }
 
     private void Update()
@@ -69,15 +78,16 @@ public class PlayerAttack : MonoBehaviour
 
     private void CheckInput()
     {
-        if (_attackCooldownTime > 0)
+        if (_inputManager.AttackWasPressed)
         {
-            _attackCooldownTime -= Time.deltaTime;
+            _attackBufferTimer = _attackBufferTime;
         }
-        else
+
+        if (_attackBufferTimer > 0)
         {
             if (_inputManager.AttackHeld)
             {
-                if (!AttackInputHeld)
+                if (!AttackIsHeld)
                 {
                     // If crit stalling and attack held, return SawBlade to player
                     if (_sawBlade.gameObject.activeSelf && _sawBlade.IsCritAttack)
@@ -86,8 +96,12 @@ public class PlayerAttack : MonoBehaviour
                         return;
                     }
 
-                    AttackInputHeld = true;
-                    _chargingSFXIndex = AudioManager.Instance.PlaySound(transform, _chargingSFX, true, false, 0.7f);
+                    if (_sawBladeReturned)
+                    {
+                        AttackIsHeld = true;
+                        _chargingSFXIndex = AudioManager.Instance.PlaySound(transform, _chargingSFX, true, false, 0.7f);
+                        _playerAnimator.SetReadyAttackTrigger();
+                    }
                 }
                 else if (!_enteredCritThreshold && WithinCritThreshold())
                 {
@@ -97,13 +111,17 @@ public class PlayerAttack : MonoBehaviour
                 }
             }
 
-            if (AttackInputHeld && _inputManager.AttackWasReleased)
+            if (AttackIsHeld && _inputManager.AttackWasReleased)
             {
-                AttackInputHeld = false;
+                AttackIsHeld = false;
                 _enteredCritThreshold = false;
                 _chargeParticle.Stop();
                 Attack();
             }
+        }
+        else
+        {
+            _attackBufferTimer -= Time.deltaTime;
         }
     }
 
@@ -115,7 +133,7 @@ public class PlayerAttack : MonoBehaviour
 
     private void HandleChargeAttack()
     {
-        if (AttackInputHeld)
+        if (AttackIsHeld)
         {
             _attackHeldTime += Time.deltaTime;
             _chargeMeter.value += Time.deltaTime;
@@ -132,7 +150,11 @@ public class PlayerAttack : MonoBehaviour
     private void Attack()
     {
         AudioManager.Instance.StopSound(_chargingSFXIndex);
-        _attackCooldownTime = _attackBufferTime;
+        _playerAnimator.SetAttackTrigger();
+        // _attackCooldownTime = _attackBufferTime;
+        _attackBufferTimer = 0;
+        _sawBladeReturned = false;
+        
         bool critAttack = false;
         if (WithinCritThreshold())
         {
@@ -146,7 +168,7 @@ public class PlayerAttack : MonoBehaviour
             AudioManager.Instance.PlaySound(transform, _basicSFX, true, false, 1.5f, 0.9f);
         }
 
-        _lastChargeAmount = (_chargeMeter.value / _chargeMeter.maxValue);
+        float _lastChargeAmount = _chargeMeter.value / _chargeMeter.maxValue;
         _sawBlade.OnAttack(_lastChargeAmount, critAttack);
 
         _sawBlade.transform.parent = null;
@@ -167,11 +189,12 @@ public class PlayerAttack : MonoBehaviour
     {
         _chargeMeterCanvas.enabled = !_chargeMeterCanvas.enabled;
     }
-    
+
     public void OnDied()
     {
         enabled = false;
-        AttackInputHeld = false;
+        AttackIsHeld = false;
+        _attackBufferTimer = 0f;
         _chargeMeterCanvasGroup.alpha = 0f;
         _chargeMeter.value = 0f;
         _sawBlade.ResetToDefaultState();

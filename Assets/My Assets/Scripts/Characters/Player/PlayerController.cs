@@ -1,8 +1,6 @@
 using System.Collections;
 using Unity.Cinemachine;
-using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
@@ -12,19 +10,33 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float _moveSpeed = 2.5f;
     [SerializeField]
+    private LayerMask GroundedLayerMask;
+    [SerializeField]
+    private float GroundedDistance = 0.02f;
+    [SerializeField]
+    private float _maxFallSpeed = 2f;
+
+    [Header("Movement Modifiers")]
+    [SerializeField]
     private float _attackMoveSpeedMultiplier = 0.5f;
     [SerializeField]
-    private float _attackMoveSpeedCooldown = 0.5f;
+    private float _attackMoveSpeedCooldown = 0.1f;
     [SerializeField]
-    private float _knockbackDuration = 0.35f;
+    private bool _applyAttackKnockback = true;
+    [SerializeField]
+    private float _knockbackDuration = 0.4f;
     [SerializeField]
     private AnimationCurve _knockBackCurve;
+
+    [Header("Dash")]
     [SerializeField]
-    private float _dashSmoothing = 20f;
+    private float _dashBufferTime = 0.2f;
     [SerializeField]
-    private float _dashMaxDistance = 2.5f;
+    private float _dashSmoothing = 1f;
     [SerializeField]
-    private float _dashTime = 0.5f;
+    private float _dashMaxDistance = 7f;
+    [SerializeField]
+    private float _dashDuration = 0.35f;
 
     [Header("Transforms")]
     [SerializeField]
@@ -36,6 +48,10 @@ public class PlayerController : MonoBehaviour
 
     [Header("FX")]
     [SerializeField]
+    private float _footstepDistance = 1.45f;
+    [SerializeField]
+    private AudioClip _footstepSFX;
+    [SerializeField]
     private ParticleSystem _dashParticleSystem;
     [SerializeField]
     private AudioClip _dashSFX;
@@ -43,21 +59,30 @@ public class PlayerController : MonoBehaviour
     public PlayerAttack PlayerAttack { get; private set; }
     public Health Health { get; protected set; }
     public Rigidbody Rb { get; private set; }
-    public CharacterController Controller { get; private set; }
+    public CharacterController CharacterController { get; private set; }
+    public bool IsGrounded { get; private set; }
+    public float Gravity { get; private set; } = 9.81f;
 
     private InputManager _inputManager;
     private CinemachineCamera _virtualCamera;
-    private Vector3 _movementDirection;
+    private PlayerAnimator _playerAnimator;
+    private PlayerChargesManager _playerCharges;
+    private Vector3 _movementVector;
+    private Vector3 xzVelocity;
+    private float yVelocity;
     private Vector3 _rotateDirection;
+    private float _lastAttackTime;
     private bool _dashWasPressed;
     private bool _isDashing;
-    private bool _isGrounded;
-    private float _lastAttackTime;
+    private float _dashBufferTimer;
     private bool _applyingKnockback;
     private Coroutine _knockbackCoroutine;
     private float _knockbackTimer;
-    private float _dashInputBufferTime = 0.2f;
-    private float _dashBufferTimer;
+
+    // Footstep Tracking
+    private bool _startedMoving;
+    private Vector3 _lastPosition;
+    private float _distanceSinceLastFootstep;
 
     [Header("Debug")]
     [SerializeField]
@@ -71,7 +96,9 @@ public class PlayerController : MonoBehaviour
         Health = GetComponent<Health>();
         Health.Died += OnDied;
         Rb = GetComponent<Rigidbody>();
-        Controller = GetComponent<CharacterController>();
+        CharacterController = GetComponent<CharacterController>();
+        _playerAnimator = GetComponentInChildren<PlayerAnimator>();
+        _playerCharges = GetComponent<PlayerChargesManager>();
         PlayerAttack = GetComponent<PlayerAttack>();
         PlayerAttack.Attacked += OnPlayerAttack;
     }
@@ -95,23 +122,18 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (PauseScreen.Instance.gameObject.activeSelf) return;
-
+        if (PauseScreen.IsPaused) return;
         CheckInputs();
-    }
-
-    private void FixedUpdate()
-    {
-        if (PauseScreen.Instance.gameObject.activeSelf) return;
-        
-        HandleMovement();
+        HandleHorizontalMovement();
+        HandleVerticalMovement();
         HandleRotation();
         HandleDash();
+        CheckGrounded();
     }
 
     private void CheckInputs()
     {
-        _movementDirection = new Vector3(_inputManager.Translation.x, 0f, _inputManager.Translation.y);
+        _movementVector = new Vector3(_inputManager.Translation.x, 0f, _inputManager.Translation.y);
 
         if (_inputManager.UsingGamepad)
         {
@@ -125,40 +147,88 @@ public class PlayerController : MonoBehaviour
             _rotateDirection = playerToCursorDirection;
         }
 
-        if (_inputManager.DashWasPressed)
+        if (_inputManager.DashWasPressed && _playerCharges.IsChargeAvailable())
         {
-            _dashBufferTimer = _dashInputBufferTime;
+            _dashBufferTimer = _dashBufferTime;
         }
     }
 
-    private void HandleMovement()
+    private void HandleHorizontalMovement()
     {
-        if (_applyingKnockback || _isDashing) return;
-
-        float moveSpeed = !PlayerAttack.AttackInputHeld ? _moveSpeed : _moveSpeed * _attackMoveSpeedMultiplier;
-
-        if (_lastAttackTime + _attackMoveSpeedCooldown >= Time.time)
+        if (_applyingKnockback || _isDashing)
         {
-            // lerp return to base speed
+            xzVelocity = Vector3.zero;
             return;
         }
 
-        if (_inputManager.IsMovementActive())
+        if (_lastAttackTime + _attackMoveSpeedCooldown >= Time.time)
         {
-            Vector3 move = _movementDirection * (moveSpeed * Time.fixedDeltaTime);
-            Controller.Move(move);
-            if (!PlayerAttack.AttackInputHeld) _rotationTransform.rotation = Quaternion.LookRotation(_movementDirection);
+            // Todo: lerp return to base speed
+            return;
         }
+
+        if (PauseScreen.IsPaused)
+        {
+            xzVelocity = Vector3.zero;
+        }
+        else
+        {
+            if (_inputManager.IsMovementActive())
+            {
+                if (!PlayerAttack.AttackIsHeld)
+                {
+                    _rotationTransform.rotation = Quaternion.LookRotation(_movementVector);
+                }
+
+                if (!_startedMoving)
+                {
+                    _startedMoving = true;
+                    PlayFootstep();
+                }
+            }
+            else
+            {
+                _startedMoving = false;
+            }
+
+            if (_distanceSinceLastFootstep >= _footstepDistance)
+            {
+                PlayFootstep();
+            }
+            else
+            {
+                _distanceSinceLastFootstep += Vector3.Distance(_lastPosition, transform.position);
+                _lastPosition = transform.position;
+            }
+
+            float moveSpeed = !PlayerAttack.AttackIsHeld ? _moveSpeed : _moveSpeed * _attackMoveSpeedMultiplier;
+            xzVelocity = _movementVector * (moveSpeed * Time.deltaTime);
+            _playerAnimator.SetSpeed(_movementVector.magnitude);
+        }
+    }
+
+    private void HandleVerticalMovement()
+    {
+        Vector3 velocity = xzVelocity;
+
+        yVelocity += -Gravity * Time.deltaTime;
+        yVelocity = Mathf.Clamp(yVelocity, -_maxFallSpeed * Time.deltaTime, yVelocity);
+        velocity.y = yVelocity;
+
+        CharacterController.Move(velocity);
     }
 
     private void HandleRotation()
     {
-        if (!PlayerAttack.AttackInputHeld) return;
+        if (!PlayerAttack.AttackIsHeld || PauseScreen.IsPaused) return;
 
-        if (_inputManager.UsingGamepad && _inputManager.IsDirectionActive())
+        if (_inputManager.UsingGamepad)
         {
-            var lookAtRotation = Quaternion.LookRotation(_rotateDirection);
-            _rotationTransform.localRotation = lookAtRotation;
+            if (_inputManager.IsDirectionActive())
+            {
+                var lookAtRotation = Quaternion.LookRotation(_rotateDirection);
+                _rotationTransform.localRotation = lookAtRotation;
+            }
         }
         else
         {
@@ -179,12 +249,15 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            _dashBufferTimer -= Time.fixedDeltaTime;
+            _dashBufferTimer -= Time.deltaTime;
         }
     }
 
     private IEnumerator DashCoroutine()
     {
+        _isDashing = true;
+        _playerCharges.UseCharge();
+        
         if (_knockbackCoroutine != null)
         {
             StopCoroutine(_knockbackCoroutine);
@@ -192,30 +265,45 @@ public class PlayerController : MonoBehaviour
             _applyingKnockback = false;
         }
 
-        _isDashing = true;
-        ToggleMeshRenderers(false);
         GetComponent<CapsuleCollider>().excludeLayers = LayerMask.GetMask("Enemy");
-        Controller.excludeLayers = LayerMask.GetMask("Enemy");
+        CharacterController.excludeLayers = LayerMask.GetMask("Enemy");
+        _playerAnimator.SetIsDashing(true);
         _dashParticleSystem.Play();
-        AudioManager.Instance.PlaySound(transform, _dashSFX);
+        float pitch = Random.Range(0.9f, 1.1f);
+        AudioManager.Instance.PlaySound(transform, _dashSFX, true, false, 0.85f, pitch);
 
-        var dir = _movementDirection == Vector3.zero ? _rotationTransform.forward : _movementDirection;
-        Vector3 dashVector = dir * _dashMaxDistance;
         float startTime = Time.time;
+        var dir = _movementVector == Vector3.zero ? _rotationTransform.forward : _movementVector;
+        Vector3 dashVector = dir * _dashMaxDistance;
 
-        while (startTime + _dashTime >= Time.time && Health.IsAlive())
+        while (startTime + _dashDuration >= Time.time && Health.IsAlive())
         {
             var t = _knockbackTimer / _knockbackDuration;
             var curveValue = _knockBackCurve.Evaluate(t);
             var move = dashVector * (curveValue * _dashSmoothing * Time.deltaTime);
-            Controller.Move(move);
-            yield return new WaitForFixedUpdate();
+            CharacterController.Move(move);
+            yield return null;
         }
 
-        ToggleMeshRenderers(true);
+        // Reset state
         GetComponent<CapsuleCollider>().excludeLayers -= LayerMask.GetMask("Enemy");
-        Controller.excludeLayers -= LayerMask.GetMask("Enemy");
+        CharacterController.excludeLayers -= LayerMask.GetMask("Enemy");
+        _playerAnimator.SetIsDashing(false);
         _isDashing = false;
+    }
+
+    private void CheckGrounded()
+    {
+        var origin = CharacterController.center - Vector3.up * (.5f * CharacterController.height - CharacterController.radius);
+        IsGrounded = Physics.SphereCast(
+            transform.TransformPoint(origin) + Vector3.up * CharacterController.contactOffset,
+            CharacterController.radius,
+            Vector3.down,
+            out var hit,
+            GroundedDistance + CharacterController.contactOffset,
+            GroundedLayerMask, QueryTriggerInteraction.Ignore);
+
+        _playerAnimator.SetIsGrounded(IsGrounded);
     }
 
     private void ToggleMeshRenderers(bool toggle)
@@ -229,6 +317,8 @@ public class PlayerController : MonoBehaviour
 
     private void OnPlayerAttack(bool critAttack)
     {
+        if (!_applyAttackKnockback) return;
+
         if (_knockbackCoroutine != null) StopCoroutine(_knockbackCoroutine);
         _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(critAttack));
         _lastAttackTime = Time.time;
@@ -246,7 +336,7 @@ public class PlayerController : MonoBehaviour
             var t = _knockbackTimer / _knockbackDuration;
             var curveValue = _knockBackCurve.Evaluate(t);
             var move = knockbackDir * (curveValue * amount * Time.deltaTime);
-            Controller.Move(move);
+            CharacterController.Move(move);
             _knockbackTimer += Time.deltaTime;
             yield return null;
         }
@@ -261,7 +351,7 @@ public class PlayerController : MonoBehaviour
         enabled = false;
         _dashBufferTimer = 0f;
         PlayerAttack.enabled = false;
-        Controller.enabled = false;
+        CharacterController.enabled = false;
         PlayerAttack.OnDied();
         ToggleMeshRenderers(false);
     }
@@ -275,7 +365,7 @@ public class PlayerController : MonoBehaviour
         ToggleMeshRenderers(true);
         Health.OnRespawn();
         PlayerAttack.OnRespawn();
-        Controller.enabled = true;
+        CharacterController.enabled = true;
     }
 
     public void ResetCamera()
@@ -292,12 +382,11 @@ public class PlayerController : MonoBehaviour
         cinemachineFollow.TrackerSettings = origTrackerSettings;
     }
 
-    private void OnDrawGizmos()
+    public void PlayFootstep()
     {
-        if (showMouseAimDirection)
-        {
-            // Gizmos.color = Color.red;
-            // Gizmos.DrawWireSphere(_mouseHitPosition, 0.2f);
-        }
+        var pitch = Mathf.Clamp(Random.Range(0.9f, 1.2f) * _movementVector.magnitude, 0.8f, 1.2f);
+        var volume = _movementVector.magnitude * 0.9f;
+        AudioManager.Instance.PlaySound(transform, _footstepSFX, true, false, volume, pitch);
+        _distanceSinceLastFootstep = 0f;
     }
 }

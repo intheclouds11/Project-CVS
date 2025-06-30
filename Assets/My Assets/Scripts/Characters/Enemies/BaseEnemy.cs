@@ -36,7 +36,7 @@ public abstract class BaseEnemy : MonoBehaviour
         _player = GameManager.Instance.Player1;
     }
 
-    protected void OnDied(GameObject obj)
+    protected virtual void OnDied(GameObject obj)
     {
         gameObject.SetActive(false);
     }

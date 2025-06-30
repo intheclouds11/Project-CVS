@@ -1215,6 +1215,7 @@ GameObject:
   - component: {fileID: 4648012314726008055}
   - component: {fileID: 2581591375223168961}
   - component: {fileID: 4065388455726538326}
+  - component: {fileID: 8142782589148350863}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -1251,8 +1252,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MovementDeadzone: 0.1
-  AimActiveThreshold: 0.6
-  AimReleaseThreshold: 0.2
+  AimActiveThreshold: 0.75
+  AimReleaseThreshold: 0.7
 --- !u!114 &748137451264701366
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1319,6 +1320,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetFrameRate: 120
+--- !u!114 &8142782589148350863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4434078024402439613}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e6c8cf5068d9d04c86ea2bdf3bdde37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  NewTimeScale: 1
 --- !u!1 &4514551651019587858
 GameObject:
   m_ObjectHideFlags: 0

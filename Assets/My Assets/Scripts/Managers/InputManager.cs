@@ -17,21 +17,26 @@ public class InputManager : MonoBehaviour
 
     public Vector2 Translation { get; private set; }
     public Vector2 Direction { get; private set; }
+    public bool DashWasPressed { get; private set; }
+
     public bool AttackWasPressed { get; private set; }
     public bool AttackHeld { get; private set; }
     public bool AttackWasReleased { get; private set; }
-    public bool PauseWasPressed { get; private set; }
-    public bool DashWasPressed { get; private set; }
+    public bool CritSpecialWasPressed { get; private set; }
     public bool ActivateAbilityWasPressed { get; private set; }
+
     public bool InteractWasPressed { get; private set; }
+    public bool PauseWasPressed { get; private set; }
     public bool RespawnWasPressed { get; private set; }
-    public bool ToggleChargeHUDWasPressed { get; private set; }
-    public bool ToggleGodModeWasPressed { get; private set; }
     public bool OpenInventoryWasPressed { get; private set; }
     public bool ActivateExpressionUpWasPressed { get; private set; }
     public bool ActivateExpressionDownWasPressed { get; private set; }
     public bool ActivateExpressionLeftWasPressed { get; private set; }
     public bool ActivateExpressionRightWasPressed { get; private set; }
+    
+    // Dev tools
+    public bool ToggleChargeHUDWasPressed { get; private set; }
+    public bool ToggleGodModeWasPressed { get; private set; }
 
     public bool UsingGamepad { get; private set; }
     private MyInputs _inputs;
@@ -61,9 +66,8 @@ public class InputManager : MonoBehaviour
         PauseWasPressed = _inputs.Player.Pause.WasPerformedThisFrame();
         DashWasPressed = _inputs.Player.Dash.WasPerformedThisFrame();
         ActivateAbilityWasPressed = _inputs.Player.ActivateAbility.WasPerformedThisFrame();
+        CritSpecialWasPressed = _inputs.Player.CritSpecial.WasPerformedThisFrame();
         InteractWasPressed = _inputs.Player.Interact.WasPerformedThisFrame();
-        ToggleChargeHUDWasPressed = _inputs.Player.ToggleChargeHUD.WasPerformedThisFrame();
-        ToggleGodModeWasPressed = _inputs.Player.ToggleGodMode.WasPerformedThisFrame();
 
         if (UsingGamepad)
         {
@@ -81,6 +85,12 @@ public class InputManager : MonoBehaviour
             AttackHeld = _inputs.Player.Attack.IsPressed();
             AttackWasReleased = _inputs.Player.Attack.WasReleasedThisFrame();
             RespawnWasPressed = DashWasPressed || InteractWasPressed || AttackWasPressed;
+        }
+
+        if (Debug.isDebugBuild)
+        {
+            ToggleChargeHUDWasPressed = _inputs.Player.ToggleChargeHUD.WasPerformedThisFrame();
+            ToggleGodModeWasPressed = _inputs.Player.ToggleGodMode.WasPerformedThisFrame();
         }
     }
 

@@ -581,11 +581,13 @@ MonoBehaviour:
   _baseDamage: 70
   _critDamage: 120
   _impulseForce: 5
-  _returnStartTime: 0.35
-  _returnMaxDistance: 5
-  _launchSfx: {fileID: 8300000, guid: fddac796930e0bf46a1e5cec7fab1522, type: 3}
-  _bladeSpinLoopSfx: {fileID: 8300000, guid: 3623ceedba7853a468feb0ac4ac416e7, type: 3}
-  _impactSfx: {fileID: 8300000, guid: 92aadb14cc314f54db316cc18b68fe36, type: 3}
+  _longRangeChargeThreshold: 0.25
+  _longRangeReturnTime: 0.35
+  _shortRangeReturnTime: 0.15
+  _startReturnPlayerDistance: 5
+  _swipeSFX: {fileID: 8300000, guid: 614a61b848da5244e8da0f319f2e687e, type: 3}
+  _bladeSpinLoopSFX: {fileID: 8300000, guid: 3623ceedba7853a468feb0ac4ac416e7, type: 3}
+  _impactSFX: {fileID: 8300000, guid: 92aadb14cc314f54db316cc18b68fe36, type: 3}
   _impactVfx: {fileID: 9049631545069152736, guid: 6a0d9d4912f0e7b43b46b2a49721b4bb, type: 3}
 --- !u!54 &7434762892271647052
 Rigidbody:

@@ -110,6 +110,15 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""Crit Special"",
+                    ""type"": ""Button"",
+                    ""id"": ""47a89c97-1c8b-4fcb-af9e-3f405c3eba15"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""Direction"",
                     ""type"": ""Value"",
                     ""id"": ""56f9ee43-58d0-4263-8288-ae5487335188"",
@@ -548,6 +557,28 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
                     ""action"": ""Toggle God Mode"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c3e5d442-2aa9-4070-9cc8-4b4f6adcbe57"",
+                    ""path"": ""<Keyboard>/ctrl"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Crit Special"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4fe58497-5cd5-4bd8-97bb-b90cf47f5fa8"",
+                    ""path"": ""<Gamepad>/rightStickPress"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Crit Special"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -586,6 +617,7 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
         m_Player_Translation = m_Player.FindAction("Translation", throwIfNotFound: true);
         m_Player_Attack = m_Player.FindAction("Attack", throwIfNotFound: true);
+        m_Player_CritSpecial = m_Player.FindAction("Crit Special", throwIfNotFound: true);
         m_Player_Direction = m_Player.FindAction("Direction", throwIfNotFound: true);
         m_Player_Pause = m_Player.FindAction("Pause", throwIfNotFound: true);
         m_Player_Dash = m_Player.FindAction("Dash", throwIfNotFound: true);
@@ -680,6 +712,7 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
     private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
     private readonly InputAction m_Player_Translation;
     private readonly InputAction m_Player_Attack;
+    private readonly InputAction m_Player_CritSpecial;
     private readonly InputAction m_Player_Direction;
     private readonly InputAction m_Player_Pause;
     private readonly InputAction m_Player_Dash;
@@ -711,6 +744,10 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/Attack".
         /// </summary>
         public InputAction @Attack => m_Wrapper.m_Player_Attack;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/CritSpecial".
+        /// </summary>
+        public InputAction @CritSpecial => m_Wrapper.m_Player_CritSpecial;
         /// <summary>
         /// Provides access to the underlying input action "Player/Direction".
         /// </summary>
@@ -791,6 +828,9 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
             @Attack.started += instance.OnAttack;
             @Attack.performed += instance.OnAttack;
             @Attack.canceled += instance.OnAttack;
+            @CritSpecial.started += instance.OnCritSpecial;
+            @CritSpecial.performed += instance.OnCritSpecial;
+            @CritSpecial.canceled += instance.OnCritSpecial;
             @Direction.started += instance.OnDirection;
             @Direction.performed += instance.OnDirection;
             @Direction.canceled += instance.OnDirection;
@@ -844,6 +884,9 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
             @Attack.started -= instance.OnAttack;
             @Attack.performed -= instance.OnAttack;
             @Attack.canceled -= instance.OnAttack;
+            @CritSpecial.started -= instance.OnCritSpecial;
+            @CritSpecial.performed -= instance.OnCritSpecial;
+            @CritSpecial.canceled -= instance.OnCritSpecial;
             @Direction.started -= instance.OnDirection;
             @Direction.performed -= instance.OnDirection;
             @Direction.canceled -= instance.OnDirection;
@@ -960,6 +1003,13 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnAttack(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Crit Special" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCritSpecial(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "Direction" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>

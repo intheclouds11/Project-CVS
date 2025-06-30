@@ -30,8 +30,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.76, y: 0.76, z: 0.76}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 6692608903624908347}
   m_Father: {fileID: 0}
@@ -50,8 +50,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canTarget: 1
   _agroRange: 8
-  _disengageRange: 15
   _moveSpeed: 5
+  _dashRange: 3.5
+  _dashSpeed: 1
+  _dashDuration: 0.5
+  _dashDelayDuration: 1
+  _dashCooldownDuration: 1.5
+  _alertSFX: {fileID: 8300000, guid: baa42a3793a623b42bc15d843bdbfd13, type: 3}
+  _dashingSFX: {fileID: 8300000, guid: b6d3f0aac49764654879e55ed401c6f2, type: 3}
 --- !u!114 &7312698501997549328
 MonoBehaviour:
   m_ObjectHideFlags: 0

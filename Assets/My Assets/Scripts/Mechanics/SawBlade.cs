@@ -3,6 +3,7 @@ using System.Collections;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 public class SawBlade : MonoBehaviour
 {
@@ -11,29 +12,43 @@ public class SawBlade : MonoBehaviour
     [SerializeField]
     private float _critDamage = 120f;
     [SerializeField]
-    private float _impulseForce = 5f;
+    private float _shortRangeImpulse = 1f;
     [SerializeField]
-    private float _returnStartTime = 1.5f;
+    private float _longRangeImpulse = 5f;
+    [field: SerializeField, Tooltip("Percent charge required for long range attack")]
+    private float _longRangeChargeThreshold = 0.25f;
     [SerializeField]
-    private float _returnMaxDistance = 5f;
+    private float _longRangeReturnTime = 0.35f;
     [SerializeField]
-    private AudioClip _launchSfx;
+    private float _shortRangeReturnTime = 0.15f;
     [SerializeField]
-    private AudioClip _bladeSpinLoopSfx;
+    private float _startReturnPlayerDistance = 5f;
+
+    [Header("FX")]
     [SerializeField]
-    private AudioClip _impactSfx;
+    private AudioClip _swipeSFX;
+    [SerializeField]
+    private AudioClip _bladeSpinLoopSFX;
+    [SerializeField]
+    private AudioClip _impactSFX;
     [SerializeField]
     private GameObject _impactVfx;
 
-    private float _newDamage;
-    private float _newImpulseForce;
-    private int _loopAudioSourceIndex = -1;
     public bool IsCritAttack { get; private set; }
+    public static event Action EnemyHit;
+    public event Action ReturnedToPlayer;
+
+    private bool _longRangeAttack;
+    private float _finalDamage;
+    private float _finalImpulseForce;
+    private float _finalStartReturnTime;
+    private int _loopAudioSourceIndex = -1;
     private float _spawnTime;
     private bool _isReturning;
     private Rigidbody _rb;
     private PlayerController _player;
     private CinemachineImpulseSource _impulseSource;
+    private bool _hasInitialized;
 
 
     private void Awake()
@@ -41,24 +56,37 @@ public class SawBlade : MonoBehaviour
         _impulseSource = GetComponent<CinemachineImpulseSource>();
         _player = GameManager.Instance.Player1;
         _rb = GetComponent<Rigidbody>();
+        _finalStartReturnTime = _longRangeReturnTime;
+        _hasInitialized = true;
     }
 
     private void OnEnable()
     {
         _spawnTime = Time.time;
-        Vector3 forceToAdd = transform.forward * _newImpulseForce;
+        Vector3 forceToAdd = transform.forward * _finalImpulseForce;
         _rb.AddForce(forceToAdd, ForceMode.Impulse);
 
-        PlayLoopAudio();
+        if (_longRangeAttack)
+        {
+            PlayLoopAudio();
+        }
+        else
+        {
+            var pitch = Random.Range(0.9f, 1.1f);
+            AudioManager.Instance.PlaySound(transform, _swipeSFX, true, false, 1f, pitch);
+        }
     }
 
     private void Update()
     {
-        transform.rotation *= Quaternion.AngleAxis(transform.eulerAngles.y + Time.deltaTime * 360, Vector3.up);
+        if (_longRangeAttack)
+        {
+            transform.rotation *= Quaternion.AngleAxis(transform.eulerAngles.y + Time.deltaTime * 360, Vector3.up);
+        }
 
         if (_isReturning) return;
 
-        if (Time.time >= _spawnTime + _returnStartTime) // When returnStartTime is reached
+        if (Time.time >= _spawnTime + _finalStartReturnTime)
         {
             if (IsCritAttack)
             {
@@ -70,7 +98,7 @@ public class SawBlade : MonoBehaviour
             }
         }
 
-        if (Vector3.Distance(transform.position, _player.transform.position) >= _returnMaxDistance)
+        if (Vector3.Distance(transform.position, _player.transform.position) >= _startReturnPlayerDistance)
         {
             ReturnToPlayer();
         }
@@ -80,7 +108,7 @@ public class SawBlade : MonoBehaviour
     {
         _isReturning = true;
         var dir = (_player.transform.position - transform.position).normalized;
-        Vector3 forceToAdd = new Vector3(dir.x, 0f, dir.z) * (_impulseForce * 4f);
+        Vector3 forceToAdd = new Vector3(dir.x, 0f, dir.z) * (_longRangeImpulse * 4f);
         _rb.linearVelocity = Vector3.zero;
         _rb.AddForce(forceToAdd, ForceMode.Impulse);
         transform.GetChild(0).gameObject.layer = LayerMask.NameToLayer("Default");
@@ -89,30 +117,39 @@ public class SawBlade : MonoBehaviour
     private void PlayLoopAudio()
     {
         AudioManager.Instance.StopSound(_loopAudioSourceIndex);
-        _loopAudioSourceIndex = AudioManager.Instance.PlaySound(transform, _bladeSpinLoopSfx, true, true, 0.6f);
+        _loopAudioSourceIndex = AudioManager.Instance.PlaySound(transform, _bladeSpinLoopSFX, true, true, 0.6f);
     }
 
     private void OnTriggerEnter(Collider other)
     {
         // Debug.Log($"Hit: {other.transform.name}", other.transform);
-        
+
         if (other.gameObject.layer != LayerMask.NameToLayer("Player"))
         {
             var enemyHit = other.GetComponentInParent<BaseEnemy>();
             if (enemyHit)
             {
                 if (IsCritAttack) _impulseSource.GenerateImpulse();
-                enemyHit.Health.TakeDamage(_newDamage);
+                enemyHit.Health.TakeDamage(_finalDamage);
+                EnemyHit?.Invoke();
             }
 
             PlayEffects();
         }
 
-        ResetToDefaultState();
+        OnReturnedToPlayer();
     }
 
+    private void OnReturnedToPlayer()
+    {
+        ReturnedToPlayer?.Invoke();
+        ResetToDefaultState();
+    }
+    
     public void ResetToDefaultState()
     {
+        if (!_hasInitialized) return;
+        
         AudioManager.Instance.StopSound(_loopAudioSourceIndex);
         transform.GetChild(0).gameObject.layer = LayerMask.NameToLayer("Weapon");
         _rb.linearVelocity = Vector3.zero;
@@ -125,14 +162,18 @@ public class SawBlade : MonoBehaviour
     {
         Instantiate(_impactVfx, transform.position, Quaternion.LookRotation(-transform.forward));
 
-        AudioManager.Instance.PlaySound(transform, _impactSfx, true, false, 0.4f);
+        AudioManager.Instance.PlaySound(transform, _impactSFX, true, false, 0.4f);
     }
 
     public void OnAttack(float chargeAmount, bool crit)
     {
-        _newImpulseForce = _impulseForce * chargeAmount;
-        _newDamage = crit ? _critDamage : _baseDamage * chargeAmount;
+        _longRangeAttack = chargeAmount >= _longRangeChargeThreshold;
+        _finalImpulseForce = _longRangeAttack ? _longRangeImpulse * chargeAmount : _shortRangeImpulse;
+        _finalStartReturnTime = _longRangeAttack ? _longRangeReturnTime : _shortRangeReturnTime;
+
+        _finalDamage = crit ? _critDamage : Mathf.Clamp(_baseDamage * chargeAmount * 2f, _baseDamage * 0.5f, _baseDamage);
         IsCritAttack = crit;
-        // Debug.Log($"currentDMG: {_newDamage}");
+
+        Debug.Log($"_finalDamage: {_finalDamage}");
     }
 }
