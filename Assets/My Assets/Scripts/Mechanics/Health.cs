@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Health : MonoBehaviour
 {
@@ -46,7 +47,8 @@ public class Health : MonoBehaviour
 
     private void OnDied()
     {
-        AudioManager.Instance.PlaySound(transform, _diedSfx);
+        float pitch = Random.Range(0.8f, 1f);
+        AudioManager.Instance.PlaySound(transform, _diedSfx, true, false, 1f, pitch);
         Instantiate(_diedVfx, transform.position, transform.rotation);
         Died?.Invoke(gameObject);
     }

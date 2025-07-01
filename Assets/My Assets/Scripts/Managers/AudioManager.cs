@@ -6,7 +6,8 @@ using UnityEngine;
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance;
-    private static List<AudioSource> _audioSources = new();
+    private List<AudioSource> _audioSources = new();
+    private int _usedSource;
 
     private void Awake()
     {
@@ -18,34 +19,27 @@ public class AudioManager : MonoBehaviour
     /// Returns index of AudioSource that allows classes to control the AudioSource via AudioManager.
     /// </summary>
     /// <returns></returns>
-    public int PlaySound(Transform tr, AudioClip clip, bool follow = true, bool loop = false, float volume = 1f, float pitch = 1f)
+    public AudioSource PlaySound(Transform tr, AudioClip clip, bool follow = true, bool loop = false, float volume = 1f,
+        float pitch = 1f)
     {
-        for (int i = 0; i < _audioSources.Count; i++)
+        if (!clip)
         {
-            var audioSource = _audioSources[i];
-            if (!audioSource.isPlaying)
-            {
-                audioSource.loop = loop;
-                audioSource.volume = volume;
-                audioSource.pitch = pitch;
-                audioSource.transform.position = tr.position;
-                if (follow) audioSource.gameObject.GetComponent<Follower>().SetTarget(tr);
-                audioSource.clip = clip;
-                audioSource.Play();
-                return i;
-            }
+            Debug.LogWarning("No audio clip!", tr);
+            return null;
         }
 
-        return -1;
-    }
+        var audioSource = _audioSources[_usedSource];
+        
+        _usedSource++;
+        if (_usedSource >= _audioSources.Count) _usedSource = 0;
 
-    public void StopSound(int index)
-    {
-        if (index == -1) return;
-        var audioSource = _audioSources[index];
-        audioSource.transform.parent = transform;
-        audioSource.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-
-        audioSource.Stop();
+        audioSource.loop = loop;
+        audioSource.volume = volume;
+        audioSource.pitch = pitch;
+        audioSource.transform.position = tr.position;
+        if (follow) audioSource.gameObject.GetComponent<Follower>().SetTarget(tr);
+        audioSource.clip = clip;
+        audioSource.Play();
+        return audioSource;
     }
 }

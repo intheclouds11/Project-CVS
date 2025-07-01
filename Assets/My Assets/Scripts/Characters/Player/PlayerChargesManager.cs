@@ -113,7 +113,7 @@ public class PlayerChargesManager : MonoBehaviour
         }
     }
 
-    public void ForceFullRecharge()
+    private void ForceFullRecharge()
     {
         _remainingCharges = _maxCharges;
         foreach (var playerCharge in _charges)
@@ -128,5 +128,20 @@ public class PlayerChargesManager : MonoBehaviour
         _remainingCharges++;
         playerCharge.ChargeGameObject.SetActive(true);
         AudioManager.Instance.PlaySound(transform, _rechargeSFX, true, false, 0.5f, 1.2f);
+    }
+
+    public void OnDied()
+    {
+        enabled = false;
+        foreach (var chargeGameObject in _chargeGameObjects)
+        {
+            chargeGameObject.SetActive(false);
+        }
+    }
+
+    public void OnRespawn()
+    {
+        ForceFullRecharge();
+        enabled = true;
     }
 }

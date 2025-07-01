@@ -18,7 +18,12 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField]
     private Canvas _chargeMeterCanvas;
     [SerializeField]
-    private ParticleSystem _chargeParticle;
+    private GameObject _chargeIndicator;
+    [SerializeField]
+    private Color _chargeIndicatorNewColor;
+    [SerializeField]
+    private float _chargeIndicatorColorModifier = 1;
+    private Color _originalIndicatorColor;
     [SerializeField]
     private ParticleSystem _critParticle;
     [SerializeField]
@@ -39,21 +44,26 @@ public class PlayerAttack : MonoBehaviour
     private float _attackHeldTime;
     private CanvasGroup _chargeMeterCanvasGroup;
     private bool _enteredCritThreshold;
+    private bool _exceededCritThreshold;
     private float _attackCooldownTime;
     private float _attackBufferTimer;
-    private int _chargingSFXIndex;
+    private AudioSource _chargingAudio;
     private InputManager _inputManager;
     private PlayerAnimator _playerAnimator;
+    private PlayerController _player;
+    private SkinnedMeshRenderer indicatorMR;
     private bool _sawBladeReturned = true;
 
     public event Action<bool> Attacked;
     public bool AttackIsHeld { get; private set; }
+    public event Action EnteredCritThreshold; // todo: could let enemies anticipate the player more
 
 
     private void Awake()
     {
         _inputManager = InputManager.Instance;
         _playerAnimator = GetComponentInChildren<PlayerAnimator>();
+        _player = GetComponent<PlayerController>();
         _sawBlade.ReturnedToPlayer += OnSawBladeReturnedToPlayer;
 
         _chargeMeter.maxValue = _critChargeTime + _critGraceTime;
@@ -61,6 +71,8 @@ public class PlayerAttack : MonoBehaviour
         _critRange.value = _critGraceTime;
         _chargeMeterCanvasGroup = _chargeMeterCanvas.GetComponent<CanvasGroup>();
         _chargeMeterCanvasGroup.alpha = 0.25f;
+        indicatorMR = _chargeIndicator.GetComponent<SkinnedMeshRenderer>();
+        _originalIndicatorColor = indicatorMR.material.color;
     }
 
     private void OnSawBladeReturnedToPlayer()
@@ -71,6 +83,13 @@ public class PlayerAttack : MonoBehaviour
     private void Update()
     {
         if (PauseScreen.Instance.gameObject.activeSelf) return;
+
+        if (AttackIsHeld && !_enteredCritThreshold)
+        {
+            var newColor = Color.Lerp(indicatorMR.material.color, _chargeIndicatorNewColor,
+                _chargeIndicatorColorModifier * Time.deltaTime);
+            indicatorMR.material.color = newColor;
+        }
 
         CheckInput();
         HandleChargeAttack();
@@ -99,24 +118,29 @@ public class PlayerAttack : MonoBehaviour
                     if (_sawBladeReturned)
                     {
                         AttackIsHeld = true;
-                        _chargingSFXIndex = AudioManager.Instance.PlaySound(transform, _chargingSFX, true, false, 0.7f);
+                        _chargingAudio = AudioManager.Instance.PlaySound(transform, _chargingSFX, true, false, 0.7f);
                         _playerAnimator.SetReadyAttackTrigger();
                     }
                 }
                 else if (!_enteredCritThreshold && WithinCritThreshold())
                 {
-                    _enteredCritThreshold = true;
-                    _chargeParticle.Play();
                     OnEnteredCritThreshold();
                 }
             }
 
-            if (AttackIsHeld && _inputManager.AttackWasReleased)
+            if (AttackIsHeld)
             {
-                AttackIsHeld = false;
-                _enteredCritThreshold = false;
-                _chargeParticle.Stop();
-                Attack();
+                if (!_exceededCritThreshold && ExceededCritThreshold())
+                {
+                    _exceededCritThreshold = true;
+                    indicatorMR.material.color = _originalIndicatorColor;
+                }
+
+                if (_inputManager.AttackWasReleased && !_player.IsDashing)
+                {
+                    AttackIsHeld = false;
+                    Attack();
+                }
             }
         }
         else
@@ -127,8 +151,8 @@ public class PlayerAttack : MonoBehaviour
 
     private void OnEnteredCritThreshold()
     {
-        // Debug.Log($"Entered crit threshold");
-        // todo: visual indicator (flash like PO)
+        _enteredCritThreshold = true;
+        EnteredCritThreshold?.Invoke();
     }
 
     private void HandleChargeAttack()
@@ -149,16 +173,17 @@ public class PlayerAttack : MonoBehaviour
 
     private void Attack()
     {
-        AudioManager.Instance.StopSound(_chargingSFXIndex);
-        _playerAnimator.SetAttackTrigger();
-        // _attackCooldownTime = _attackBufferTime;
         _attackBufferTimer = 0;
         _sawBladeReturned = false;
-        
+        // _chargeIndicator.transform.localScale = _originalChargeIndicatorScale;
+        indicatorMR.material.color = _originalIndicatorColor;
+        _chargingAudio.Stop();
+        _playerAnimator.SetAttackTrigger();
+
         bool critAttack = false;
         if (WithinCritThreshold())
         {
-            // _inputManager.Vibrate(0.8f, 0.8f, 0.25f);
+            _inputManager.Vibrate(0.4f, 1f, 0.2f);
             _critParticle.Play();
             AudioManager.Instance.PlaySound(transform, _critSFX, true, false, 2f, 1.2f);
             critAttack = true;
@@ -176,13 +201,20 @@ public class PlayerAttack : MonoBehaviour
         _sawBlade.transform.rotation = _sawBladeSpawnPoint.rotation;
         _sawBlade.gameObject.SetActive(true);
 
-        Attacked?.Invoke(critAttack);
         _attackHeldTime = 0f;
+        _enteredCritThreshold = false;
+        _exceededCritThreshold = false;
+        Attacked?.Invoke(critAttack);
     }
 
     private bool WithinCritThreshold()
     {
         return _attackHeldTime >= _critChargeTime && _attackHeldTime <= _critChargeTime + _critGraceTime;
+    }
+
+    private bool ExceededCritThreshold()
+    {
+        return _attackHeldTime >= _critChargeTime + _critGraceTime;
     }
 
     public void ToggleChargeHUD()
@@ -197,7 +229,6 @@ public class PlayerAttack : MonoBehaviour
         _attackBufferTimer = 0f;
         _chargeMeterCanvasGroup.alpha = 0f;
         _chargeMeter.value = 0f;
-        _sawBlade.ResetToDefaultState();
     }
 
     public void OnRespawn()

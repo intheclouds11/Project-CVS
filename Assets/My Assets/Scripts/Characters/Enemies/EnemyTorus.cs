@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 public class EnemyTorus : BaseEnemy
 {
@@ -31,8 +32,8 @@ public class EnemyTorus : BaseEnemy
 
     private Animator _animator;
     private bool _inAgroRange;
-    private int _alertAudioSourceIndex;
-    private int _dashingAudioSourceIndex;
+    private AudioSource _alertAudio;
+    private AudioSource _dashingAudio;
     private float _lastDashCompleteTime;
     private bool _isDashing;
 
@@ -47,8 +48,8 @@ public class EnemyTorus : BaseEnemy
     protected override void OnDied(GameObject obj)
     {
         base.OnDied(obj);
-        AudioManager.Instance.StopSound(_alertAudioSourceIndex);
-        AudioManager.Instance.StopSound(_dashingAudioSourceIndex);
+        if (_alertAudio) _alertAudio.Stop();
+        if (_dashingAudio) _dashingAudio.Stop();
     }
 
     private void Update()
@@ -71,23 +72,24 @@ public class EnemyTorus : BaseEnemy
     private IEnumerator DashCoroutine()
     {
         _isDashing = true;
-        _alertAudioSourceIndex = AudioManager.Instance.PlaySound(transform, _alertSFX, true, false, 0.7f, 1.3f);
+        float pitch = Random.Range(1.1f, 1.3f);
+        _alertAudio = AudioManager.Instance.PlaySound(transform, _alertSFX, true, false, 0.7f, pitch);
         _animator.SetTrigger("Alerted");
 
         yield return new WaitForSeconds(_dashDelayDuration);
 
-        _dashingAudioSourceIndex = AudioManager.Instance.PlaySound(transform, _dashingSFX, true, false, 0.7f, 1.3f);
+        _dashingAudio = AudioManager.Instance.PlaySound(transform, _dashingSFX, true, false, 0.7f, pitch);
 
         float startTime = Time.time;
         var dir = (_player.transform.position - transform.position).normalized;
-        var targetPos = _player.transform.position + dir;
+        var targetPos = _player.transform.position + dir * 4f;
 
         while (startTime + _dashDuration >= Time.time)
         {
             transform.position = Vector3.Lerp(transform.position, targetPos, _moveSpeed * Time.deltaTime);
             yield return null;
         }
-        
+
         yield return new WaitForSeconds(_dashDelayDuration * 0.5f);
 
         _isDashing = false;

@@ -3,13 +3,18 @@ using UnityEngine;
 
 public class PlayerAnimator : MonoBehaviour
 {
-    private Animator animator;
+    private Animator _animator;
 
-    void Awake() => animator = GetComponent<Animator>();
+    
+    private void Awake()
+    {
+        _animator = GetComponent<Animator>();
+    }
 
-    public void SetSpeed(float speed) => animator.SetFloat("Speed", speed);
-    public void SetIsGrounded(bool grounded) => animator.SetBool("IsGrounded", grounded);
-    public void SetReadyAttackTrigger() => animator.SetTrigger("ReadyAttack");
-    public void SetAttackTrigger() => animator.SetTrigger("Attack");
-    public void SetIsDashing(bool dashing) => animator.SetBool("IsDashing", dashing);
+    public void SetSpeed(float speed) => _animator.SetFloat("Speed", speed);
+    public void SetIsGrounded(bool grounded) => _animator.SetBool("IsGrounded", grounded);
+    public void SetReadyAttackTrigger() => _animator.SetTrigger("ReadyAttack");
+    public void SetAttackTrigger() => _animator.SetTrigger("Attack");
+    public void SetDiedTrigger() => _animator.SetTrigger("Died");
+    public void SetIsDashing(bool dashing) => _animator.SetBool("IsDashing", dashing);
 }

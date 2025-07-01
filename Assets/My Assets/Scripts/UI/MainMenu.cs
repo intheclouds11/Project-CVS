@@ -16,6 +16,7 @@ public class MainMenu : MonoBehaviour
     public void StartGame()
     {
         // Todo: Add transition
+        InputManager.Instance.Vibrate(0.6f, 0.5f, 1f);
         GameManager.Instance.GameStart();
         SceneManager.LoadScene(1);
     }

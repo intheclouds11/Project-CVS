@@ -40,6 +40,7 @@ public class InputManager : MonoBehaviour
 
     public bool UsingGamepad { get; private set; }
     private MyInputs _inputs;
+    private Coroutine _vibrateCoroutine;
 
 
     private void Awake()
@@ -87,7 +88,7 @@ public class InputManager : MonoBehaviour
             RespawnWasPressed = DashWasPressed || InteractWasPressed || AttackWasPressed;
         }
 
-        if (Debug.isDebugBuild)
+        // if (Debug.isDebugBuild)
         {
             ToggleChargeHUDWasPressed = _inputs.Player.ToggleChargeHUD.WasPerformedThisFrame();
             ToggleGodModeWasPressed = _inputs.Player.ToggleGodMode.WasPerformedThisFrame();
@@ -106,19 +107,21 @@ public class InputManager : MonoBehaviour
 
     public void Vibrate(float lowFreq, float highFreq, float duration)
     {
-        StartCoroutine(VibrateCoroutine(lowFreq, highFreq, duration));
+        var gamepad = Gamepad.current;
+        if (gamepad == null) return;
+        
+        if (_vibrateCoroutine != null) StopCoroutine(_vibrateCoroutine);
+        _vibrateCoroutine = StartCoroutine(VibrateCoroutine(gamepad, lowFreq, highFreq, duration));
     }
 
-    private IEnumerator VibrateCoroutine(float low, float high, float time)
+    private IEnumerator VibrateCoroutine(Gamepad gamepad, float low, float high, float time)
     {
-        var gamepad = Gamepad.current;
-        if (gamepad == null) yield break;
-
         gamepad.SetMotorSpeeds(low, high);
         gamepad.ResumeHaptics();
         yield return new WaitForSeconds(time);
         gamepad.PauseHaptics();
         gamepad.SetMotorSpeeds(0, 0);
+        _vibrateCoroutine = null;
     }
 
     private bool IsGamepadInUse()

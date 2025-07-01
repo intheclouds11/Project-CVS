@@ -48,6 +48,8 @@ public class PlayerController : MonoBehaviour
 
     [Header("FX")]
     [SerializeField]
+    private float _deathDelay = 0.3f;
+    [SerializeField]
     private float _footstepDistance = 1.45f;
     [SerializeField]
     private AudioClip _footstepSFX;
@@ -73,7 +75,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 _rotateDirection;
     private float _lastAttackTime;
     private bool _dashWasPressed;
-    private bool _isDashing;
+    public bool IsDashing { get; private set; }
     private float _dashBufferTimer;
     private bool _applyingKnockback;
     private Coroutine _knockbackCoroutine;
@@ -155,7 +157,7 @@ public class PlayerController : MonoBehaviour
 
     private void HandleHorizontalMovement()
     {
-        if (_applyingKnockback || _isDashing)
+        if (_applyingKnockback || IsDashing)
         {
             xzVelocity = Vector3.zero;
             return;
@@ -241,7 +243,7 @@ public class PlayerController : MonoBehaviour
     {
         if (_dashBufferTimer > 0f)
         {
-            if (!_isDashing && !_applyingKnockback)
+            if (!IsDashing && !_applyingKnockback)
             {
                 StartCoroutine(DashCoroutine());
                 _dashBufferTimer = 0f;
@@ -255,9 +257,9 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator DashCoroutine()
     {
-        _isDashing = true;
+        IsDashing = true;
         _playerCharges.UseCharge();
-        
+
         if (_knockbackCoroutine != null)
         {
             StopCoroutine(_knockbackCoroutine);
@@ -267,7 +269,8 @@ public class PlayerController : MonoBehaviour
 
         GetComponent<CapsuleCollider>().excludeLayers = LayerMask.GetMask("Enemy");
         CharacterController.excludeLayers = LayerMask.GetMask("Enemy");
-        _playerAnimator.SetIsDashing(true);
+        if (!PlayerAttack.AttackIsHeld) _playerAnimator.SetIsDashing(true);
+
         _dashParticleSystem.Play();
         float pitch = Random.Range(0.9f, 1.1f);
         AudioManager.Instance.PlaySound(transform, _dashSFX, true, false, 0.85f, pitch);
@@ -289,7 +292,7 @@ public class PlayerController : MonoBehaviour
         GetComponent<CapsuleCollider>().excludeLayers -= LayerMask.GetMask("Enemy");
         CharacterController.excludeLayers -= LayerMask.GetMask("Enemy");
         _playerAnimator.SetIsDashing(false);
-        _isDashing = false;
+        IsDashing = false;
     }
 
     private void CheckGrounded()
@@ -353,6 +356,14 @@ public class PlayerController : MonoBehaviour
         PlayerAttack.enabled = false;
         CharacterController.enabled = false;
         PlayerAttack.OnDied();
+        _playerAnimator.SetDiedTrigger();
+        _playerCharges.OnDied();
+        StartCoroutine(DiedCoroutine());
+    }
+
+    private IEnumerator DiedCoroutine()
+    {
+        yield return new WaitForSeconds(_deathDelay);
         ToggleMeshRenderers(false);
     }
 
@@ -365,6 +376,7 @@ public class PlayerController : MonoBehaviour
         ToggleMeshRenderers(true);
         Health.OnRespawn();
         PlayerAttack.OnRespawn();
+        _playerCharges.OnRespawn();
         CharacterController.enabled = true;
     }
 

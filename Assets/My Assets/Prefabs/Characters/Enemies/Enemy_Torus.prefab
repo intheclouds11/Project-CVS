@@ -54,7 +54,7 @@ MonoBehaviour:
   _dashRange: 3.5
   _dashSpeed: 1
   _dashDuration: 0.5
-  _dashDelayDuration: 1
+  _dashDelayDuration: 0.75
   _dashCooldownDuration: 1.5
   _alertSFX: {fileID: 8300000, guid: baa42a3793a623b42bc15d843bdbfd13, type: 3}
   _dashingSFX: {fileID: 8300000, guid: b6d3f0aac49764654879e55ed401c6f2, type: 3}
@@ -71,7 +71,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxHealth: 100
-  _diedSfx: {fileID: 8300000, guid: 122f0dca8319dec46972e688151fc65b, type: 3}
+  _diedSfx: {fileID: 8300000, guid: 3152b2c46126d324ca368dd04f75bebc, type: 3}
   _diedVfx: {fileID: 9049631545069152736, guid: e2d4687b86076744fbdd2aa6777e932f, type: 3}
 --- !u!95 &1714698826164707562
 Animator:

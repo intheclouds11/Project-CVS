@@ -42,7 +42,7 @@ public class SawBlade : MonoBehaviour
     private float _finalDamage;
     private float _finalImpulseForce;
     private float _finalStartReturnTime;
-    private int _loopAudioSourceIndex = -1;
+    private AudioSource _loopAudio;
     private float _spawnTime;
     private bool _isReturning;
     private Rigidbody _rb;
@@ -55,9 +55,15 @@ public class SawBlade : MonoBehaviour
     {
         _impulseSource = GetComponent<CinemachineImpulseSource>();
         _player = GameManager.Instance.Player1;
+        _player.Health.Died += OnDied;
         _rb = GetComponent<Rigidbody>();
         _finalStartReturnTime = _longRangeReturnTime;
         _hasInitialized = true;
+    }
+
+    private void OnDied(GameObject obj)
+    {
+        ResetToDefaultState();
     }
 
     private void OnEnable()
@@ -116,8 +122,8 @@ public class SawBlade : MonoBehaviour
 
     private void PlayLoopAudio()
     {
-        AudioManager.Instance.StopSound(_loopAudioSourceIndex);
-        _loopAudioSourceIndex = AudioManager.Instance.PlaySound(transform, _bladeSpinLoopSFX, true, true, 0.6f);
+        if (_loopAudio) _loopAudio.Stop();
+        _loopAudio = AudioManager.Instance.PlaySound(transform, _bladeSpinLoopSFX, true, true, 0.6f);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -145,12 +151,12 @@ public class SawBlade : MonoBehaviour
         ReturnedToPlayer?.Invoke();
         ResetToDefaultState();
     }
-    
+
     public void ResetToDefaultState()
     {
         if (!_hasInitialized) return;
-        
-        AudioManager.Instance.StopSound(_loopAudioSourceIndex);
+
+        if (_loopAudio) _loopAudio.Stop();
         transform.GetChild(0).gameObject.layer = LayerMask.NameToLayer("Weapon");
         _rb.linearVelocity = Vector3.zero;
         _isReturning = false;
@@ -174,6 +180,6 @@ public class SawBlade : MonoBehaviour
         _finalDamage = crit ? _critDamage : Mathf.Clamp(_baseDamage * chargeAmount * 2f, _baseDamage * 0.5f, _baseDamage);
         IsCritAttack = crit;
 
-        Debug.Log($"_finalDamage: {_finalDamage}");
+        // Debug.Log($"_finalDamage: {_finalDamage}");
     }
 }

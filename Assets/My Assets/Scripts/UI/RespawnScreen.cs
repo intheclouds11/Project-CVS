@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class RespawnScreen : MonoBehaviour
 {
     [SerializeField]
-    private float _delayRespawnInputTime = 1f;
+    private float _delayRespawnInputTime = 0.5f;
     [SerializeField]
     private float _fadeInTime = 3f;
     [SerializeField]
@@ -17,16 +17,22 @@ public class RespawnScreen : MonoBehaviour
     private Image _blackImage;
     [SerializeField]
     private TextMeshProUGUI _respawnText;
-
+    
     private CanvasGroup _canvasGroup;
     private bool _startedRespawn;
     private float _lastTimeShown;
-
-
+    
+    
     private void Awake()
     {
         _canvasGroup = GetComponent<CanvasGroup>();
         SceneManager.sceneLoaded += OnSceneLoaded;
+        if (Debug.isDebugBuild || Application.isEditor)
+        {
+            _delayRespawnInputTime = 0f;
+            _fadeInTime = 0.5f;
+            _fadeOutTime = 0.5f;
+        }
     }
 
     private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
@@ -66,8 +72,13 @@ public class RespawnScreen : MonoBehaviour
             yield return null;
         }
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.1f);
 
+        Respawn();
+    }
+
+    private static void Respawn()
+    {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         GameManager.Instance.OnReturnToMainMenu();
         GameManager.Instance.GameStart();
@@ -76,16 +87,16 @@ public class RespawnScreen : MonoBehaviour
     private IEnumerator OnSceneLoadedCoroutine()
     {
         GameManager.Instance.Player1.ResetCamera();
-        
+
         yield return new WaitForSeconds(0.1f);
-        
+
         // _respawnText.enabled = false;
         // while (_canvasGroup.alpha > 0f)
         // {
         //     _canvasGroup.alpha -= Time.deltaTime / _fadeOutTime;
         //     yield return null;
         // }
-        
+
         _canvasGroup.alpha = 0f;
         yield return null;
         gameObject.SetActive(false);
