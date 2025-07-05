@@ -9,10 +9,10 @@ public class PlayerController : MonoBehaviour
     [Header("Movement")]
     [SerializeField]
     private float _moveSpeed = 2.5f;
-    [SerializeField]
-    private LayerMask GroundedLayerMask;
-    [SerializeField]
-    private float GroundedDistance = 0.02f;
+    // [SerializeField]
+    // private LayerMask GroundedLayerMask;
+    // [SerializeField]
+    // private float GroundedDistance = 0.02f;
     [SerializeField]
     private float _maxFallSpeed = 2f;
 
@@ -60,25 +60,19 @@ public class PlayerController : MonoBehaviour
 
     public PlayerAttack PlayerAttack { get; private set; }
     public Health Health { get; protected set; }
-    public Rigidbody Rb { get; private set; }
     public CharacterController CharacterController { get; private set; }
-    public bool IsGrounded { get; private set; }
+    // public bool IsGrounded { get; private set; }
     public float Gravity { get; private set; } = 9.81f;
+    public bool IsDashing { get; private set; }
 
-    private InputManager _inputManager;
-    private CinemachineCamera _virtualCamera;
-    private PlayerAnimator _playerAnimator;
-    private PlayerChargesManager _playerCharges;
     private Vector3 _movementVector;
     private Vector3 xzVelocity;
     private float yVelocity;
     private Vector3 _rotateDirection;
     private float _lastAttackTime;
     private bool _dashWasPressed;
-    public bool IsDashing { get; private set; }
     private float _dashBufferTimer;
     private bool _applyingKnockback;
-    private Coroutine _knockbackCoroutine;
     private float _knockbackTimer;
 
     // Footstep Tracking
@@ -86,18 +80,20 @@ public class PlayerController : MonoBehaviour
     private Vector3 _lastPosition;
     private float _distanceSinceLastFootstep;
 
-    [Header("Debug")]
-    [SerializeField]
-    private bool showMouseAimDirection = true;
+    private Coroutine _knockbackCoroutine;
+    private InputManager _inputManager;
+    private CinemachineCamera _virtualCamera;
+    private PlayerAnimator _playerAnimator;
+    private PlayerChargesManager _playerCharges;
 
 
     private void Awake()
     {
-        DontDestroyOnLoad(gameObject);
+        
+
         SceneManager.sceneLoaded += OnSceneLoaded;
         Health = GetComponent<Health>();
         Health.Died += OnDied;
-        Rb = GetComponent<Rigidbody>();
         CharacterController = GetComponent<CharacterController>();
         _playerAnimator = GetComponentInChildren<PlayerAnimator>();
         _playerCharges = GetComponent<PlayerChargesManager>();
@@ -107,6 +103,11 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
+        if (!gameObject.scene.name.Equals("DontDestroyOnLoad"))
+        {
+            Debug.LogError($"Player is a scene object in scene: {gameObject.scene.name}");
+        }
+        
         _inputManager = InputManager.Instance;
         _virtualCamera = FindAnyObjectByType<CinemachineCamera>();
         _virtualCamera.Follow = _lookAt; // Set follower
@@ -130,7 +131,7 @@ public class PlayerController : MonoBehaviour
         HandleVerticalMovement();
         HandleRotation();
         HandleDash();
-        CheckGrounded();
+        // CheckGrounded();
     }
 
     private void CheckInputs()
@@ -295,19 +296,19 @@ public class PlayerController : MonoBehaviour
         IsDashing = false;
     }
 
-    private void CheckGrounded()
-    {
-        var origin = CharacterController.center - Vector3.up * (.5f * CharacterController.height - CharacterController.radius);
-        IsGrounded = Physics.SphereCast(
-            transform.TransformPoint(origin) + Vector3.up * CharacterController.contactOffset,
-            CharacterController.radius,
-            Vector3.down,
-            out var hit,
-            GroundedDistance + CharacterController.contactOffset,
-            GroundedLayerMask, QueryTriggerInteraction.Ignore);
-
-        _playerAnimator.SetIsGrounded(IsGrounded);
-    }
+    // private void CheckGrounded()
+    // {
+    //     var origin = CharacterController.center - Vector3.up * (.5f * CharacterController.height - CharacterController.radius);
+    //     IsGrounded = Physics.SphereCast(
+    //         transform.TransformPoint(origin) + Vector3.up * CharacterController.contactOffset,
+    //         CharacterController.radius,
+    //         Vector3.down,
+    //         out var hit,
+    //         GroundedDistance + CharacterController.contactOffset,
+    //         GroundedLayerMask, QueryTriggerInteraction.Ignore);
+    //
+    //     _playerAnimator.SetIsGrounded(IsGrounded);
+    // }
 
     private void ToggleMeshRenderers(bool toggle)
     {
@@ -318,27 +319,26 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void OnPlayerAttack(bool critAttack)
+    private void OnPlayerAttack(float knockbackAmount)
     {
         if (!_applyAttackKnockback) return;
 
         if (_knockbackCoroutine != null) StopCoroutine(_knockbackCoroutine);
-        _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(critAttack));
+        _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(knockbackAmount));
         _lastAttackTime = Time.time;
     }
 
-    private IEnumerator KnockbackCoroutine(bool critAttack)
+    private IEnumerator KnockbackCoroutine(float knockbackAmount)
     {
         _applyingKnockback = true;
 
-        var amount = critAttack ? PlayerAttack.PlayerCritKnockbackAmount : PlayerAttack.PlayerBasicKnockbackAmount;
         Vector3 knockbackDir = -_rotationTransform.forward;
 
         while (_knockbackTimer < _knockbackDuration && Health.IsAlive())
         {
             var t = _knockbackTimer / _knockbackDuration;
             var curveValue = _knockBackCurve.Evaluate(t);
-            var move = knockbackDir * (curveValue * amount * Time.deltaTime);
+            var move = knockbackDir * (curveValue * knockbackAmount * Time.deltaTime);
             CharacterController.Move(move);
             _knockbackTimer += Time.deltaTime;
             yield return null;

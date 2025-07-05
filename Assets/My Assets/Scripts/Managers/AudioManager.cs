@@ -2,17 +2,27 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance;
-    private List<AudioSource> _audioSources = new();
+    [field: SerializeField]
+    public AudioSource MusicAudioSource { get; private set; }
+    [SerializeField]
+    private AudioMixer _audioMixer;
+    [SerializeField]
+    private GameObject _SFXParent;
+
+
+    private List<AudioSource> _SFXAudioSources = new();
     private int _usedSource;
+
 
     private void Awake()
     {
         Instance = this;
-        _audioSources = GetComponentsInChildren<AudioSource>().ToList();
+        _SFXAudioSources = _SFXParent.GetComponentsInChildren<AudioSource>().ToList();
     }
 
     /// <summary>
@@ -28,10 +38,10 @@ public class AudioManager : MonoBehaviour
             return null;
         }
 
-        var audioSource = _audioSources[_usedSource];
-        
+        var audioSource = _SFXAudioSources[_usedSource];
+
         _usedSource++;
-        if (_usedSource >= _audioSources.Count) _usedSource = 0;
+        if (_usedSource >= _SFXAudioSources.Count) _usedSource = 0;
 
         audioSource.loop = loop;
         audioSource.volume = volume;
@@ -41,5 +51,15 @@ public class AudioManager : MonoBehaviour
         audioSource.clip = clip;
         audioSource.Play();
         return audioSource;
+    }
+
+    public void AdjustMusicGroupGain(float newGain)
+    {
+        _audioMixer.SetFloat("MusicGain", newGain);
+    }
+
+    public void AdjustAmbienceGroupGain(float newGain)
+    {
+        _audioMixer.SetFloat("AmbienceGain", newGain);
     }
 }

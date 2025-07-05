@@ -1,18 +1,24 @@
 using System;
+using System.Linq;
 using UnityEngine;
 
 public class PlayerSpawnPoint : MonoBehaviour
 {
-    public static event Action PlayerSpawned;
+    public static event Action<PlayerController> PlayerSpawned;
+    
+    [SerializeField]
+    private bool _activeRespawnPoint;
     [SerializeField]
     private GameObject _playerPrefab;
 
-    private GameObject _player;
+    private PlayerController _player;
 
 
     private void Start()
     {
-        _player = FindAnyObjectByType<PlayerController>()?.gameObject;
+        if (!_activeRespawnPoint) return;
+        
+        _player = GameObject.FindWithTag("Player")?.GetComponent<PlayerController>();
 
         if (!_player)
         {
@@ -20,15 +26,17 @@ public class PlayerSpawnPoint : MonoBehaviour
         }
         else
         {
-            _player.GetComponent<PlayerController>().Respawn(transform.position, Quaternion.identity, true);
+            _player.Respawn(transform.position, Quaternion.identity, true);
         }
 
-        PlayerSpawned?.Invoke();
+        PlayerSpawned?.Invoke(_player);
         gameObject.SetActive(false);
     }
 
-    public GameObject Spawn()
+    public PlayerController Spawn()
     {
-        return Instantiate(_playerPrefab, transform.position, Quaternion.identity);
+        var player = Instantiate(_playerPrefab, transform.position, Quaternion.identity).GetComponent<PlayerController>();
+        DontDestroyOnLoad(player);
+        return player;
     }
 }

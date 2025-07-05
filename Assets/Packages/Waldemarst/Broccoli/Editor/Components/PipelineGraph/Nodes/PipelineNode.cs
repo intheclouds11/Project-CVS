@@ -19,7 +19,7 @@ namespace Broccoli.TreeNodeEditor
         public PipelineElement pipelineElement { get; private set; }
         public Port srcPort = null;
         public Port sinkPort = null;
-        public new class UxmlFactory : UxmlFactory<PipelineNode, VisualElement.UxmlTraits> {}
+        public new class UxmlFactory : UxmlElementAttribute {}
         #endregion
 
         #region Delegates

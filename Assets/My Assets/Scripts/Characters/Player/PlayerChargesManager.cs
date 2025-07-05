@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using NaughtyAttributes;
 using UnityEngine;
@@ -19,6 +20,8 @@ public class PlayerChargesManager : MonoBehaviour
     private int _maxCharges = 1;
     [SerializeField]
     private float _rechargeTime = 2f;
+    [SerializeField]
+    private float _fadeInTime = 0.5f;
     [SerializeField]
     private AudioClip _rechargeSFX;
     [SerializeField]
@@ -55,7 +58,7 @@ public class PlayerChargesManager : MonoBehaviour
 
     private void SawBladeOnEnemyHit()
     {
-        if (_remainingCharges < _maxCharges)
+        if (_enemyHitRecharges && _remainingCharges < _maxCharges)
         {
             for (int i = _charges.Count - 1; i >= 0; i--)
             {
@@ -127,7 +130,23 @@ public class PlayerChargesManager : MonoBehaviour
     {
         _remainingCharges++;
         playerCharge.ChargeGameObject.SetActive(true);
+        StartCoroutine(FadeIn(playerCharge));
         AudioManager.Instance.PlaySound(transform, _rechargeSFX, true, false, 0.5f, 1.2f);
+    }
+
+    private IEnumerator FadeIn(PlayerCharge playerCharge)
+    {
+        var mr = playerCharge.ChargeGameObject.GetComponent<MeshRenderer>();
+        Color endColor = mr.material.color;
+        mr.material.color = new Color(mr.material.color.r, mr.material.color.g, mr.material.color.b, 0f);
+
+        while (mr.material.color.a <= 0.9f)
+        {
+            mr.material.color = Color.Lerp(mr.material.color, endColor, _fadeInTime * Time.deltaTime);
+            yield return null;
+        }
+
+        mr.material.color = endColor;
     }
 
     public void OnDied()

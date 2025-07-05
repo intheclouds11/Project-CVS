@@ -1,39 +1,51 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class PlayerAttack : MonoBehaviour
 {
+    [Header("Settings")]
     [SerializeField]
     private float _attackBufferTime = 0.3f;
-    [field: SerializeField] public float PlayerBasicKnockbackAmount { get; private set; } = 0.2f;
-    [field: SerializeField] public float PlayerCritKnockbackAmount { get; private set; } = 0.8f;
+    [SerializeField]
+    private float _playerBasicKnockbackAmount = 2.5f;
+    [SerializeField]
+    private float _playerCritKnockbackAmount = 5f;
     [SerializeField]
     private float _critChargeTime = 0.4f;
     [SerializeField]
     private float _critGraceTime = 0.1f;
+
+    [Header("Transforms")]
     [SerializeField]
-    private Slider _chargeMeter;
-    [SerializeField]
-    private Canvas _chargeMeterCanvas;
-    [SerializeField]
-    private GameObject _chargeIndicator;
-    [SerializeField]
-    private Color _chargeIndicatorNewColor;
-    [SerializeField]
-    private float _chargeIndicatorColorModifier = 1;
-    private Color _originalIndicatorColor;
-    [SerializeField]
-    private ParticleSystem _critParticle;
-    [SerializeField]
-    private Slider _critRange;
+    private SawBlade _sawBlade;
     [SerializeField]
     private Transform _sawBladeSpawnPoint;
     [SerializeField]
     private Transform _sawBladePlayerParent;
+
+    [Header("Charging Visuals")]
     [SerializeField]
-    private SawBlade _sawBlade;
+    private Slider _chargeMeter;
+    [SerializeField]
+    private Slider _critRange;
+    [SerializeField]
+    private Canvas _chargeMeterCanvas;
+    [SerializeField]
+    private Transform _chargeIndicator;
+    [SerializeField]
+    private float _chargeIndicatorDelay = 0.2f;
+    [SerializeField]
+    private Color _chargedColor;
+    [SerializeField]
+    private float _chargeIndicatorColorModifier = 1;
+    [SerializeField]
+    private ParticleSystem _critParticle;
+
+    [Header("SFX")]
     [SerializeField]
     private AudioClip _chargingSFX;
     [SerializeField]
@@ -41,22 +53,25 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField]
     private AudioClip _critSFX;
 
+    public event Action<float> Attacked;
+    public bool AttackIsHeld { get; private set; }
+    public event Action EnteredCritThreshold; // todo: could let enemies anticipate the player more
+
+    private bool _sawBladeReturned = true;
     private float _attackHeldTime;
-    private CanvasGroup _chargeMeterCanvasGroup;
     private bool _enteredCritThreshold;
     private bool _exceededCritThreshold;
     private float _attackCooldownTime;
     private float _attackBufferTimer;
+    private Color _originalIndicatorColor;
+    private Coroutine _chargeIndicatorCoroutine;
+
+    private CanvasGroup _chargeMeterCanvasGroup;
     private AudioSource _chargingAudio;
     private InputManager _inputManager;
     private PlayerAnimator _playerAnimator;
     private PlayerController _player;
     private SkinnedMeshRenderer indicatorMR;
-    private bool _sawBladeReturned = true;
-
-    public event Action<bool> Attacked;
-    public bool AttackIsHeld { get; private set; }
-    public event Action EnteredCritThreshold; // todo: could let enemies anticipate the player more
 
 
     private void Awake()
@@ -84,15 +99,20 @@ public class PlayerAttack : MonoBehaviour
     {
         if (PauseScreen.Instance.gameObject.activeSelf) return;
 
-        if (AttackIsHeld && !_enteredCritThreshold)
-        {
-            var newColor = Color.Lerp(indicatorMR.material.color, _chargeIndicatorNewColor,
-                _chargeIndicatorColorModifier * Time.deltaTime);
-            indicatorMR.material.color = newColor;
-        }
-
         CheckInput();
         HandleChargeAttack();
+    }
+
+    private IEnumerator ChargeIndicatorCoroutine()
+    {
+        yield return new WaitForSeconds(_chargeIndicatorDelay);
+
+        while (AttackIsHeld && !_enteredCritThreshold)
+        {
+            var newColor = Color.Lerp(indicatorMR.material.color, _chargedColor, _chargeIndicatorColorModifier * Time.deltaTime);
+            indicatorMR.material.color = newColor;
+            yield return null;
+        }
     }
 
     private void CheckInput()
@@ -118,6 +138,8 @@ public class PlayerAttack : MonoBehaviour
                     if (_sawBladeReturned)
                     {
                         AttackIsHeld = true;
+                        if (_chargeIndicatorCoroutine != null) StopCoroutine(_chargeIndicatorCoroutine);
+                        _chargeIndicatorCoroutine = StartCoroutine(ChargeIndicatorCoroutine());
                         _chargingAudio = AudioManager.Instance.PlaySound(transform, _chargingSFX, true, false, 0.7f);
                         _playerAnimator.SetReadyAttackTrigger();
                     }
@@ -204,7 +226,7 @@ public class PlayerAttack : MonoBehaviour
         _attackHeldTime = 0f;
         _enteredCritThreshold = false;
         _exceededCritThreshold = false;
-        Attacked?.Invoke(critAttack);
+        Attacked?.Invoke(critAttack ? _playerCritKnockbackAmount : _playerBasicKnockbackAmount);
     }
 
     private bool WithinCritThreshold()
@@ -225,6 +247,7 @@ public class PlayerAttack : MonoBehaviour
     public void OnDied()
     {
         enabled = false;
+        _sawBladeReturned = true;
         AttackIsHeld = false;
         _attackBufferTimer = 0f;
         _chargeMeterCanvasGroup.alpha = 0f;

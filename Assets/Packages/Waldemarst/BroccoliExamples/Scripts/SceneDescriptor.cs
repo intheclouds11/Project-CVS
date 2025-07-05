@@ -117,7 +117,7 @@ namespace Broccoli.Examples
             }
         }
         public void RebuildTreeFactories () {
-            TreeFactory[] treeFactories = GameObject.FindObjectsOfType<TreeFactory> ();
+            TreeFactory[] treeFactories = GameObject.FindObjectsByType<TreeFactory> (FindObjectsSortMode.None);
             bool rebuild = false;
             for (int i = 0; i < treeFactories.Length; i++) {
                 treeFactories [i].ProcessPipelinePreview (null, true);
@@ -181,7 +181,7 @@ namespace Broccoli.Examples
             return string.Empty;
         }
         public TreeFactory GetTreeFactory () {
-            TreeFactory[] treeFactories = GameObject.FindObjectsOfType<TreeFactory> ();
+            TreeFactory[] treeFactories = GameObject.FindObjectsByType<TreeFactory> (FindObjectsSortMode.None);
             if (treeFactories.Length > 0) return treeFactories[0];
             return null;
         }

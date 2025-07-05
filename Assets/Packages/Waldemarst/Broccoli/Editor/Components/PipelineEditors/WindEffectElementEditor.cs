@@ -250,7 +250,7 @@ namespace Broccoli.TreeNodeEditor
 			if (treeController != null) {
 				windParamsInfo = string.Empty;
 				if (windEffectElement.previewWindMode == WindEffectElement.PreviewWindMode.WindZone) {
-					WindZone[] windZones = FindObjectsOfType<WindZone> ();
+					WindZone[] windZones = FindObjectsByType<WindZone> (FindObjectsSortMode.None);
 					bool windZoneFound = false;
 					for (int i = 0; i < windZones.Length; i++) {
 						if (windZones [i].gameObject.activeSelf && windZones[i].mode == WindZoneMode.Directional) {

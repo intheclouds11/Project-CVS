@@ -79,7 +79,7 @@ public class SawBlade : MonoBehaviour
         else
         {
             var pitch = Random.Range(0.9f, 1.1f);
-            AudioManager.Instance.PlaySound(transform, _swipeSFX, true, false, 1f, pitch);
+            AudioManager.Instance.PlaySound(transform, _swipeSFX, true, false, 0.8f, pitch);
         }
     }
 
@@ -123,7 +123,7 @@ public class SawBlade : MonoBehaviour
     private void PlayLoopAudio()
     {
         if (_loopAudio) _loopAudio.Stop();
-        _loopAudio = AudioManager.Instance.PlaySound(transform, _bladeSpinLoopSFX, true, true, 0.6f);
+        _loopAudio = AudioManager.Instance.PlaySound(transform, _bladeSpinLoopSFX, true, true, 0.7f);
     }
 
     private void OnTriggerEnter(Collider other)

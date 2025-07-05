@@ -13,7 +13,7 @@ OcclusionCullingSettings:
 --- !u!104 &2
 RenderSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 9
+  serializedVersion: 10
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
@@ -38,13 +38,12 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &4
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
-  m_GIWorkflowMode: 1
+  serializedVersion: 13
+  m_BakeOnSceneLoad: 0
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -67,9 +66,6 @@ LightmapSettings:
     m_LightmapParameters: {fileID: 0}
     m_LightmapsBakeMode: 1
     m_TextureCompression: 0
-    m_FinalGather: 0
-    m_FinalGatherFiltering: 1
-    m_FinalGatherRayCount: 256
     m_ReflectionCompression: 2
     m_MixedBakeMode: 1
     m_BakeBackend: 0
@@ -98,8 +94,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_LightingSettings: {fileID: 4890085278179872738, guid: 7bbf0d5dd77a61fb5ad7ed82499c0f01,
-    type: 2}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: 7bbf0d5dd77a61fb5ad7ed82499c0f01, type: 2}
 --- !u!1 &5
 GameObject:
   m_ObjectHideFlags: 0
@@ -488,6 +483,7 @@ GameObject:
   m_Component:
   - component: {fileID: 49}
   - component: {fileID: 109}
+  - component: {fileID: 114}
   m_Layer: 0
   m_Name: Directional light
   m_TagString: Untagged
@@ -925,6 +921,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -967,6 +966,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1009,6 +1011,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1051,6 +1056,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1093,6 +1101,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1135,6 +1146,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1177,6 +1191,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1219,6 +1236,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1261,6 +1281,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1303,6 +1326,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1345,6 +1371,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1387,6 +1416,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1429,6 +1461,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1471,6 +1506,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1513,6 +1551,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1555,6 +1596,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1597,6 +1641,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1639,6 +1686,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2160,9 +2210,8 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 26}
   m_Enabled: 1
-  serializedVersion: 10
+  serializedVersion: 11
   m_Type: 1
-  m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
   m_Range: 10
@@ -2212,8 +2261,12 @@ Light:
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
+  m_ForceVisible: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 4.0677967
+  m_LightUnit: 1
+  m_LuxAtDistance: 1
+  m_EnableSpotReflector: 1
 --- !u!124 &110
 Behaviour:
   m_ObjectHideFlags: 0
@@ -2268,6 +2321,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   page: example_path_types
+--- !u!114 &114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 26}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Version: 3
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_LightLayerMask: 1
+  m_RenderingLayers: 1
+  m_CustomShadowLayers: 0
+  m_ShadowLayerMask: 1
+  m_ShadowRenderingLayers: 1
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
 --- !u!114 &115
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2282,7 +2358,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   version: 1073741824
   data:
-    dataString: UEsDBBQAAAgIAAAIIez1DQBA5AIAAIIHAAALACQAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQHdVEtPGzEQ/iuRz6XaAKWhtzYJoQceIlQcGg7Gns1aceyVHyQB8d87431ks6Cq50qR1pkZz3zfN+N5Zb7gJbBvg1em+c7GgEd2ByJws4yaO/ZpwDZKhgLtGZ4llO1ZgAng6O6AbWvbrv6+0HfwhidnAw/KmlTjwzAqQV+KNlbCXL1Abee+RCx3lKC2KG/XEJwS381SQ3PNC24MyPl/QUaZFGjdzCl5hTmIBp1Z13kJW760hvI3MQ+J27tKww8roTEalVu3nsoljK0PHs051x56RP8myL/JFo3QfF1igyo16uBh1oTjadBTjFALq7Xyjd5hl5rLxrz0EUlQBxVHWgkAxReglgV1/bh7+SbPPYQalOO7iXKoTpWV/bCVZGvuVxWyZ65jApAQVSmv3nmPviR37uz6sqla8QmFEqs7vhPch46iXfPkEHY0G65X/EnDQwHm2s6cjUZ27kYPx5PO/5bauABBwIKL0ILtGWP5vj3DfXveEvntPEDZEsk+n+6tvzz4ubZJ+wYAuWrTOeUEh437iYzS0Pi6AloJJCa458vudNWOC+V8QNdhOMXeYodAghFQK39EAYbwPdnoKBebJrCkRgxj6wwkc026BMN12N1ixtAfgZ6vg6vnueD00Gp0ta95P70rybyPz7Ke69Zu2nY7HF6fJro5/X5MS6ywmyvwxU0MWpluEfJco8Jji1tONBLXVJtr8+hyLmDvCLAN0cGEB56qIRwcse5cedQy3TBRa5rmRCAhQgL0eyR9C1quOpnZtTXp5R18E/xlVPLwjbAzcfY1g5PTk+MTno1G+ZEcCTEajuR5nuUiE0M2qBYeys31baVX3SWcLrPnYvDBNGtwMHO8TI9WOr6ZqZe17cihTG7nwgGYmypDSxYcFsHlIqdSIc05hKBMmkv2umDaihXIxf7CIik73QbHD6yleraBLAs2Tttvwcjcvkmc3WcFG6q+aGFhMtDYOpD3SsOal4u07dnbH1BLAwQUAAAICAAACCHs3jjSfm0AAAB4AAAACQAkAG1ldGEuanNvbgoAIAAAAAAAAQAYAACAPtXesZ0BAIA+1d6xnQEAgD7V3rGdAatWKkstKs7Mz1OyUjDRM9azsNBRUEovSizIKAaKGII4pZkpIHa0klmymblBqrGJsZFxooGFRZpuikVysoWhRYplmkFaskGyoVIsUH1JZUGqX2JuKkRPQGJJRlpmXkpmXrqee1FmijvIaKXYWgBQSwECLQAUAAAICAAACCHs9Q0AQOQCAACCBwAACwAkAAAAAAAAAAAAAAAAAAAAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQFQSwECLQAUAAAICAAACCHs3jjSfm0AAAB4AAAACQAkAAAAAAAAAAAAAAAxAwAAbWV0YS5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0BUEsFBgAAAAACAAIAuAAAAOkDAAAAAA==
+    dataString: UEsDBBQAAAgIAACIn+uF7oD+qAIAAO8FAAALACQAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQGFVEtPGzEQ/iuRz6XaAKWhtzYJoQcgIlQcGg7Gns1aceyVHyQB5b93xvtMOFRaab0z34y/bx77wZTxJYhg3cwpeWclsB8DRmf2ZdA5b2HHV9Ys1Ds0mGclQ0EgnjCPPCiL9iGFebuB4JT4aVaawBkao1G5dZupXMHY+uDRnHPtAV3OBoo2aPoYsF0dsK/f7/QeHPAkwARw/0NFIzTflCCJbQceZg0cTwloUEmNIdbCaq18TYOFfZlkjnnpI4pAgFQcZSUChC9ArYqAH+f94Ic89xBqUo7vJ8phdaqs7JetSrbhfl0xe+M6JgKJUZXy7pP37Fty585ubptbKz2hUGL9yPeC+9CraN88OaYdzZbrNX/V8FyAubczZ6ORvdjo4XzS+26ljQsQRCy4CC3ZE2MsP7dn2LXnkMTvFgHKVkj29bKz/vHgF9qm2jcEyFWbriknOGzcb1SUhsbXN6CVSGKCJ77qT1ftuFHOB3Qdwwk7xw6BBCOgrvwZAQzxe7XRUS42TWSpGjGMrTOQzLXoEgzXYT/HjOF0BE58PV4nnhtOi1azq33N/pyEJHOHz7IT19xu23Y7HF6fJro5/X2hLvjCbu/AFw8xaGX6l5DnHis8tsZUo9uT2oQtosu5gM4RYBeigwkPPN2GdHDE+nPlsZYpwkStaZqTgMQIBdDzQvUtOF6rk5ndW5M27+id6K+iksc7wq7E1fcMLi4vzi94NhrlZ3IkxGg4ktd5lotMDFlaImWw3FzPq3rVXcLpMp0WgwvT/AYHM8fLtLTS8e1MvW9srxzK5HYhHIB5qDK0YsHhJfhzkVOpUOYCQlAmzSX7WDJtxRrksgtYpspOd8HxI2up3mwgy5KN099vycjc7iTO7puCLd2+bGlhMtDYOpBPSsOGl+TKDuzwD1BLAwQUAAAICAAAiJ/rYeMoE2wAAAB3AAAACQAkAG1ldGEuanNvbgoAIAAAAAAAAQAYAACAPtXesZ0BAIA+1d6xnQEAgD7V3rGdAatWKkstKs7Mz1OyUjDVM9az0FFQSi9KLMgoBgoYgjilmSkgdrSSWbKZuUGqsYmxkXGigYVFmm6KRXKyhaFFimWaQVqyQbKhUixQfUllQapfYm4qRE9AYklGWmZeSmZeup57UWaKO8hopdhaAFBLAQItABQAAAgIAACIn+uF7oD+qAIAAO8FAAALACQAAAAAAAAAAAAAAAAAAABncmFwaDAuanNvbgoAIAAAAAAAAQAYAACAPtXesZ0BAIA+1d6xnQEAgD7V3rGdAVBLAQItABQAAAgIAACIn+th4ygTbAAAAHcAAAAJACQAAAAAAAAAAAAAAPUCAABtZXRhLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQFQSwUGAAAAAAIAAgC4AAAArAMAAAAA
     file_cachedStartup: {fileID: 0}
     cacheStartup: 0
   showNavGraphs: 1

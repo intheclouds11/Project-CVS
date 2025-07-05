@@ -9,6 +9,8 @@ public class Health : MonoBehaviour
     [SerializeField]
     private AudioClip _diedSfx;
     [SerializeField]
+    private float _diedSFXVolume = 0.9f;
+    [SerializeField]
     private GameObject _diedVfx;
 
     public float CurrentHealth { get; private set; }
@@ -47,8 +49,8 @@ public class Health : MonoBehaviour
 
     private void OnDied()
     {
-        float pitch = Random.Range(0.8f, 1f);
-        AudioManager.Instance.PlaySound(transform, _diedSfx, true, false, 1f, pitch);
+        float pitch = Random.Range(0.9f, 1f);
+        AudioManager.Instance.PlaySound(transform, _diedSfx, true, false, _diedSFXVolume, pitch);
         Instantiate(_diedVfx, transform.position, transform.rotation);
         Died?.Invoke(gameObject);
     }

@@ -60,15 +60,15 @@ public class GameManager : MonoBehaviour
         CurrentState = GameState.Playing;
     }
 
-    private void OnPlayerSpawned()
+    private void OnPlayerSpawned(PlayerController player)
     {
-        Player1 = FindAnyObjectByType<PlayerController>();
+        Player1 = player;
         Player1.Health.Died += OnPlayerDied;
     }
 
     private void OnAllEnemiesCleared()
     {
-        StartCoroutine(OnAllEnemiesClearedCoroutine());
+        // StartCoroutine(OnAllEnemiesClearedCoroutine());
     }
 
     private IEnumerator OnAllEnemiesClearedCoroutine()

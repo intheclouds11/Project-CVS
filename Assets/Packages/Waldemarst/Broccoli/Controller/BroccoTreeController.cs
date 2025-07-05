@@ -461,7 +461,7 @@ namespace Broccoli.Controller {
 				leafTurbulenceFactor = 0.4f;
 			}
 			valueWindDirection = new Vector4 (1f, 0f, 0f, 0f);
-			WindZone[] windZones = FindObjectsOfType<WindZone> ();
+			WindZone[] windZones = FindObjectsByType<WindZone> (FindObjectsSortMode.None);
 			for (int i = 0; i < windZones.Length; i++) {
 				if (windZones [i].gameObject.activeSelf && windZones[i].mode == WindZoneMode.Directional) {
 					windMain = windZones [i].windMain;

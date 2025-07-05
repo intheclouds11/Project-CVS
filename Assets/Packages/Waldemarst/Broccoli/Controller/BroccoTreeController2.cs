@@ -689,7 +689,7 @@ namespace Broccoli.Controller {
 		private static void UpdateWindValues (ref WindParams windParams, WindSource windSource, Vector3 windDirection, float windMain, float windTurbulence) {
 			windParams.windDirection = new Vector4 (1f, 0f, 0f, 0f);
 			if (windSource == WindSource.WindZone) {
-				WindZone[] windZones = FindObjectsOfType<WindZone> ();
+				WindZone[] windZones = FindObjectsByType<WindZone> (FindObjectsSortMode.None);
 				for (int i = 0; i < windZones.Length; i++) {
 					if (windZones [i].gameObject.activeSelf && windZones[i].mode == WindZoneMode.Directional) {
 						windParams.windMain = windZones [i].windMain;

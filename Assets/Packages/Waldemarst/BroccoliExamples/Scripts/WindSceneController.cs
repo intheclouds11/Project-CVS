@@ -39,7 +39,7 @@ namespace Broccoli.Examples
             // The rest of the tree controllers should have instance to global and source to self in order to receive wind updates.
             // 1. GLOBAL: wind calculations shared by all instances.
             // 2. SELF: wind values are set by script and not taken from a WindZone.
-            BroccoTreeController2[] treeControllers = FindObjectsOfType<BroccoTreeController2> ();
+            BroccoTreeController2[] treeControllers = FindObjectsByType<BroccoTreeController2> (FindObjectsSortMode.None);
             if (treeControllers != null && treeControllers.Length > 0) {
                 treeController = treeControllers [0];
             }
