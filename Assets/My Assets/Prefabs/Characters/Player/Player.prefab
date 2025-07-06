@@ -5712,9 +5712,24 @@ MonoBehaviour:
     m_RotationOrder: 4
   _dashBufferTime: 0.2
   _dashSmoothing: 1
-  _dashMaxDistance: 7
+  _dashMaxDistance: 10
   _dashDuration: 0.35
-  _rotationTransform: {fileID: 8673189364770339060}
+  _dashCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0.0015649437
+      value: 1.0019029
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  <RotationTransform>k__BackingField: {fileID: 8673189364770339060}
   _lookAt: {fileID: 2451761307776542671}
   _playerModel: {fileID: 6395808596881023677}
   _deathDelay: 0.3
@@ -5790,10 +5805,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d785fb0c3347e10428564414cc141033, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxHealth: 1
-  _diedSfx: {fileID: 8300000, guid: b498fe5b2c61e064a8b03ebde16b3414, type: 3}
+  _currentHealth: 0
+  _maxHealth: 2
+  _damageKnockbackAmount: 20
+  _damageKnockbackDuration: 0.2
+  _damageInvincibilityDuration: 0.5
+  _damagedSFX: {fileID: 8300000, guid: b600853e0320c9e4fb7f3c839b603c56, type: 3}
+  _damagedVignetteIntensity: 0.55
+  _damagedSaturation: -40
+  _damagedSFXVolume: 0.8
+  _recoverHealthSFX: {fileID: 8300000, guid: 9a4f2950b30176443afcc3f35a409d6c, type: 3}
+  _diedSFX: {fileID: 8300000, guid: b498fe5b2c61e064a8b03ebde16b3414, type: 3}
   _diedSFXVolume: 0.65
-  _diedVfx: {fileID: 9049631545069152736, guid: e2d4687b86076744fbdd2aa6777e932f, type: 3}
+  _diedVFX: {fileID: 9049631545069152736, guid: e2d4687b86076744fbdd2aa6777e932f, type: 3}
 --- !u!136 &6682522008067125303
 CapsuleCollider:
   m_ObjectHideFlags: 0

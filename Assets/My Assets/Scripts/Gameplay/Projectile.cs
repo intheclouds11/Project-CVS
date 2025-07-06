@@ -92,11 +92,11 @@ public class Projectile : MonoBehaviour
             var enemyHit = other.GetComponentInParent<BaseEnemy>();
             if (playerHit && !isPlayerProjectile)
             {
-                playerHit.Health.TakeDamage(_damage);
+                // playerHit.Health.TakeDamage(_damage);
             }
             else if (enemyHit && isPlayerProjectile)
             {
-                enemyHit.Health.TakeDamage(_damage);
+                // enemyHit.Health.TakeDamage(_damage);
             }
         }
         else
@@ -108,11 +108,11 @@ public class Projectile : MonoBehaviour
                 var enemyHit = hitCollider.GetComponentInParent<BaseEnemy>();
                 if (playerHit && !isPlayerProjectile)
                 {
-                    playerHit.Health.TakeDamage(_damage);
+                    // playerHit.Health.TakeDamage(_damage);
                 }
                 else if (enemyHit && isPlayerProjectile)
                 {
-                    enemyHit.Health.TakeDamage(_damage);
+                    // enemyHit.Health.TakeDamage(_damage);
                 }
             }
         }

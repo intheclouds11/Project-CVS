@@ -1,6 +1,8 @@
 using System.Collections;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
@@ -9,10 +11,6 @@ public class PlayerController : MonoBehaviour
     [Header("Movement")]
     [SerializeField]
     private float _moveSpeed = 2.5f;
-    // [SerializeField]
-    // private LayerMask GroundedLayerMask;
-    // [SerializeField]
-    // private float GroundedDistance = 0.02f;
     [SerializeField]
     private float _maxFallSpeed = 2f;
 
@@ -37,10 +35,12 @@ public class PlayerController : MonoBehaviour
     private float _dashMaxDistance = 7f;
     [SerializeField]
     private float _dashDuration = 0.35f;
+    [SerializeField]
+    private AnimationCurve _dashCurve;
 
     [Header("Transforms")]
-    [SerializeField]
-    private Transform _rotationTransform;
+    [field: SerializeField]
+    public Transform RotationTransform { get; private set; }
     [SerializeField]
     private Transform _lookAt;
     [SerializeField]
@@ -61,7 +61,6 @@ public class PlayerController : MonoBehaviour
     public PlayerAttack PlayerAttack { get; private set; }
     public Health Health { get; protected set; }
     public CharacterController CharacterController { get; private set; }
-    // public bool IsGrounded { get; private set; }
     public float Gravity { get; private set; } = 9.81f;
     public bool IsDashing { get; private set; }
 
@@ -72,8 +71,9 @@ public class PlayerController : MonoBehaviour
     private float _lastAttackTime;
     private bool _dashWasPressed;
     private float _dashBufferTimer;
+    private float _dashTimeElapsed;
     private bool _applyingKnockback;
-    private float _knockbackTimer;
+    private float _knockbackTimeElapsed;
 
     // Footstep Tracking
     private bool _startedMoving;
@@ -89,11 +89,10 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        
-
         SceneManager.sceneLoaded += OnSceneLoaded;
         Health = GetComponent<Health>();
         Health.Died += OnDied;
+        Health.DamageTaken += OnDamageTaken;
         CharacterController = GetComponent<CharacterController>();
         _playerAnimator = GetComponentInChildren<PlayerAnimator>();
         _playerCharges = GetComponent<PlayerChargesManager>();
@@ -107,7 +106,7 @@ public class PlayerController : MonoBehaviour
         {
             Debug.LogError($"Player is a scene object in scene: {gameObject.scene.name}");
         }
-        
+
         _inputManager = InputManager.Instance;
         _virtualCamera = FindAnyObjectByType<CinemachineCamera>();
         _virtualCamera.Follow = _lookAt; // Set follower
@@ -131,7 +130,6 @@ public class PlayerController : MonoBehaviour
         HandleVerticalMovement();
         HandleRotation();
         HandleDash();
-        // CheckGrounded();
     }
 
     private void CheckInputs()
@@ -180,7 +178,7 @@ public class PlayerController : MonoBehaviour
             {
                 if (!PlayerAttack.AttackIsHeld)
                 {
-                    _rotationTransform.rotation = Quaternion.LookRotation(_movementVector);
+                    RotationTransform.rotation = Quaternion.LookRotation(_movementVector);
                 }
 
                 if (!_startedMoving)
@@ -230,13 +228,13 @@ public class PlayerController : MonoBehaviour
             if (_inputManager.IsDirectionActive())
             {
                 var lookAtRotation = Quaternion.LookRotation(_rotateDirection);
-                _rotationTransform.localRotation = lookAtRotation;
+                RotationTransform.localRotation = lookAtRotation;
             }
         }
         else
         {
             float angle = Mathf.Atan2(_rotateDirection.y, _rotateDirection.x) * Mathf.Rad2Deg;
-            _rotationTransform.rotation = Quaternion.Euler(0f, -angle + 90f, 0f);
+            RotationTransform.rotation = Quaternion.Euler(0f, -angle + 90f, 0f);
         }
     }
 
@@ -276,16 +274,16 @@ public class PlayerController : MonoBehaviour
         float pitch = Random.Range(0.9f, 1.1f);
         AudioManager.Instance.PlaySound(transform, _dashSFX, true, false, 0.85f, pitch);
 
-        float startTime = Time.time;
-        var dir = _movementVector == Vector3.zero ? _rotationTransform.forward : _movementVector;
+        var dir = _movementVector == Vector3.zero ? RotationTransform.forward : _movementVector;
         Vector3 dashVector = dir * _dashMaxDistance;
 
-        while (startTime + _dashDuration >= Time.time && Health.IsAlive())
+        while (_dashTimeElapsed < _dashDuration && Health.IsAlive())
         {
-            var t = _knockbackTimer / _knockbackDuration;
-            var curveValue = _knockBackCurve.Evaluate(t);
+            var t = _dashTimeElapsed / _dashDuration;
+            var curveValue = _dashCurve.Evaluate(t);
             var move = dashVector * (curveValue * _dashSmoothing * Time.deltaTime);
             CharacterController.Move(move);
+            _dashTimeElapsed += Time.deltaTime;
             yield return null;
         }
 
@@ -293,22 +291,9 @@ public class PlayerController : MonoBehaviour
         GetComponent<CapsuleCollider>().excludeLayers -= LayerMask.GetMask("Enemy");
         CharacterController.excludeLayers -= LayerMask.GetMask("Enemy");
         _playerAnimator.SetIsDashing(false);
+        _dashTimeElapsed = 0f;
         IsDashing = false;
     }
-
-    // private void CheckGrounded()
-    // {
-    //     var origin = CharacterController.center - Vector3.up * (.5f * CharacterController.height - CharacterController.radius);
-    //     IsGrounded = Physics.SphereCast(
-    //         transform.TransformPoint(origin) + Vector3.up * CharacterController.contactOffset,
-    //         CharacterController.radius,
-    //         Vector3.down,
-    //         out var hit,
-    //         GroundedDistance + CharacterController.contactOffset,
-    //         GroundedLayerMask, QueryTriggerInteraction.Ignore);
-    //
-    //     _playerAnimator.SetIsGrounded(IsGrounded);
-    // }
 
     private void ToggleMeshRenderers(bool toggle)
     {
@@ -321,32 +306,42 @@ public class PlayerController : MonoBehaviour
 
     private void OnPlayerAttack(float knockbackAmount)
     {
-        if (!_applyAttackKnockback) return;
-
-        if (_knockbackCoroutine != null) StopCoroutine(_knockbackCoroutine);
-        _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(knockbackAmount));
         _lastAttackTime = Time.time;
+        if (!_applyAttackKnockback) return;
+        
+        if (_knockbackCoroutine != null) StopCoroutine(_knockbackCoroutine);
+        Vector3 knockbackDir = -RotationTransform.forward;
+        _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(knockbackDir, knockbackAmount, _knockbackDuration));
     }
 
-    private IEnumerator KnockbackCoroutine(float knockbackAmount)
+    private IEnumerator KnockbackCoroutine(Vector3 dir, float knockbackAmount, float knockbackDuration)
     {
         _applyingKnockback = true;
 
-        Vector3 knockbackDir = -_rotationTransform.forward;
-
-        while (_knockbackTimer < _knockbackDuration && Health.IsAlive())
+        while (_knockbackTimeElapsed < knockbackDuration && Health.IsAlive())
         {
-            var t = _knockbackTimer / _knockbackDuration;
+            var t = _knockbackTimeElapsed / knockbackDuration;
             var curveValue = _knockBackCurve.Evaluate(t);
-            var move = knockbackDir * (curveValue * knockbackAmount * Time.deltaTime);
+            var move = dir * (curveValue * knockbackAmount * Time.deltaTime);
             CharacterController.Move(move);
-            _knockbackTimer += Time.deltaTime;
+            _knockbackTimeElapsed += Time.deltaTime;
             yield return null;
         }
 
-        _knockbackTimer = 0f;
+        _knockbackTimeElapsed = 0f;
         _applyingKnockback = false;
         _knockbackCoroutine = null;
+    }
+    
+    private void OnDamageTaken(Vector3 knockbackDir, float knockbackAmount, float knockbackDuration)
+    {
+        if (knockbackAmount <= 0) return;
+        
+        _playerAnimator.SetSpeed(0f);
+        //todo: damage knockback animation
+        
+        if (_knockbackCoroutine != null) StopCoroutine(_knockbackCoroutine);
+        _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(knockbackDir, knockbackAmount, knockbackDuration));
     }
 
     private void OnDied(GameObject deadObj)

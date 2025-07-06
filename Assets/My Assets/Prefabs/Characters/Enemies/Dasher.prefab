@@ -58,7 +58,7 @@ MonoBehaviour:
   _agroSFX: {fileID: 8300000, guid: 9f7aa5ccf137dd040a14777f4acd51a1, type: 3}
   _abilityStartSFX: {fileID: 8300000, guid: baa42a3793a623b42bc15d843bdbfd13, type: 3}
   _dashTriggerDistance: 2.5
-  _dashSpeed: 3
+  _dashSpeed: 4
   _dashDuration: 0.5
   _dashDelayDuration: 0.45
   _dashCooldownDuration: 1.5
@@ -78,9 +78,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d785fb0c3347e10428564414cc141033, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _currentHealth: 0
   _maxHealth: 100
-  _diedSfx: {fileID: 8300000, guid: 3152b2c46126d324ca368dd04f75bebc, type: 3}
-  _diedVfx: {fileID: 9049631545069152736, guid: e2d4687b86076744fbdd2aa6777e932f, type: 3}
+  _damageKnockbackAmount: 0
+  _damageInvincibilityDuration: 0
+  _damagedSFX: {fileID: 0}
+  _damagedVignetteIntensity: 0.7
+  _damagedSaturation: -40
+  _damagedSFXVolume: 0.8
+  _recoverHealthSFX: {fileID: 0}
+  _diedSFX: {fileID: 8300000, guid: 3152b2c46126d324ca368dd04f75bebc, type: 3}
+  _diedSFXVolume: 0.9
+  _diedVFX: {fileID: 9049631545069152736, guid: e2d4687b86076744fbdd2aa6777e932f, type: 3}
 --- !u!95 &1714698826164707562
 Animator:
   serializedVersion: 7

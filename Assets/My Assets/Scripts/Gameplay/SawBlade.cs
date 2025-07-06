@@ -8,9 +8,9 @@ using Random = UnityEngine.Random;
 public class SawBlade : MonoBehaviour
 {
     [SerializeField]
-    private float _baseDamage = 20f;
+    private int _baseDamage = 70;
     [SerializeField]
-    private float _critDamage = 120f;
+    private int _critDamage = 120;
     [SerializeField]
     private float _shortRangeImpulse = 1f;
     [SerializeField]
@@ -35,11 +35,11 @@ public class SawBlade : MonoBehaviour
     private GameObject _impactVfx;
 
     public bool IsCritAttack { get; private set; }
-    public static event Action EnemyHit;
+    public static event Action<bool> HitEnemy; // bool: wasCritAttack
     public event Action ReturnedToPlayer;
 
     private bool _longRangeAttack;
-    private float _finalDamage;
+    private int _finalDamage;
     private float _finalImpulseForce;
     private float _finalStartReturnTime;
     private AudioSource _loopAudio;
@@ -135,9 +135,15 @@ public class SawBlade : MonoBehaviour
             var enemyHit = other.GetComponentInParent<BaseEnemy>();
             if (enemyHit)
             {
-                if (IsCritAttack) _impulseSource.GenerateImpulse();
-                enemyHit.Health.TakeDamage(_finalDamage);
-                EnemyHit?.Invoke();
+                if (IsCritAttack)
+                {
+                    _impulseSource.GenerateImpulse();
+                    _player.Health.RecoverHP(1);
+                }
+
+                var knockbackDir = enemyHit.transform.position - transform.position;
+                enemyHit.Health.TakeDamage(_finalDamage, knockbackDir);
+                HitEnemy?.Invoke(IsCritAttack);
             }
 
             PlayEffects();
@@ -177,7 +183,7 @@ public class SawBlade : MonoBehaviour
         _finalImpulseForce = _longRangeAttack ? _longRangeImpulse * chargeAmount : _shortRangeImpulse;
         _finalStartReturnTime = _longRangeAttack ? _longRangeReturnTime : _shortRangeReturnTime;
 
-        _finalDamage = crit ? _critDamage : Mathf.Clamp(_baseDamage * chargeAmount * 2f, _baseDamage * 0.5f, _baseDamage);
+        _finalDamage = crit ? _critDamage : (int) Mathf.Clamp(_baseDamage * chargeAmount * 2f, _baseDamage * 0.5f, _baseDamage);
         IsCritAttack = crit;
 
         // Debug.Log($"_finalDamage: {_finalDamage}");

@@ -76,9 +76,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxHealth: 100
-  _diedSfx: {fileID: 8300000, guid: 3152b2c46126d324ca368dd04f75bebc, type: 3}
+  _damageKnockbackAmount: 0
+  _damageRecoveryDuration: 0
+  _damagedSFX: {fileID: 0}
+  _damagedSFXVolume: 0.8
+  _diedSFX: {fileID: 8300000, guid: 3152b2c46126d324ca368dd04f75bebc, type: 3}
   _diedSFXVolume: 0.9
-  _diedVfx: {fileID: 9049631545069152736, guid: e2d4687b86076744fbdd2aa6777e932f, type: 3}
+  _diedVFX: {fileID: 9049631545069152736, guid: e2d4687b86076744fbdd2aa6777e932f, type: 3}
 --- !u!95 &1714698826164707562
 Animator:
   serializedVersion: 7

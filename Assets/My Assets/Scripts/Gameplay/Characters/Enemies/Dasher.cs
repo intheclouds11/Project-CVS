@@ -137,7 +137,8 @@ public class Dasher : BaseEnemy
             var playerHit = other.GetComponent<PlayerController>();
             if (playerHit)
             {
-                playerHit.Health.TakeDamage(1);
+                var knockBackDir = (playerHit.transform.position - transform.position).normalized;
+                playerHit.Health.TakeDamage(1, knockBackDir);
             }
         }
     }

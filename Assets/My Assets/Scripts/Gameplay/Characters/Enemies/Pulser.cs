@@ -23,7 +23,7 @@ public class Pulser : BaseEnemy
 
     private float _lastPulseCompleteTime;
     private bool _isPulsing;
-    
+
 
     protected override void OnDied(GameObject obj)
     {
@@ -60,8 +60,7 @@ public class Pulser : BaseEnemy
         _pulseVFX.SetActive(false);
         _pulseVFX.SetActive(true);
         _animator.SetTrigger("Alerted");
-        
-        // float pitch = Random.Range(1.1f, 1.3f);
+
         _agroAudio.Stop();
         _agroAudio = null;
         _abilityStartAudio = AudioManager.Instance.PlaySound(transform, _abilityStartSFX, true, false, 0.7f);
@@ -70,14 +69,15 @@ public class Pulser : BaseEnemy
 
         if (!_player.IsDashing && _distToPlayer <= _pulseDamageRadius)
         {
-            _player.Health.TakeDamage(1);
+            var knockBackDir = (_player.transform.position - transform.position).normalized;
+            _player.Health.TakeDamage(1, knockBackDir);
         }
 
         yield return new WaitForSeconds(_pulseDuration);
-        
-        
+
+
         _agroAudio = AudioManager.Instance.PlaySound(transform, _agroSFX, true, true, 1f, _agroPitch);
-        
+
         _aiFollower.canMove = true;
         _isPulsing = false;
         _lastPulseCompleteTime = Time.time;
@@ -90,7 +90,8 @@ public class Pulser : BaseEnemy
             var playerHit = other.GetComponent<PlayerController>();
             if (playerHit)
             {
-                playerHit.Health.TakeDamage(1);
+                var knockBackDir = (playerHit.transform.position - transform.position).normalized;
+                playerHit.Health.TakeDamage(1, knockBackDir);
             }
         }
     }

@@ -48,15 +48,15 @@ public class PlayerChargesManager : MonoBehaviour
 
     private void OnEnable()
     {
-        SawBlade.EnemyHit += SawBladeOnEnemyHit;
+        SawBlade.HitEnemy += SawBladeOnEnemyHit;
     }
 
     private void OnDisable()
     {
-        SawBlade.EnemyHit -= SawBladeOnEnemyHit;
+        SawBlade.HitEnemy -= SawBladeOnEnemyHit;
     }
 
-    private void SawBladeOnEnemyHit()
+    private void SawBladeOnEnemyHit(bool wasCritHit)
     {
         if (_enemyHitRecharges && _remainingCharges < _maxCharges)
         {

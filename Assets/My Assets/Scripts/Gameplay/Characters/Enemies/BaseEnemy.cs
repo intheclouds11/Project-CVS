@@ -41,6 +41,7 @@ public abstract class BaseEnemy : MonoBehaviour
 
     protected virtual void Awake()
     {
+        _player = GameManager.Instance?.Player1;
         Health = GetComponent<Health>();
         Health.Died += OnDied;
         _animator = GetComponent<Animator>();
