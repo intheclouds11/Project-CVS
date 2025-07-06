@@ -75,11 +75,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d785fb0c3347e10428564414cc141033, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _currentHealth: 0
   _maxHealth: 100
   _damageKnockbackAmount: 0
-  _damageRecoveryDuration: 0
+  _damageKnockbackDuration: 1
+  _damageInvincibilityDuration: 0
   _damagedSFX: {fileID: 0}
+  _damagedVignetteIntensity: 0.7
+  _damagedSaturation: -40
   _damagedSFXVolume: 0.8
+  _recoverHealthSFX: {fileID: 0}
   _diedSFX: {fileID: 8300000, guid: 3152b2c46126d324ca368dd04f75bebc, type: 3}
   _diedSFXVolume: 0.9
   _diedVFX: {fileID: 9049631545069152736, guid: e2d4687b86076744fbdd2aa6777e932f, type: 3}
@@ -96268,22 +96273,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: PulseAttack
       objectReference: {fileID: 0}
-    - target: {fileID: 995300729845106293, guid: bdf896d4a58720e4299c7259058ba19e, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 995300729845106294, guid: bdf896d4a58720e4299c7259058ba19e, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 995300729845106294, guid: bdf896d4a58720e4299c7259058ba19e, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 995300729845106294, guid: bdf896d4a58720e4299c7259058ba19e, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1.1
-      objectReference: {fileID: 0}
     - target: {fileID: 995300729845106294, guid: bdf896d4a58720e4299c7259058ba19e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -96323,18 +96312,6 @@ PrefabInstance:
     - target: {fileID: 995300729845106294, guid: bdf896d4a58720e4299c7259058ba19e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 995300729845106294, guid: bdf896d4a58720e4299c7259058ba19e, type: 3}
-      propertyPath: m_ConstrainProportionsScale
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 995300730520826044, guid: bdf896d4a58720e4299c7259058ba19e, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1.99
-      objectReference: {fileID: 0}
-    - target: {fileID: 995300730520826047, guid: bdf896d4a58720e4299c7259058ba19e, type: 3}
-      propertyPath: m_Shadows.m_Type
-      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

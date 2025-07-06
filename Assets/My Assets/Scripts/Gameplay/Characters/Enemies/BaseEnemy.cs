@@ -52,9 +52,15 @@ public abstract class BaseEnemy : MonoBehaviour
         _patrol = GetComponent<Patrol>();
         if (_patrol)
         {
-            if (_patrol.targets.Any()) _destinationSetter.enabled = false;
-            else _patrol.enabled = false;
-            _patrolAudio = AudioManager.Instance.PlaySound(transform, _patrolSFX, true, true);
+            if (_patrol.targets.Any())
+            {
+                _destinationSetter.enabled = false;
+                _patrolAudio = AudioManager.Instance.PlaySoundLoop(transform, _patrolSFX, true);
+            }
+            else
+            {
+                _patrol.enabled = false;
+            }
         }
 
         _agroPitch = Random.Range(0.9f, 1.1f);

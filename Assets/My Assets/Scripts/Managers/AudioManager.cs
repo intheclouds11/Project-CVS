@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
@@ -13,9 +14,12 @@ public class AudioManager : MonoBehaviour
     private AudioMixer _audioMixer;
     [SerializeField]
     private GameObject _SFXParent;
+    [SerializeField]
+    private GameObject _loopAudioParent;
 
 
     private List<AudioSource> _SFXAudioSources = new();
+    private List<AudioSource> _loopAudioSources = new();
     private int _usedSource;
 
 
@@ -23,6 +27,15 @@ public class AudioManager : MonoBehaviour
     {
         Instance = this;
         _SFXAudioSources = _SFXParent.GetComponentsInChildren<AudioSource>().ToList();
+        _loopAudioSources = _loopAudioParent.GetComponentsInChildren<AudioSource>().ToList();
+    }
+
+    public void OnPlayerRespawned()
+    {
+        foreach (var loopAudioSource in _loopAudioSources)
+        {
+            loopAudioSource.Stop();
+        }
     }
 
     /// <summary>
@@ -40,10 +53,54 @@ public class AudioManager : MonoBehaviour
 
         var audioSource = _SFXAudioSources[_usedSource];
 
-        _usedSource++;
-        if (_usedSource >= _SFXAudioSources.Count) _usedSource = 0;
+        if (audioSource.isPlaying)
+        {
+            foreach (var source in _SFXAudioSources)
+            {
+                if (!source.isPlaying)
+                {
+                    audioSource = source;
+                    _usedSource = _SFXAudioSources.IndexOf(source);
+                    break;
+                }
+            }
+        }
+        else
+        {
+            _usedSource++;
+            if (_usedSource >= _SFXAudioSources.Count) _usedSource = 0;
+        }
 
         audioSource.loop = loop;
+        audioSource.volume = volume;
+        audioSource.pitch = pitch;
+        audioSource.transform.position = tr.position;
+        if (follow) audioSource.gameObject.GetComponent<Follower>().SetTarget(tr);
+        audioSource.clip = clip;
+        audioSource.Play();
+        return audioSource;
+    }
+
+    public AudioSource PlaySoundLoop(Transform tr, AudioClip clip, bool follow = true, float volume = 1f,
+        float pitch = 1f)
+    {
+        AudioSource audioSource = null;
+        
+        foreach (var loopAudioSource in _loopAudioSources)
+        {
+            if (!loopAudioSource.isPlaying)
+            {
+                audioSource = loopAudioSource;
+                break;
+            }
+        }
+
+        if (!audioSource)
+        {
+            Debug.LogWarning($"No loopAudioSource available");
+            return null;
+        }
+        
         audioSource.volume = volume;
         audioSource.pitch = pitch;
         audioSource.transform.position = tr.position;

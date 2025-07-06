@@ -141,6 +141,8 @@ public class PlayerAttack : MonoBehaviour
                         if (_chargeIndicatorCoroutine != null) StopCoroutine(_chargeIndicatorCoroutine);
                         _chargeIndicatorCoroutine = StartCoroutine(ChargeIndicatorCoroutine());
                         _chargingAudio = AudioManager.Instance.PlaySound(transform, _chargingSFX, true, false, 0.7f);
+                        
+                        if (_player.IsDashing) _playerAnimator.SetIsDashing(false);
                         _playerAnimator.SetReadyAttackTrigger();
                     }
                 }
@@ -200,6 +202,7 @@ public class PlayerAttack : MonoBehaviour
         // _chargeIndicator.transform.localScale = _originalChargeIndicatorScale;
         indicatorMR.material.color = _originalIndicatorColor;
         _chargingAudio.Stop();
+        if (_player.IsDashing) _playerAnimator.SetIsDashing(false);
         _playerAnimator.SetAttackTrigger();
 
         bool critAttack = false;

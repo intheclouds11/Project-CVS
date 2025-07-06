@@ -16,7 +16,7 @@ TagManager:
   - WorldUI
   - Environment
   - Weapon
-  - CameraTriggerZone
+  - TriggerZone
   - Enemy
   - 
   - 

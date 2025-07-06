@@ -14,7 +14,9 @@ public class PlayerAnimator : MonoBehaviour
     public void SetSpeed(float speed) => _animator.SetFloat("Speed", speed);
     public void SetIsGrounded(bool grounded) => _animator.SetBool("IsGrounded", grounded);
     public void SetReadyAttackTrigger() => _animator.SetTrigger("ReadyAttack");
+    public void ResetReadyAttackTrigger() => _animator.ResetTrigger("ReadyAttack");
     public void SetAttackTrigger() => _animator.SetTrigger("Attack");
+    public void ResetAttackTrigger() => _animator.ResetTrigger("Attack");
     public void SetDiedTrigger() => _animator.SetTrigger("Died");
     public void SetIsDashing(bool dashing) => _animator.SetBool("IsDashing", dashing);
 }

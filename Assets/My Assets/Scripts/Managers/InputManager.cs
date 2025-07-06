@@ -87,7 +87,7 @@ public class InputManager : MonoBehaviour
             // Device specific
             AttackWasPressed = _inputs.Player.Attack.WasPerformedThisFrame();
             AttackHeld = _inputs.Player.Attack.IsPressed();
-            AttackWasReleased = _inputs.Player.Attack.WasReleasedThisFrame();
+            AttackWasReleased = !_inputs.Player.Attack.IsPressed();
             RespawnWasPressed = DashWasPressed || InteractWasPressed || AttackWasPressed;
         }
 

@@ -274,7 +274,7 @@ public class PlayerController : MonoBehaviour
         float pitch = Random.Range(0.9f, 1.1f);
         AudioManager.Instance.PlaySound(transform, _dashSFX, true, false, 0.85f, pitch);
 
-        var dir = _movementVector == Vector3.zero ? RotationTransform.forward : _movementVector;
+        var dir = _movementVector == Vector3.zero ? RotationTransform.forward : _movementVector.normalized;
         Vector3 dashVector = dir * _dashMaxDistance;
 
         while (_dashTimeElapsed < _dashDuration && Health.IsAlive())
@@ -372,6 +372,7 @@ public class PlayerController : MonoBehaviour
         Health.OnRespawn();
         PlayerAttack.OnRespawn();
         _playerCharges.OnRespawn();
+        AudioManager.Instance.OnPlayerRespawned();
         CharacterController.enabled = true;
     }
 

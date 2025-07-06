@@ -67,14 +67,18 @@ public class Pulser : BaseEnemy
 
         yield return new WaitForSeconds(_pulseDelayDuration);
 
-        if (!_player.IsDashing && _distToPlayer <= _pulseDamageRadius)
+        var startTime = Time.time;
+
+        while (startTime + _pulseDuration >= Time.time)
         {
-            var knockBackDir = (_player.transform.position - transform.position).normalized;
-            _player.Health.TakeDamage(1, knockBackDir);
+            if (!_player.IsDashing && _distToPlayer <= _pulseDamageRadius)
+            {
+                var knockBackDir = (_player.transform.position - transform.position).normalized;
+                _player.Health.TakeDamage(1, knockBackDir);
+            }
+
+            yield return null;
         }
-
-        yield return new WaitForSeconds(_pulseDuration);
-
 
         _agroAudio = AudioManager.Instance.PlaySound(transform, _agroSFX, true, true, 1f, _agroPitch);
 
