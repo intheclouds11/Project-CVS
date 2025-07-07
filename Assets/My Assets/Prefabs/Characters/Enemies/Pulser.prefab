@@ -52,15 +52,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _agroRange: 5
-  _agroSpeed: 5.5
+  _agroSpeed: 6.5
   _patrolSpeed: 1
   _patrolSFX: {fileID: 8300000, guid: 8ba6493c6bbf4374cbee78f819a4a9d1, type: 3}
   _agroSFX: {fileID: 8300000, guid: 9f7aa5ccf137dd040a14777f4acd51a1, type: 3}
   _abilityStartSFX: {fileID: 8300000, guid: 625defa160e93884b88a528a8582617f, type: 3}
-  _pulseTriggerDistance: 2.5
+  _pulseTriggerDistance: 1.5
   _pulseDamageRadius: 2.5
   _pulseDuration: 0.35
-  _pulseDelayDuration: 0.5
+  _pulseDelayDuration: 0.35
   _pulseCooldownDuration: 2
   _pulseVFX: {fileID: 6578114084321120969}
 --- !u!114 &7312698501997549328

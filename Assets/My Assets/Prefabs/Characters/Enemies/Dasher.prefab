@@ -33,7 +33,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.76, y: 0.76, z: 0.76}
+  m_LocalScale: {x: 0.76000005, y: 0.76, z: 0.76000005}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 6692608903624908347}
@@ -52,12 +52,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _agroRange: 7
-  _agroSpeed: 3.5
+  _agroSpeed: 4
   _patrolSpeed: 1
   _patrolSFX: {fileID: 8300000, guid: 8ba6493c6bbf4374cbee78f819a4a9d1, type: 3}
   _agroSFX: {fileID: 8300000, guid: 9f7aa5ccf137dd040a14777f4acd51a1, type: 3}
   _abilityStartSFX: {fileID: 8300000, guid: baa42a3793a623b42bc15d843bdbfd13, type: 3}
-  _dashTriggerDistance: 2.5
+  _dashTriggerDistance: 3.5
   _dashSpeed: 4
   _dashDuration: 0.5
   _dashDelayDuration: 0.45
@@ -81,6 +81,7 @@ MonoBehaviour:
   _currentHealth: 0
   _maxHealth: 100
   _damageKnockbackAmount: 0
+  _damageKnockbackDuration: 1
   _damageInvincibilityDuration: 0
   _damagedSFX: {fileID: 0}
   _damagedVignetteIntensity: 0.7
@@ -34249,7 +34250,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 737
+  m_VersionIndex: 842
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -54881,7 +54882,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 4780
+  m_VersionIndex: 4885
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -75517,7 +75518,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 4780
+  m_VersionIndex: 4885
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -96153,7 +96154,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 4780
+  m_VersionIndex: 4885
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []

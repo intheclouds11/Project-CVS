@@ -43,10 +43,10 @@ public class Health : MonoBehaviour
         get => _currentHealth;
         private set => _currentHealth = value;
     }
-    
+
     /// Vector3: knockbackDir, float: _damageKnockbackAmount, float: _damageKnockbackDuration
     public event Action<Vector3, float, float> DamageTaken;
-    
+
     public event Action<GameObject> Died;
     private float _lastDamageTime;
 
@@ -55,14 +55,15 @@ public class Health : MonoBehaviour
     private ColorAdjustments _colorAdjustments;
     private float _startingVignetteIntensity;
     private float _startingSaturation;
+    private bool _isPlayerHealth;
 
 
     private void Awake()
     {
         CurrentHealth = _maxHealth;
 
-
-        if (GetComponent<PlayerController>())
+        _isPlayerHealth = GetComponent<PlayerController>();
+        if (_isPlayerHealth)
         {
             _globalVolume = FindAnyObjectByType<Volume>();
             _globalVolume.profile.TryGet(out _vignette);
@@ -93,7 +94,7 @@ public class Health : MonoBehaviour
 
     public void RecoverHP(int amount)
     {
-        if (CurrentHealth == _maxHealth) return;
+        if (Mathf.Approximately(_vignette.intensity.value, _startingVignetteIntensity)) return;
 
         var newHealth = CurrentHealth + amount;
         CurrentHealth = newHealth > _maxHealth ? _maxHealth : newHealth;
@@ -115,22 +116,21 @@ public class Health : MonoBehaviour
         if (damage <= 0 || CurrentHealth <= 0) return;
         if (_lastDamageTime + _damageInvincibilityDuration >= Time.time) return;
 
-        if (GetComponent<PlayerController>() && GameManager.Instance.GodMode)
-        {
-            return;
-        }
+        
+        int newHealth = CurrentHealth - damage;
+        bool isGodMode = _isPlayerHealth && GameManager.Instance.GodMode;
 
-        CurrentHealth -= damage;
-        _lastDamageTime = Time.time;
-
-        if (CurrentHealth > 0)
+        if (newHealth > 0)
         {
             OnDamaged(knockbackDir);
         }
-        else
+        else if (!isGodMode)
         {
             OnDied();
         }
+
+        if (!isGodMode) CurrentHealth = newHealth;
+        _lastDamageTime = Time.time;
     }
 
     private void OnDamaged(Vector3 knockbackDir)
@@ -141,7 +141,7 @@ public class Health : MonoBehaviour
             AudioManager.Instance.PlaySound(transform, _damagedSFX, true, false, _damagedSFXVolume, pitch);
         }
 
-        if (GetComponent<PlayerController>())
+        if (_isPlayerHealth)
         {
             _vignette.intensity.value = _damagedVignetteIntensity;
             _colorAdjustments.saturation.value = _damagedSaturation;
