@@ -14,25 +14,59 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   folderDatas_byGuid:
     keys:
+    - 421d75dd39e175c4094290e2fca73d52
     - 366b78f6b3fb0844a8f520104a769063
-    - 8a6da50aa4fd910488fae1da5ab90669
     - 5243ab87e00eb3c4d998003ccd9cf68a
     - 9c53962885c2c4f449125a979d6ad240
+    - a7cb1bfee1697ce4ba3c4586dc49faae
+    - f73e3269629bf124aadc60243daa4db6
+    - 8a6da50aa4fd910488fae1da5ab90669
+    - 709f11a7f3c4041caa4ef136ea32d874
+    - ed2cacf393a7b2b48bc16063d7465758
+    - 90cfb36f2f10db34fa78d58033a68b44
     values:
-    - iconNameOrGuid: 
-      colorIndex: 4
+    - iconNameOrGuid: AudioSource Icon
+      colorIndex: 0
       isIconRecursive: 0
       isColorRecursive: 0
-    - iconNameOrGuid: 
+    - iconNameOrGuid: RawImage Icon
+      colorIndex: 5
+      isIconRecursive: 0
+      isColorRecursive: 1
+    - iconNameOrGuid: cs Script Icon
+      colorIndex: 1
+      isIconRecursive: 0
+      isColorRecursive: 1
+    - iconNameOrGuid: SceneAsset Icon
+      colorIndex: 10
+      isIconRecursive: 0
+      isColorRecursive: 1
+    - iconNameOrGuid: AudioClip Icon
+      colorIndex: 0
+      isIconRecursive: 0
+      isColorRecursive: 0
+    - iconNameOrGuid: Material Icon
+      colorIndex: 0
+      isIconRecursive: 0
+      isColorRecursive: 0
+    - iconNameOrGuid: Prefab Icon
       colorIndex: 7
       isIconRecursive: 0
+      isColorRecursive: 1
+    - iconNameOrGuid: Settings Icon
+      colorIndex: 0
+      isIconRecursive: 1
       isColorRecursive: 0
-    - iconNameOrGuid: cs Script Icon
+    - iconNameOrGuid: 
+      colorIndex: 3
+      isIconRecursive: 0
+      isColorRecursive: 1
+    - iconNameOrGuid: Settings Icon
       colorIndex: 0
       isIconRecursive: 0
       isColorRecursive: 0
-    - iconNameOrGuid: SceneAsset Icon
-      colorIndex: 0
-      isIconRecursive: 0
-      isColorRecursive: 0
-  bookmarks: []
+  bookmarks:
+  - guid: 420b74b53608d5049824b8ace43ede61
+  - guid: 8a6da50aa4fd910488fae1da5ab90669
+  - guid: 9c53962885c2c4f449125a979d6ad240
+  - guid: 5243ab87e00eb3c4d998003ccd9cf68a
