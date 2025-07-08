@@ -5627,8 +5627,8 @@ GameObject:
   - component: {fileID: 8521407939565448716}
   - component: {fileID: 5541405201192610845}
   - component: {fileID: 8296661728433086853}
+  - component: {fileID: 1614991079967622114}
   - component: {fileID: 4469519121344481290}
-  - component: {fileID: 1889821891905050348}
   - component: {fileID: 6682522008067125303}
   - component: {fileID: 1312695437502043355}
   m_Layer: 6
@@ -5750,6 +5750,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _attackBufferTime: 0.5
+  _attackRate: 0.3
   _playerBasicKnockbackAmount: 2.5
   _playerCritKnockbackAmount: 5
   _critChargeTime: 0.4
@@ -5765,9 +5766,37 @@ MonoBehaviour:
   _chargedColor: {r: 1, g: 1, b: 1, a: 1}
   _chargeIndicatorColorModifier: 3
   _critParticle: {fileID: 7262850200320588973}
-  _chargingSFX: {fileID: 8300000, guid: 0350013893072914aa030e96e60da80a, type: 3}
+  _chargingSFX: {fileID: 8300000, guid: 9f7492f92840fd64792192768d9abd1e, type: 3}
   _basicSFX: {fileID: 8300000, guid: 555a0d083b665f74cb531890f26ee5e4, type: 3}
   _critSFX: {fileID: 8300000, guid: 555a0d083b665f74cb531890f26ee5e4, type: 3}
+--- !u!114 &1614991079967622114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1965895980782986867}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c097efe5a31f38644a12336090499b97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _currentHealth: 0
+  _maxHealth: 2
+  _damageKnockbackAmount: 20
+  _damageKnockbackDuration: 0.2
+  _damagedSFX: {fileID: 8300000, guid: b600853e0320c9e4fb7f3c839b603c56, type: 3}
+  _damagedSFXVolume: 0.8
+  _recoverHealthSFX: {fileID: 8300000, guid: 9a4f2950b30176443afcc3f35a409d6c, type: 3}
+  _diedSFX: {fileID: 8300000, guid: b498fe5b2c61e064a8b03ebde16b3414, type: 3}
+  _diedSFXVolume: 0.65
+  _diedSFXPitch: 1
+  _diedVFX: {fileID: 9049631545069152736, guid: e2d4687b86076744fbdd2aa6777e932f, type: 3}
+  _damageInvincibilityDuration: 0.5
+  _damagedVignetteIntensity: 0.55
+  _damagedLowPassFreq: 5000
+  _damagedLowPassAdjustSpeed: 2
+  _damagedSaturation: -40
 --- !u!114 &4469519121344481290
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5793,31 +5822,6 @@ MonoBehaviour:
   - RechargeTimer: 0
   - RechargeTimer: 0
   - RechargeTimer: 0
---- !u!114 &1889821891905050348
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1965895980782986867}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d785fb0c3347e10428564414cc141033, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _currentHealth: 0
-  _maxHealth: 2
-  _damageKnockbackAmount: 20
-  _damageKnockbackDuration: 0.2
-  _damageInvincibilityDuration: 0.5
-  _damagedSFX: {fileID: 8300000, guid: b600853e0320c9e4fb7f3c839b603c56, type: 3}
-  _damagedVignetteIntensity: 0.55
-  _damagedSaturation: -40
-  _damagedSFXVolume: 0.8
-  _recoverHealthSFX: {fileID: 8300000, guid: 9a4f2950b30176443afcc3f35a409d6c, type: 3}
-  _diedSFX: {fileID: 8300000, guid: b498fe5b2c61e064a8b03ebde16b3414, type: 3}
-  _diedSFXVolume: 0.65
-  _diedVFX: {fileID: 9049631545069152736, guid: e2d4687b86076744fbdd2aa6777e932f, type: 3}
 --- !u!136 &6682522008067125303
 CapsuleCollider:
   m_ObjectHideFlags: 0

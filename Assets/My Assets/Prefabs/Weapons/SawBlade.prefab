@@ -582,12 +582,15 @@ MonoBehaviour:
   _critDamage: 120
   _shortRangeImpulse: 1
   _longRangeImpulse: 5
+  _returnImpulse: 20
   _longRangeChargeThreshold: 0.4
   _longRangeReturnTime: 0.35
   _shortRangeReturnTime: 0.2
   _startReturnPlayerDistance: 3.7
   _swipeSFX: {fileID: 8300000, guid: 614a61b848da5244e8da0f319f2e687e, type: 3}
   _bladeSpinLoopSFX: {fileID: 8300000, guid: 3623ceedba7853a468feb0ac4ac416e7, type: 3}
+  _returnedSFX: {fileID: 8300000, guid: aafcc4dbe3d5b6841b9ee4d3b19fefdd, type: 3}
+  _returnedSFXVolume: 0.55
   _impactSFX: {fileID: 8300000, guid: 92aadb14cc314f54db316cc18b68fe36, type: 3}
   _impactVfx: {fileID: 9049631545069152736, guid: 6a0d9d4912f0e7b43b46b2a49721b4bb, type: 3}
 --- !u!54 &7434762892271647052

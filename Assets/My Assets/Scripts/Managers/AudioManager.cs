@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
@@ -21,6 +22,7 @@ public class AudioManager : MonoBehaviour
     private List<AudioSource> _SFXAudioSources = new();
     private List<AudioSource> _loopAudioSources = new();
     private int _usedSource;
+    private Coroutine _masterLowPassCoroutine;
 
 
     private void Awake()
@@ -32,6 +34,7 @@ public class AudioManager : MonoBehaviour
 
     public void OnPlayerRespawned()
     {
+        AdjustMasterLowPass(22000f, 2f);
         foreach (var loopAudioSource in _loopAudioSources)
         {
             loopAudioSource.Stop();
@@ -85,7 +88,7 @@ public class AudioManager : MonoBehaviour
         float pitch = 1f)
     {
         AudioSource audioSource = null;
-        
+
         foreach (var loopAudioSource in _loopAudioSources)
         {
             if (!loopAudioSource.isPlaying)
@@ -100,7 +103,7 @@ public class AudioManager : MonoBehaviour
             Debug.LogWarning($"No loopAudioSource available");
             return null;
         }
-        
+
         audioSource.volume = volume;
         audioSource.pitch = pitch;
         audioSource.transform.position = tr.position;
@@ -118,5 +121,29 @@ public class AudioManager : MonoBehaviour
     public void AdjustAmbienceGroupGain(float newGain)
     {
         _audioMixer.SetFloat("AmbienceGain", newGain);
+    }
+
+    public void AdjustMasterLowPass(float cutoffFreq, float duration)
+    {
+        if (_masterLowPassCoroutine != null) StopCoroutine(_masterLowPassCoroutine);
+        _masterLowPassCoroutine = StartCoroutine(AdjustMasterLowPassCoroutine(cutoffFreq, duration));
+    }
+
+    private IEnumerator AdjustMasterLowPassCoroutine(float desiredFreq, float duration)
+    {
+        float timeElapsed = 0f;
+        _audioMixer.GetFloat("MasterLowpassCutoffFreq", out var currentFreq);
+
+        while (timeElapsed < duration)
+        {
+            timeElapsed += Time.deltaTime;
+            float newFreq = Mathf.Lerp(currentFreq, desiredFreq, timeElapsed / duration);
+
+            _audioMixer.SetFloat("MasterLowpassCutoffFreq", newFreq);
+            yield return null;
+        }
+
+        _audioMixer.SetFloat("MasterLowpassCutoffFreq", desiredFreq);
+        _masterLowPassCoroutine = null;
     }
 }

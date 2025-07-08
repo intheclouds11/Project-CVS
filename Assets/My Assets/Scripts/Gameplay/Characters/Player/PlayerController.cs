@@ -59,7 +59,7 @@ public class PlayerController : MonoBehaviour
     private AudioClip _dashSFX;
 
     public PlayerAttack PlayerAttack { get; private set; }
-    public Health Health { get; protected set; }
+    public PlayerHealth Health { get; protected set; }
     public CharacterController CharacterController { get; private set; }
     public float Gravity { get; private set; } = 9.81f;
     public bool IsDashing { get; private set; }
@@ -90,7 +90,7 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
-        Health = GetComponent<Health>();
+        Health = GetComponent<PlayerHealth>();
         Health.Died += OnDied;
         Health.DamageTaken += OnDamageTaken;
         CharacterController = GetComponent<CharacterController>();

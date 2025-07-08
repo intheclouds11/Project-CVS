@@ -79,14 +79,12 @@ MonoBehaviour:
   _maxHealth: 100
   _damageKnockbackAmount: 0
   _damageKnockbackDuration: 1
-  _damageInvincibilityDuration: 0
   _damagedSFX: {fileID: 0}
-  _damagedVignetteIntensity: 0.7
-  _damagedSaturation: -40
   _damagedSFXVolume: 0.8
   _recoverHealthSFX: {fileID: 0}
   _diedSFX: {fileID: 8300000, guid: 3152b2c46126d324ca368dd04f75bebc, type: 3}
   _diedSFXVolume: 0.9
+  _diedSFXPitch: 0.8
   _diedVFX: {fileID: 9049631545069152736, guid: e2d4687b86076744fbdd2aa6777e932f, type: 3}
 --- !u!95 &1714698826164707562
 Animator:
