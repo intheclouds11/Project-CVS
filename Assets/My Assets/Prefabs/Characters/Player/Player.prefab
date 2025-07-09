@@ -5737,6 +5737,12 @@ MonoBehaviour:
   _footstepSFX: {fileID: 8300000, guid: aa715c9f83bb7db4ead2c973c10efdd8, type: 3}
   _dashParticleSystem: {fileID: 4672856745462179865}
   _dashSFX: {fileID: 8300000, guid: ed934b11f1f98db469747ae341a65546, type: 3}
+  _transparentMaterials:
+  - {fileID: 2100000, guid: 845a0ab8a93a91f4d8babafcecf85791, type: 2}
+  - {fileID: 2100000, guid: 8f46d98a60a64a740b63910e4cce78d4, type: 2}
+  _originalMaterials:
+  - {fileID: 2100000, guid: d1c21ddfc1c2cdb4cb13b8aa6483bfd4, type: 2}
+  - {fileID: 2100000, guid: 4028805fc44b7d343bc284d0434e30bd, type: 2}
 --- !u!114 &8296661728433086853
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5749,7 +5755,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6285eb9f905df2d44800c73d7ff29b09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _attackBufferTime: 0.15
+  _attackBufferTime: 0.1
   _attackRate: 0.4
   _playerBasicKnockbackAmount: -1.5
   _playerCritKnockbackAmount: -3.5
@@ -7767,7 +7773,7 @@ Animator:
   m_GameObject: {fileID: 6019530001912428551}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 2f25db078fd35f042994f8a64ddf26b1, type: 3}
-  m_Controller: {fileID: 9100000, guid: 0e3b69c1648d7c54da0a17f38ad0b067, type: 2}
+  m_Controller: {fileID: 9100000, guid: 067649a10dca0aa46ba8519d4faf265f, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -9011,10 +9017,6 @@ PrefabInstance:
     - target: {fileID: 3904565489924947698, guid: 8ed770000db2d6c4e9ab175ff2f907b6, type: 3}
       propertyPath: m_Name
       value: SawBlade
-      objectReference: {fileID: 0}
-    - target: {fileID: 3904565489924947698, guid: 8ed770000db2d6c4e9ab175ff2f907b6, type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

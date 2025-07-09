@@ -101,6 +101,8 @@ public class PlayerChargesManager : MonoBehaviour
 
     public void UseCharge()
     {
+        if (GameManager.Instance.GodMode) return;
+        
         _remainingCharges--;
 
         for (int i = _charges.Count - 1; i >= 0; i--)
@@ -116,7 +118,7 @@ public class PlayerChargesManager : MonoBehaviour
         }
     }
 
-    private void ForceFullRecharge()
+    public void ForceFullRecharge()
     {
         _remainingCharges = _maxCharges;
         foreach (var playerCharge in _charges)

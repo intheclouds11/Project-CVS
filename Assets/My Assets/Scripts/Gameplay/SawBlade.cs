@@ -16,13 +16,17 @@ public class SawBlade : MonoBehaviour
     [SerializeField]
     private float _longRangeImpulse = 5f;
     [SerializeField]
+    private float _critImpulse = 8f;
+    [SerializeField]
     private float _returnSpeed = 20f;
     [field: SerializeField, Tooltip("Percent charge required for long range attack")]
     private float _longRangeChargeThreshold = 0.25f;
     [SerializeField]
-    private float _longRangeReturnTime = 0.35f;
+    private float _shortRangeReturnTime = 0.2f;
     [SerializeField]
-    private float _shortRangeReturnTime = 0.15f;
+    private float _longRangeReturnTime = 0.4f;
+    [SerializeField]
+    private float _critReturnTime = 0.2f;
 
     [Header("FX")]
     [SerializeField]
@@ -181,15 +185,15 @@ public class SawBlade : MonoBehaviour
 
     public void OnAttack(Transform spawnPoint, float chargeAmount, bool crit)
     {
+        IsCritAttack = crit;
         IsLongRangeAttack = chargeAmount >= _longRangeChargeThreshold;
-        _finalImpulseForce = IsLongRangeAttack ? _longRangeImpulse * chargeAmount : _shortRangeImpulse;
-        _finalStartReturnTime = IsLongRangeAttack ? _longRangeReturnTime : _shortRangeReturnTime;
+        _finalImpulseForce = IsCritAttack ? _critImpulse : IsLongRangeAttack ? _longRangeImpulse : _shortRangeImpulse;
+        _finalStartReturnTime = IsCritAttack ? _critReturnTime : IsLongRangeAttack ? _longRangeReturnTime : _shortRangeReturnTime;
 
         _finalDamage = crit ? _critDamage : (int) Mathf.Clamp(_baseDamage * chargeAmount * 2f, _baseDamage * 0.5f, _baseDamage);
-        IsCritAttack = crit;
 
         // Debug.Log($"_finalDamage: {_finalDamage}");
-        
+
         transform.parent = null;
         transform.position = spawnPoint.position;
         transform.rotation = spawnPoint.rotation;

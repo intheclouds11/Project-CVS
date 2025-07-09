@@ -39,6 +39,8 @@ public class GameManager : MonoBehaviour
         if (InputManager.Instance.ToggleGodModeWasPressed)
         {
             GodMode = !GodMode;
+            AudioManager.Instance.MusicAudioSource.volume = GodMode ? 0f : AudioManager.Instance.InitialMusicVolume;
+            if (GodMode) Player1.PlayerCharges.ForceFullRecharge();
             Debug.Log($"GameManager: GodMode set to {GodMode}");
         }
     }

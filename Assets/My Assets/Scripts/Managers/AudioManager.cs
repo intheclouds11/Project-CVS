@@ -23,6 +23,7 @@ public class AudioManager : MonoBehaviour
     private List<AudioSource> _loopAudioSources = new();
     private int _usedSource;
     private Coroutine _masterLowPassCoroutine;
+    public float InitialMusicVolume { get; private set; }
 
 
     private void Awake()
@@ -30,6 +31,7 @@ public class AudioManager : MonoBehaviour
         Instance = this;
         _SFXAudioSources = _SFXParent.GetComponentsInChildren<AudioSource>().ToList();
         _loopAudioSources = _loopAudioParent.GetComponentsInChildren<AudioSource>().ToList();
+        InitialMusicVolume = MusicAudioSource.volume;
     }
 
     public void OnPlayerRespawned()

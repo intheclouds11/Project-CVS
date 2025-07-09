@@ -74,6 +74,7 @@ public class PlayerAttack : MonoBehaviour
     private bool _exceededCritThreshold;
     private float _attackCooldownTime;
     private float _attackBufferTimer;
+    private bool _bufferedNextAttackDirection;
     private Vector3 _bufferedRotateDir;
     private Color _originalIndicatorColor;
     private Coroutine _chargeIndicatorCoroutine;
@@ -109,7 +110,7 @@ public class PlayerAttack : MonoBehaviour
         HandleCharging();
         HandleAttacking();
 
-        if (State != AttackState.Charging && _chargeMeterCanvasGroup.alpha != 0f)
+        if (!IsCharging && _chargeMeterCanvasGroup.alpha != 0f)
         {
             var newAlpha = _chargeMeterCanvasGroup.alpha - 0.5f * Time.deltaTime;
             _chargeMeterCanvasGroup.alpha = Mathf.Clamp(newAlpha, 0f, 1);
@@ -131,12 +132,26 @@ public class PlayerAttack : MonoBehaviour
 
                 if (_player.IsDashing) _playerAnimator.SetIsDashing(false);
                 _playerAnimator.SetReadyAttackTrigger();
-                Debug.Log($"StartCharge");
+                // Debug.Log($"StartCharge");
             }
             else
             {
-                _attackHeldTime += Time.deltaTime;
-                _chargeMeter.value += Time.deltaTime;
+                _player.SetAttackRotateDirection(_player.GetRotateDirection());
+
+                if (_exceededCritThreshold)
+                {
+                    _attackHeldTime -= Time.deltaTime;
+                    if (_chargeMeter.value > _critChargeTime)
+                    {
+                        _chargeMeter.value -= Time.deltaTime;
+                    }
+                }
+                else
+                {
+                    _attackHeldTime += Time.deltaTime;
+                    _chargeMeter.value += Time.deltaTime;
+                }
+
                 _chargeMeterCanvasGroup.alpha = 1f;
 
                 if (!_enteredCritThreshold && WithinCritThreshold())
@@ -151,16 +166,9 @@ public class PlayerAttack : MonoBehaviour
             }
         }
     }
-
-    private bool _bufferedNextAttackDirection;
+    
     private void HandleAttacking()
     {
-        if (_inputManager.AttackWasPressed && !_bufferedNextAttackDirection)
-        {
-            _bufferedRotateDir = _player.GetRotateDirection();
-            _bufferedNextAttackDirection = true;
-        }
-
         if (_inputManager.AttackWasReleased)
         {
             _attackBufferTimer = _attackBufferTime;
@@ -173,9 +181,16 @@ public class PlayerAttack : MonoBehaviour
                 StartCoroutine(Attack());
             }
         }
-        else
+        else if (_attackBufferTimer <= 0)
         {
             _attackBufferTimer -= Time.deltaTime;
+        }
+
+        if (IsAttacking && _inputManager.AttackWasPressed)
+        {
+            _bufferedRotateDir = _player.GetRotateDirection();
+            _bufferedNextAttackDirection = true;
+            // Debug.Log($"_bufferedNextAttackDirection: {_bufferedRotateDir}");
         }
     }
 
@@ -199,10 +214,15 @@ public class PlayerAttack : MonoBehaviour
 
     private IEnumerator Attack()
     {
-        Debug.Log($"StartATTACK");
-        _player.SetRotateDirection(_bufferedRotateDir);
+        // Debug.Log($"StartATTACK");
+        if (!IsCharging && _bufferedNextAttackDirection)
+        {
+            _player.SetAttackRotateDirection(_bufferedRotateDir);
+            _bufferedNextAttackDirection = false;
+            // Debug.Log($"SetAttackRotateDirection: {_bufferedRotateDir}");
+        }
+
         _attackBufferTimer = 0f;
-        _bufferedNextAttackDirection = false;
         State = AttackState.Attacking;
 
         indicatorMR.material.color = _originalIndicatorColor;
@@ -210,13 +230,13 @@ public class PlayerAttack : MonoBehaviour
         if (_player.IsDashing) _playerAnimator.SetIsDashing(false);
         _playerAnimator.SetAttackTrigger();
 
-        _isCritAttack = false;
+        _wasCritAttack = false;
         if (WithinCritThreshold())
         {
             _inputManager.Vibrate(0.4f, 1f, 0.2f);
             _critParticle.Play();
             AudioManager.Instance.PlaySound(transform, _critSFX, true, false, 2f, 1.2f);
-            _isCritAttack = true;
+            _wasCritAttack = true;
         }
         else
         {
@@ -224,22 +244,22 @@ public class PlayerAttack : MonoBehaviour
         }
 
         _lastChargeAmount = _chargeMeter.value / _chargeMeter.maxValue;
+        Attacked?.Invoke(_wasCritAttack ? _playerCritKnockbackAmount : _playerBasicKnockbackAmount);
+
+        yield return new WaitForSeconds(_attackRate);
 
         _attackHeldTime = 0f;
         _enteredCritThreshold = false;
         _exceededCritThreshold = false;
-        Attacked?.Invoke(_isCritAttack ? _playerCritKnockbackAmount : _playerBasicKnockbackAmount);
-
-        yield return new WaitForSeconds(_attackRate);
         State = AttackState.Idle;
     }
 
-    private bool _isCritAttack;
+    private bool _wasCritAttack;
     private float _lastChargeAmount;
 
     public void ThrowSawBlade()
     {
-        _sawBlade.OnAttack(_sawBladeSpawnPoint, _lastChargeAmount, _isCritAttack);
+        _sawBlade.OnAttack(_sawBladeSpawnPoint, _lastChargeAmount, _wasCritAttack);
     }
 
     private bool WithinCritThreshold()
@@ -260,7 +280,6 @@ public class PlayerAttack : MonoBehaviour
     public void OnDied()
     {
         enabled = false;
-        // IsCharging = false;
         State = AttackState.Idle;
         _attackBufferTimer = 0f;
         _chargeMeterCanvasGroup.alpha = 0f;
