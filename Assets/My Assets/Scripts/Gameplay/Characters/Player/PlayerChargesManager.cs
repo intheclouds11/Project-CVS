@@ -43,7 +43,7 @@ public class PlayerChargesManager : MonoBehaviour
             _charges[i].ChargeGameObject = chargeGO;
         }
 
-        ForceFullRecharge();
+        _remainingCharges = _maxCharges;
     }
 
     private void OnEnable()
@@ -121,8 +121,10 @@ public class PlayerChargesManager : MonoBehaviour
     public void ForceFullRecharge()
     {
         _remainingCharges = _maxCharges;
-        foreach (var playerCharge in _charges)
+        for (int i = 0; i < _charges.Count; i++)
         {
+            if (i >= _maxCharges) return;
+            var playerCharge = _charges[i];
             playerCharge.ChargeGameObject.SetActive(true);
             playerCharge.RechargeTimer = 0f;
         }

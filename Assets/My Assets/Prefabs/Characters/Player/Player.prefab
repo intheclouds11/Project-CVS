@@ -5818,7 +5818,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _enemyHitRecharges: 1
-  _maxCharges: 3
+  _maxCharges: 1
   _rechargeTime: 2.5
   _fadeInTime: 7
   _rechargeSFX: {fileID: 8300000, guid: e5f685ffb5eac584ba1c83ed5e9bb6d3, type: 3}
