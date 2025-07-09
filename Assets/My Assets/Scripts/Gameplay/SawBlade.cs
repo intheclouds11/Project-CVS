@@ -16,15 +16,13 @@ public class SawBlade : MonoBehaviour
     [SerializeField]
     private float _longRangeImpulse = 5f;
     [SerializeField]
-    private float _returnImpulse = 20f;
+    private float _returnSpeed = 20f;
     [field: SerializeField, Tooltip("Percent charge required for long range attack")]
     private float _longRangeChargeThreshold = 0.25f;
     [SerializeField]
     private float _longRangeReturnTime = 0.35f;
     [SerializeField]
     private float _shortRangeReturnTime = 0.15f;
-    [SerializeField]
-    private float _startReturnPlayerDistance = 5f;
 
     [Header("FX")]
     [SerializeField]
@@ -96,34 +94,24 @@ public class SawBlade : MonoBehaviour
             transform.rotation *= Quaternion.AngleAxis(transform.eulerAngles.y + Time.deltaTime * 360, Vector3.up);
         }
 
-        if (IsReturning) return;
-
-        if (Time.time >= _spawnTime + _finalStartReturnTime)
+        if (!IsReturning)
         {
-            if (IsCritAttack)
-            {
-                _rb.linearVelocity = Vector3.zero;
-                transform.GetChild(0).gameObject.layer = LayerMask.NameToLayer("Default"); // Player can self-return SawBlade
-            }
-            else
+            if (Time.time >= _spawnTime + _finalStartReturnTime)
             {
                 ReturnToPlayer();
             }
         }
-
-        if (Vector3.Distance(transform.position, _player.transform.position) >= _startReturnPlayerDistance)
+        else
         {
-            ReturnToPlayer();
+            Vector3 newPos = Vector3.MoveTowards(_rb.position, _player.LookAt.position, _returnSpeed * Time.deltaTime);
+            _rb.MovePosition(newPos);
         }
     }
 
     public void ReturnToPlayer()
     {
         IsReturning = true;
-        var dir = (_player.transform.position - transform.position).normalized;
-        Vector3 forceToAdd = new Vector3(dir.x, 0f, dir.z) * _returnImpulse;
         _rb.linearVelocity = Vector3.zero;
-        _rb.AddForce(forceToAdd, ForceMode.Impulse);
         transform.GetChild(0).gameObject.layer = LayerMask.NameToLayer("Default");
     }
 
@@ -191,7 +179,7 @@ public class SawBlade : MonoBehaviour
         AudioManager.Instance.PlaySound(transform, _impactSFX, true, false, 0.4f);
     }
 
-    public void OnAttack(float chargeAmount, bool crit)
+    public void OnAttack(Transform spawnPoint, float chargeAmount, bool crit)
     {
         IsLongRangeAttack = chargeAmount >= _longRangeChargeThreshold;
         _finalImpulseForce = IsLongRangeAttack ? _longRangeImpulse * chargeAmount : _shortRangeImpulse;
@@ -201,5 +189,10 @@ public class SawBlade : MonoBehaviour
         IsCritAttack = crit;
 
         // Debug.Log($"_finalDamage: {_finalDamage}");
+        
+        transform.parent = null;
+        transform.position = spawnPoint.position;
+        transform.rotation = spawnPoint.rotation;
+        gameObject.SetActive(true);
     }
 }

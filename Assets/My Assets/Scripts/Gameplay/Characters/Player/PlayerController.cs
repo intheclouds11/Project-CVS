@@ -41,8 +41,8 @@ public class PlayerController : MonoBehaviour
     [Header("Transforms")]
     [field: SerializeField]
     public Transform RotationTransform { get; private set; }
-    [SerializeField]
-    private Transform _lookAt;
+    [field: SerializeField]
+    public Transform LookAt { get; private set; }
     [SerializeField]
     private Transform _playerModel;
 
@@ -68,6 +68,21 @@ public class PlayerController : MonoBehaviour
     private Vector3 xzVelocity;
     private float yVelocity;
     private Vector3 _rotateDirection;
+
+    public void SetRotateDirection(Vector3 direction)
+    {
+        if (_inputManager.UsingGamepad)
+        {
+            var lookAtRotation = Quaternion.LookRotation(direction);
+            RotationTransform.localRotation = lookAtRotation;
+        }
+        else
+        {
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            RotationTransform.rotation = Quaternion.Euler(0f, -angle + 90f, 0f);
+        }
+    }
+
     private float _lastAttackTime;
     private bool _dashWasPressed;
     private float _dashBufferTimer;
@@ -109,7 +124,7 @@ public class PlayerController : MonoBehaviour
 
         _inputManager = InputManager.Instance;
         _virtualCamera = FindAnyObjectByType<CinemachineCamera>();
-        _virtualCamera.Follow = _lookAt; // Set follower
+        _virtualCamera.Follow = LookAt; // Set follower
         _virtualCamera.PreviousStateIsValid = false;
     }
 
@@ -118,13 +133,19 @@ public class PlayerController : MonoBehaviour
         _virtualCamera = FindAnyObjectByType<CinemachineCamera>();
         if (_virtualCamera)
         {
-            _virtualCamera.Follow = _lookAt;
+            _virtualCamera.Follow = LookAt;
         }
     }
 
     private void Update()
     {
-        if (PauseScreen.IsPaused) return;
+        if (PauseScreen.IsPaused)
+        {
+            xzVelocity = Vector3.zero;
+            _playerAnimator.SetSpeed(0f);
+            return;
+        }
+
         CheckInputs();
         HandleHorizontalMovement();
         HandleVerticalMovement();
@@ -136,22 +157,25 @@ public class PlayerController : MonoBehaviour
     {
         _movementVector = new Vector3(_inputManager.Translation.x, 0f, _inputManager.Translation.y);
 
-        if (_inputManager.UsingGamepad)
-        {
-            _rotateDirection = new Vector3(_inputManager.Direction.x, 0f, _inputManager.Direction.y);
-        }
-        else
-        {
-            Vector3 playerScreenPos = Camera.main.WorldToScreenPoint(_lookAt.position);
-            Vector3 mouseScreenPos = Input.mousePosition;
-            Vector3 playerToCursorDirection = (mouseScreenPos - playerScreenPos).normalized;
-            _rotateDirection = playerToCursorDirection;
-        }
+        _rotateDirection = GetRotateDirection();
 
         if (_inputManager.DashWasPressed && _playerCharges.IsChargeAvailable())
         {
             _dashBufferTimer = _dashBufferTime;
         }
+    }
+
+    public Vector3 GetRotateDirection()
+    {
+        if (_inputManager.UsingGamepad)
+        {
+            return new Vector3(_inputManager.Direction.x, 0f, _inputManager.Direction.y).normalized;
+        }
+
+        Vector3 playerScreenPos = Camera.main.WorldToScreenPoint(LookAt.position);
+        Vector3 mouseScreenPos = Input.mousePosition;
+        Vector3 playerToCursorDirection = (mouseScreenPos - playerScreenPos).normalized;
+        return playerToCursorDirection;
     }
 
     private void HandleHorizontalMovement()
@@ -168,44 +192,32 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (PauseScreen.IsPaused)
+        if (_inputManager.IsMovementActive())
         {
-            xzVelocity = Vector3.zero;
+            if (!_startedMoving)
+            {
+                _startedMoving = true;
+                PlayFootstep();
+            }
         }
         else
         {
-            if (_inputManager.IsMovementActive())
-            {
-                if (!PlayerAttack.AttackIsHeld)
-                {
-                    RotationTransform.rotation = Quaternion.LookRotation(_movementVector);
-                }
-
-                if (!_startedMoving)
-                {
-                    _startedMoving = true;
-                    PlayFootstep();
-                }
-            }
-            else
-            {
-                _startedMoving = false;
-            }
-
-            if (_distanceSinceLastFootstep >= _footstepDistance)
-            {
-                PlayFootstep();
-            }
-            else
-            {
-                _distanceSinceLastFootstep += Vector3.Distance(_lastPosition, transform.position);
-                _lastPosition = transform.position;
-            }
-
-            float moveSpeed = !PlayerAttack.AttackIsHeld ? _moveSpeed : _moveSpeed * _attackMoveSpeedMultiplier;
-            xzVelocity = _movementVector * (moveSpeed * Time.deltaTime);
-            _playerAnimator.SetSpeed(_movementVector.magnitude);
+            _startedMoving = false;
         }
+
+        if (_distanceSinceLastFootstep >= _footstepDistance)
+        {
+            PlayFootstep();
+        }
+        else
+        {
+            _distanceSinceLastFootstep += Vector3.Distance(_lastPosition, transform.position);
+            _lastPosition = transform.position;
+        }
+
+        float moveSpeed = !PlayerAttack.IsCharging ? _moveSpeed : _moveSpeed * _attackMoveSpeedMultiplier;
+        xzVelocity = _movementVector * (moveSpeed * Time.deltaTime);
+        _playerAnimator.SetSpeed(_movementVector.magnitude);
     }
 
     private void HandleVerticalMovement()
@@ -221,11 +233,24 @@ public class PlayerController : MonoBehaviour
 
     private void HandleRotation()
     {
-        if (!PlayerAttack.AttackIsHeld || PauseScreen.IsPaused) return;
+        if (PlayerAttack.State == PlayerAttack.AttackState.Attacking)
+        {
+            return;
+        }
+
+        if (PlayerAttack.State == PlayerAttack.AttackState.Idle)
+        {
+            if (_inputManager.IsMovementActive() && !_inputManager.AttackHeld)
+            {
+                RotationTransform.rotation = Quaternion.LookRotation(_movementVector);
+            }
+
+            return;
+        }
 
         if (_inputManager.UsingGamepad)
         {
-            if (_inputManager.IsDirectionActive())
+            if (_rotateDirection.magnitude > 0f)
             {
                 var lookAtRotation = Quaternion.LookRotation(_rotateDirection);
                 RotationTransform.localRotation = lookAtRotation;
@@ -268,7 +293,7 @@ public class PlayerController : MonoBehaviour
 
         GetComponent<CapsuleCollider>().excludeLayers = LayerMask.GetMask("Enemy");
         CharacterController.excludeLayers = LayerMask.GetMask("Enemy");
-        if (!PlayerAttack.AttackIsHeld) _playerAnimator.SetIsDashing(true);
+        if (!PlayerAttack.IsCharging) _playerAnimator.SetIsDashing(true);
 
         _dashParticleSystem.Play();
         float pitch = Random.Range(0.9f, 1.1f);
@@ -308,7 +333,7 @@ public class PlayerController : MonoBehaviour
     {
         _lastAttackTime = Time.time;
         if (!_applyAttackKnockback) return;
-        
+
         if (_knockbackCoroutine != null) StopCoroutine(_knockbackCoroutine);
         Vector3 knockbackDir = -RotationTransform.forward;
         _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(knockbackDir, knockbackAmount, _knockbackDuration));
@@ -332,14 +357,14 @@ public class PlayerController : MonoBehaviour
         _applyingKnockback = false;
         _knockbackCoroutine = null;
     }
-    
+
     private void OnDamageTaken(Vector3 knockbackDir, float knockbackAmount, float knockbackDuration)
     {
         if (knockbackAmount <= 0) return;
-        
+
         _playerAnimator.SetSpeed(0f);
         //todo: damage knockback animation
-        
+
         if (_knockbackCoroutine != null) StopCoroutine(_knockbackCoroutine);
         _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(knockbackDir, knockbackAmount, knockbackDuration));
     }

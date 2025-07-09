@@ -55,16 +55,26 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField]
     private AudioClip _critSFX;
 
-    public event Action<float> Attacked;
-    public bool AttackIsHeld { get; private set; }
+    public bool IsCharging => State == AttackState.Charging;
+    public bool IsAttacking => State == AttackState.Attacking;
     public event Action EnteredCritThreshold; // todo: could let enemies anticipate the player more
+    public event Action<float> Attacked;
 
-    private bool _isAttacking;
+    public enum AttackState
+    {
+        Idle,
+        Charging,
+        Attacking
+    }
+
+    public AttackState State { get; private set; }
+
     private float _attackHeldTime;
     private bool _enteredCritThreshold;
     private bool _exceededCritThreshold;
     private float _attackCooldownTime;
     private float _attackBufferTimer;
+    private Vector3 _bufferedRotateDir;
     private Color _originalIndicatorColor;
     private Coroutine _chargeIndicatorCoroutine;
 
@@ -82,6 +92,7 @@ public class PlayerAttack : MonoBehaviour
         _playerAnimator = GetComponentInChildren<PlayerAnimator>();
         _player = GetComponent<PlayerController>();
 
+        State = AttackState.Idle;
         _chargeMeter.maxValue = _critChargeTime + _critGraceTime;
         _critRange.maxValue = _chargeMeter.maxValue;
         _critRange.value = _critGraceTime;
@@ -93,80 +104,90 @@ public class PlayerAttack : MonoBehaviour
 
     private void Update()
     {
-        if (PauseScreen.Instance.gameObject.activeSelf) return;
+        if (PauseScreen.IsPaused) return;
 
-        CheckInput();
-        HandleChargeAttack();
-    }
+        HandleCharging();
+        HandleAttacking();
 
-    private IEnumerator ChargeIndicatorCoroutine()
-    {
-        yield return new WaitForSeconds(_chargeIndicatorDelay);
-
-        while (AttackIsHeld && !_enteredCritThreshold)
+        if (State != AttackState.Charging && _chargeMeterCanvasGroup.alpha != 0f)
         {
-            var newColor = Color.Lerp(indicatorMR.material.color, _chargedColor, _chargeIndicatorColorModifier * Time.deltaTime);
-            indicatorMR.material.color = newColor;
-            yield return null;
+            var newAlpha = _chargeMeterCanvasGroup.alpha - 0.5f * Time.deltaTime;
+            _chargeMeterCanvasGroup.alpha = Mathf.Clamp(newAlpha, 0f, 1);
+            _chargeMeter.value = 0f;
         }
     }
 
-    private void CheckInput()
+    private void HandleCharging()
     {
-        if (_inputManager.AttackWasPressed)
+        if (_inputManager.AttackHeld && !IsAttacking && !_sawBlade.isActiveAndEnabled)
+        {
+            if (!IsCharging)
+            {
+                State = AttackState.Charging;
+                if (_chargeIndicatorCoroutine != null) StopCoroutine(_chargeIndicatorCoroutine);
+                _chargeIndicatorCoroutine = StartCoroutine(ChargeIndicatorCoroutine());
+
+                _chargingAudio = AudioManager.Instance.PlaySound(transform, _chargingSFX, true, false, 0.7f);
+
+                if (_player.IsDashing) _playerAnimator.SetIsDashing(false);
+                _playerAnimator.SetReadyAttackTrigger();
+                Debug.Log($"StartCharge");
+            }
+            else
+            {
+                _attackHeldTime += Time.deltaTime;
+                _chargeMeter.value += Time.deltaTime;
+                _chargeMeterCanvasGroup.alpha = 1f;
+
+                if (!_enteredCritThreshold && WithinCritThreshold())
+                {
+                    OnEnteredCritThreshold();
+                }
+                else if (!_exceededCritThreshold && ExceededCritThreshold())
+                {
+                    _exceededCritThreshold = true;
+                    indicatorMR.material.color = _originalIndicatorColor;
+                }
+            }
+        }
+    }
+
+    private bool _bufferedNextAttackDirection;
+    private void HandleAttacking()
+    {
+        if (_inputManager.AttackWasPressed && !_bufferedNextAttackDirection)
+        {
+            _bufferedRotateDir = _player.GetRotateDirection();
+            _bufferedNextAttackDirection = true;
+        }
+
+        if (_inputManager.AttackWasReleased)
         {
             _attackBufferTimer = _attackBufferTime;
         }
 
         if (_attackBufferTimer > 0)
         {
-            if (_isAttacking) return;
-            if (_inputManager.AttackHeld)
+            if (!IsAttacking && !_player.IsDashing && !_sawBlade.isActiveAndEnabled && !_sawBlade.IsReturning)
             {
-                if (!AttackIsHeld)
-                {
-                    // If crit stalling and attack held, return SawBlade to player
-                    if (_sawBlade.isActiveAndEnabled && _sawBlade.IsLongRangeAttack)
-                    {
-                        _sawBlade.ReturnToPlayer();
-                        return;
-                    }
-
-                    if (!_sawBlade.isActiveAndEnabled)
-                    {
-                        AttackIsHeld = true;
-                        if (_chargeIndicatorCoroutine != null) StopCoroutine(_chargeIndicatorCoroutine);
-                        _chargeIndicatorCoroutine = StartCoroutine(ChargeIndicatorCoroutine());
-                        _chargingAudio = AudioManager.Instance.PlaySound(transform, _chargingSFX, true, false, 0.7f);
-
-                        if (_player.IsDashing) _playerAnimator.SetIsDashing(false);
-                        _playerAnimator.SetReadyAttackTrigger();
-                    }
-                }
-                else if (!_enteredCritThreshold && WithinCritThreshold())
-                {
-                    OnEnteredCritThreshold();
-                }
-            }
-
-            if (AttackIsHeld)
-            {
-                if (!_exceededCritThreshold && ExceededCritThreshold())
-                {
-                    _exceededCritThreshold = true;
-                    indicatorMR.material.color = _originalIndicatorColor;
-                }
-
-                if (_inputManager.AttackWasReleased && !_player.IsDashing)
-                {
-                    AttackIsHeld = false;
-                    StartCoroutine(Attack());
-                }
+                StartCoroutine(Attack());
             }
         }
         else
         {
             _attackBufferTimer -= Time.deltaTime;
+        }
+    }
+
+    private IEnumerator ChargeIndicatorCoroutine()
+    {
+        yield return new WaitForSeconds(_chargeIndicatorDelay);
+
+        while (IsCharging && !_enteredCritThreshold)
+        {
+            var newColor = Color.Lerp(indicatorMR.material.color, _chargedColor, _chargeIndicatorColorModifier * Time.deltaTime);
+            indicatorMR.material.color = newColor;
+            yield return null;
         }
     }
 
@@ -176,60 +197,49 @@ public class PlayerAttack : MonoBehaviour
         EnteredCritThreshold?.Invoke();
     }
 
-    private void HandleChargeAttack()
-    {
-        if (AttackIsHeld && !_isAttacking)
-        {
-            _attackHeldTime += Time.deltaTime;
-            _chargeMeter.value += Time.deltaTime;
-            _chargeMeterCanvasGroup.alpha = 1f;
-        }
-        else
-        {
-            var newAlpha = _chargeMeterCanvasGroup.alpha - 0.5f * Time.deltaTime;
-            _chargeMeterCanvasGroup.alpha = Mathf.Clamp(newAlpha, 0f, 1);
-            _chargeMeter.value = 0f;
-        }
-    }
-
     private IEnumerator Attack()
     {
+        Debug.Log($"StartATTACK");
+        _player.SetRotateDirection(_bufferedRotateDir);
         _attackBufferTimer = 0f;
-        _isAttacking = true;
+        _bufferedNextAttackDirection = false;
+        State = AttackState.Attacking;
 
         indicatorMR.material.color = _originalIndicatorColor;
-        _chargingAudio.Stop();
+        if (_chargingAudio) _chargingAudio.Stop();
         if (_player.IsDashing) _playerAnimator.SetIsDashing(false);
         _playerAnimator.SetAttackTrigger();
 
-        bool critAttack = false;
+        _isCritAttack = false;
         if (WithinCritThreshold())
         {
             _inputManager.Vibrate(0.4f, 1f, 0.2f);
             _critParticle.Play();
             AudioManager.Instance.PlaySound(transform, _critSFX, true, false, 2f, 1.2f);
-            critAttack = true;
+            _isCritAttack = true;
         }
         else
         {
             AudioManager.Instance.PlaySound(transform, _basicSFX, true, false, 1.5f, 0.9f);
         }
 
-        float _lastChargeAmount = _chargeMeter.value / _chargeMeter.maxValue;
-        _sawBlade.OnAttack(_lastChargeAmount, critAttack);
-
-        _sawBlade.transform.parent = null;
-        _sawBlade.transform.position = _sawBladeSpawnPoint.position;
-        _sawBlade.transform.rotation = _sawBladeSpawnPoint.rotation;
-        _sawBlade.gameObject.SetActive(true);
+        _lastChargeAmount = _chargeMeter.value / _chargeMeter.maxValue;
 
         _attackHeldTime = 0f;
         _enteredCritThreshold = false;
         _exceededCritThreshold = false;
-        Attacked?.Invoke(critAttack ? _playerCritKnockbackAmount : _playerBasicKnockbackAmount);
+        Attacked?.Invoke(_isCritAttack ? _playerCritKnockbackAmount : _playerBasicKnockbackAmount);
 
         yield return new WaitForSeconds(_attackRate);
-        _isAttacking = false;
+        State = AttackState.Idle;
+    }
+
+    private bool _isCritAttack;
+    private float _lastChargeAmount;
+
+    public void ThrowSawBlade()
+    {
+        _sawBlade.OnAttack(_sawBladeSpawnPoint, _lastChargeAmount, _isCritAttack);
     }
 
     private bool WithinCritThreshold()
@@ -250,7 +260,8 @@ public class PlayerAttack : MonoBehaviour
     public void OnDied()
     {
         enabled = false;
-        AttackIsHeld = false;
+        // IsCharging = false;
+        State = AttackState.Idle;
         _attackBufferTimer = 0f;
         _chargeMeterCanvasGroup.alpha = 0f;
         _chargeMeter.value = 0f;

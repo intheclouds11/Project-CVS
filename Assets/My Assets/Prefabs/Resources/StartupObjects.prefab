@@ -1254,7 +1254,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MovementDeadzone: 0.1
   AimActiveThreshold: 0.75
-  AimReleaseThreshold: 0.7
+  AimReleaseThreshold: 0.749
 --- !u!114 &748137451264701366
 MonoBehaviour:
   m_ObjectHideFlags: 0

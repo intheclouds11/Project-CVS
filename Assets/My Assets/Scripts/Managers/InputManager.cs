@@ -21,6 +21,7 @@ public class InputManager : MonoBehaviour
 
     public bool AttackWasPressed { get; private set; }
     public bool AttackHeld { get; private set; }
+    public bool PrevAttackHeld { get; private set; }
     public bool AttackWasReleased { get; private set; }
     public bool CritSpecialWasPressed { get; private set; }
     public bool ActivateAbilityWasPressed { get; private set; }
@@ -33,7 +34,7 @@ public class InputManager : MonoBehaviour
     public bool ActivateExpressionDownWasPressed { get; private set; }
     public bool ActivateExpressionLeftWasPressed { get; private set; }
     public bool ActivateExpressionRightWasPressed { get; private set; }
-    
+
     // Dev tools
     public bool ToggleChargeHUDWasPressed { get; private set; }
     public bool ToggleGodModeWasPressed { get; private set; }
@@ -76,10 +77,10 @@ public class InputManager : MonoBehaviour
         if (UsingGamepad)
         {
             // Device specific
-            AttackWasPressed = _inputs.Player.Direction.ReadValue<Vector2>().magnitude >= AimActiveThreshold;
-            AttackHeld = AttackWasPressed;
-            AttackWasReleased = _inputs.Player.Direction.ReadValue<Vector2>().magnitude <= AimReleaseThreshold;
             Direction = _inputs.Player.Direction.ReadValue<Vector2>();
+            AttackHeld = Direction.magnitude >= AimActiveThreshold;
+            AttackWasPressed = !PrevAttackHeld && AttackHeld;
+            AttackWasReleased = PrevAttackHeld && Direction.magnitude <= AimReleaseThreshold;
             RespawnWasPressed = InteractWasPressed;
         }
         else
@@ -87,9 +88,11 @@ public class InputManager : MonoBehaviour
             // Device specific
             AttackWasPressed = _inputs.Player.Attack.WasPerformedThisFrame();
             AttackHeld = _inputs.Player.Attack.IsPressed();
-            AttackWasReleased = !_inputs.Player.Attack.IsPressed();
+            AttackWasReleased = _inputs.Player.Attack.WasReleasedThisFrame();
             RespawnWasPressed = DashWasPressed || InteractWasPressed || AttackWasPressed;
         }
+
+        PrevAttackHeld = AttackHeld;
 
         if (Debug.isDebugBuild)
         {
@@ -115,7 +118,7 @@ public class InputManager : MonoBehaviour
     {
         var gamepad = Gamepad.current;
         if (gamepad == null) return;
-        
+
         if (_vibrateCoroutine != null) StopCoroutine(_vibrateCoroutine);
         _vibrateCoroutine = StartCoroutine(VibrateCoroutine(gamepad, lowFreq, highFreq, duration));
     }

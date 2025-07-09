@@ -19,4 +19,9 @@ public class PlayerAnimator : MonoBehaviour
     public void ResetAttackTrigger() => _animator.ResetTrigger("Attack");
     public void SetDiedTrigger() => _animator.SetTrigger("Died");
     public void SetIsDashing(bool dashing) => _animator.SetBool("IsDashing", dashing);
+
+    public void ThrowSawBlade()
+    {
+        GameManager.Instance.Player1.PlayerAttack.ThrowSawBlade();
+    }
 }
