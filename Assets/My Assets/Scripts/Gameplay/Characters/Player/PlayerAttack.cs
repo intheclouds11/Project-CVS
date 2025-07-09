@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class PlayerAttack : MonoBehaviour
 {
@@ -242,7 +243,8 @@ public class PlayerAttack : MonoBehaviour
         }
         else
         {
-            AudioManager.Instance.PlaySound(transform, _basicSFX, true, false, 1.5f, 0.9f);
+            var pitch = Random.Range(0.8f, 0.9f);
+            AudioManager.Instance.PlaySound(transform, _basicSFX, true, false, 1.5f, pitch);
         }
 
         _lastChargeAmount = _chargeMeter.value / _chargeMeter.maxValue;

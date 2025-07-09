@@ -45,7 +45,7 @@ public class Pulser : BaseEnemy
 
             if (_patrolAudio) _patrolAudio.Stop();
             _patrolAudio = null;
-            _agroAudio = AudioManager.Instance.PlaySound(transform, _agroSFX, true, true, 1f, _agroPitch);
+            _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
         }
         else if (_distToPlayer <= _pulseTriggerDistance && Time.time >= _lastPulseCompleteTime + _pulseCooldownDuration)
         {
@@ -75,7 +75,7 @@ public class Pulser : BaseEnemy
             {
                 _pulseVFX.SetActive(false);
                 _abilityStartAudio.Stop();
-                _agroAudio = AudioManager.Instance.PlaySound(transform, _agroSFX, true, true, 1f, _agroPitch);
+                _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
                 _isPulsing = false;
                 _lastPulseCompleteTime = Time.time;
                 yield break;
@@ -91,7 +91,7 @@ public class Pulser : BaseEnemy
             yield return null;
         }
 
-        _agroAudio = AudioManager.Instance.PlaySound(transform, _agroSFX, true, true, 1f, _agroPitch);
+        _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
 
         _aiFollower.canMove = true;
         _isPulsing = false;

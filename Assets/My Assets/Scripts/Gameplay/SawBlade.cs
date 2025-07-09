@@ -17,6 +17,7 @@ public class Knockback
     [SerializeField]
     public float StunDuration = 0.25f;
 }
+
 public class SawBlade : MonoBehaviour
 {
     [Header("Damage")]
@@ -26,7 +27,7 @@ public class SawBlade : MonoBehaviour
     private int _baseDamage = 70;
     [SerializeField]
     private int _critDamage = 120;
-    
+
     [Header("Movement")]
     [SerializeField]
     private float _shortRangeImpulse = 1f;
@@ -53,9 +54,11 @@ public class SawBlade : MonoBehaviour
     [SerializeField]
     private AudioClip _returnedSFX;
     [SerializeField]
-    private float _returnedSFXVolume;
+    private float _returnedSFXVolume = 0.55f;
     [SerializeField]
     private AudioClip _impactSFX;
+    [SerializeField]
+    private float _impactSFXVolume = 0.45f;
     [SerializeField]
     private GameObject _impactVfx;
 
@@ -139,7 +142,9 @@ public class SawBlade : MonoBehaviour
     private void PlayLoopAudio()
     {
         if (_loopAudio) _loopAudio.Stop();
-        _loopAudio = AudioManager.Instance.PlaySound(transform, _bladeSpinLoopSFX, true, true, 0.7f);
+        var pitch = IsCritAttack ? 1.05f : 1f;
+        var volume = IsCritAttack ? 0.7f : 0.6f;
+        _loopAudio = AudioManager.Instance.PlaySound(transform, _bladeSpinLoopSFX, true, true, volume, pitch);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -167,16 +172,16 @@ public class SawBlade : MonoBehaviour
                 HitEnemy?.Invoke(IsCritAttack);
             }
 
-            ReturnToPlayer();
-            PlayEffects();
+            OnAfterHit();
         }
     }
 
     private void OnReturnedToPlayer()
     {
-        if (IsCritAttack)
+        if (IsLongRangeAttack)
         {
-            AudioManager.Instance.PlaySound(transform, _returnedSFX, true, false, _returnedSFXVolume);
+            var pitch = IsCritAttack ? 1.25f : 1f;
+            AudioManager.Instance.PlaySound(transform, _returnedSFX, true, false, _returnedSFXVolume, pitch);
         }
 
         ResetToDefaultState();
@@ -194,11 +199,13 @@ public class SawBlade : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    private void PlayEffects()
+    private void OnAfterHit()
     {
-        Instantiate(_impactVfx, transform.position, Quaternion.LookRotation(-transform.forward));
+        ReturnToPlayer();
 
-        AudioManager.Instance.PlaySound(transform, _impactSFX, true, false, 0.4f);
+        Instantiate(_impactVfx, transform.position, Quaternion.LookRotation(-transform.forward));
+        var pitch = IsCritAttack ? 1.15f : Random.Range(0.9f, 1.05f);
+        AudioManager.Instance.PlaySound(transform, _impactSFX, true, false, _impactSFXVolume, pitch);
     }
 
     public void OnAttack(Transform spawnPoint, float chargeAmount, bool crit)

@@ -51,7 +51,7 @@ public class Dasher : BaseEnemy
 
             if (_patrolAudio) _patrolAudio.Stop();
             _patrolAudio = null;
-            _agroAudio = AudioManager.Instance.PlaySound(transform, _agroSFX, true, true, 1f, _agroPitch);
+            _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
         }
         else if (_distToPlayer <= _dashTriggerDistance && Time.time >= _lastDashCompleteTime + _dashCooldownDuration)
         {
@@ -116,7 +116,7 @@ public class Dasher : BaseEnemy
                 {
                     _dashingAudio.Stop();
                     _abilityStartAudio.Stop();
-                    _agroAudio = AudioManager.Instance.PlaySound(transform, _agroSFX, true, true, 1f, _agroPitch);
+                    _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
                     _isDashing = false;
                     _lastDashCompleteTime = Time.time;
                     yield break;
@@ -134,7 +134,7 @@ public class Dasher : BaseEnemy
         }
 
         yield return new WaitForSeconds(_dashDelayDuration * 0.75f);
-        _agroAudio = AudioManager.Instance.PlaySound(transform, _agroSFX, true, true, 1f, _agroPitch);
+        _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
         _aiFollower.canMove = true;
         _isDashing = false;
         _lastDashCompleteTime = Time.time;
