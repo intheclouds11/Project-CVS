@@ -22,8 +22,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float _attackMoveSpeedCooldown = 0.1f;
     [SerializeField]
-    private bool _applyAttackKnockback = true;
-    [SerializeField]
     private float _knockbackDuration = 0.4f;
     [SerializeField]
     private AnimationCurve _knockBackCurve;
@@ -328,45 +326,45 @@ public class PlayerController : MonoBehaviour
         IsDashing = false;
     }
 
-    private void OnPlayerAttack(float knockbackAmount)
+    private void OnPlayerAttack(Knockback attackKnockback)
     {
         _lastAttackTime = Time.time;
-        if (!_applyAttackKnockback) return;
+        if (!attackKnockback.ApplyKnockback) return;
 
         if (_knockbackCoroutine != null) StopCoroutine(_knockbackCoroutine);
         Vector3 knockbackDir = -RotationTransform.forward;
-        _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(knockbackDir, knockbackAmount, _knockbackDuration));
+        _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(knockbackDir, attackKnockback));
     }
 
-    private IEnumerator KnockbackCoroutine(Vector3 dir, float knockbackAmount, float knockbackDuration)
+    private IEnumerator KnockbackCoroutine(Vector3 dir, Knockback knockback)
     {
         // Debug.Log($"Start Knockback. Amount: {knockbackAmount}, Dir: {dir}, Duration: {knockbackDuration}");
         _applyingKnockback = true;
-
-        while (_knockbackTimeElapsed < knockbackDuration && Health.IsAlive())
+    
+        while (_knockbackTimeElapsed < knockback.KnockbackDuration && Health.IsAlive())
         {
-            var t = _knockbackTimeElapsed / knockbackDuration;
+            var t = _knockbackTimeElapsed / knockback.KnockbackDuration;
             var curveValue = _knockBackCurve.Evaluate(t);
-            var move = dir * (curveValue * knockbackAmount * Time.deltaTime);
+            var move = dir * (curveValue * knockback.KnockbackAmount * Time.deltaTime);
             CharacterController.Move(move);
             _knockbackTimeElapsed += Time.deltaTime;
             yield return null;
         }
-
+    
         _knockbackTimeElapsed = 0f;
         _applyingKnockback = false;
         _knockbackCoroutine = null;
     }
 
-    private void OnDamageTaken(Vector3 knockbackDir, float knockbackAmount, float knockbackDuration)
+    private void OnDamageTaken(Vector3 knockbackDir, Knockback damagedKnockback)
     {
-        if (knockbackAmount <= 0) return;
+        if (damagedKnockback.KnockbackAmount <= 0) return;
 
         _playerAnimator.SetSpeed(0f);
         //todo: damage knockback animation
 
         if (_knockbackCoroutine != null) StopCoroutine(_knockbackCoroutine);
-        _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(knockbackDir, knockbackAmount, knockbackDuration));
+        _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(knockbackDir, damagedKnockback));
     }
 
     private void OnDied(GameObject deadObj)

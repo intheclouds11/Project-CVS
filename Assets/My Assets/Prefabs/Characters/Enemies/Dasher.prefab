@@ -51,8 +51,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6f6b3bdce688a04fbbdf8612d2c5eef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _knockback:
+    ApplyKnockback: 1
+    KnockbackAmount: 10
+    KnockbackDuration: 0.25
+    StunDuration: 0.25
   _agroRange: 7
   _agroSpeed: 4
+  _attackCooldownDuration: 0.25
   _patrolSpeed: 1
   _patrolSFX: {fileID: 8300000, guid: 8ba6493c6bbf4374cbee78f819a4a9d1, type: 3}
   _agroSFX: {fileID: 8300000, guid: 9f7aa5ccf137dd040a14777f4acd51a1, type: 3}
@@ -80,16 +86,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _currentHealth: 0
   _maxHealth: 100
-  _damageKnockbackAmount: 0
-  _damageKnockbackDuration: 1
-  _damageInvincibilityDuration: 0
   _damagedSFX: {fileID: 0}
-  _damagedVignetteIntensity: 0.7
-  _damagedSaturation: -40
   _damagedSFXVolume: 0.8
   _recoverHealthSFX: {fileID: 0}
   _diedSFX: {fileID: 8300000, guid: 3152b2c46126d324ca368dd04f75bebc, type: 3}
   _diedSFXVolume: 0.9
+  _diedSFXPitch: 1
   _diedVFX: {fileID: 9049631545069152736, guid: e2d4687b86076744fbdd2aa6777e932f, type: 3}
 --- !u!95 &1714698826164707562
 Animator:

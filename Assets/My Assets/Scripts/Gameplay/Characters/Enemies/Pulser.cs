@@ -34,7 +34,7 @@ public class Pulser : BaseEnemy
     {
         _distToPlayer = Vector3.Distance(transform.position, _player.transform.position);
 
-        if (_isPulsing || !_player.Health.IsAlive()) return;
+        if (_applyingDamagedKnockback || _isPulsing || !_player.Health.IsAlive()) return;
 
         if (!_destinationSetter.target && _distToPlayer <= _agroRange)
         {
@@ -66,15 +66,26 @@ public class Pulser : BaseEnemy
         _abilityStartAudio = AudioManager.Instance.PlaySound(transform, _abilityStartSFX, true, false, 0.7f);
 
         yield return new WaitForSeconds(_pulseDelayDuration);
-
+        
         var startTime = Time.time;
 
         while (startTime + _pulseDuration >= Time.time)
         {
+            if (_applyingDamagedKnockback)
+            {
+                _pulseVFX.SetActive(false);
+                _abilityStartAudio.Stop();
+                _agroAudio = AudioManager.Instance.PlaySound(transform, _agroSFX, true, true, 1f, _agroPitch);
+                _isPulsing = false;
+                _lastPulseCompleteTime = Time.time;
+                yield break;
+            }
+            
             if (!_player.IsDashing && _distToPlayer <= _pulseDamageRadius)
             {
                 var knockBackDir = (_player.transform.position - transform.position).normalized;
-                _player.Health.TakeDamage(1, knockBackDir);
+                _player.Health.TakeDamage(1, knockBackDir, _knockback);
+                StartCoroutine(DamagedPlayerCoroutine());
             }
 
             yield return null;
@@ -95,7 +106,8 @@ public class Pulser : BaseEnemy
             if (playerHit)
             {
                 var knockBackDir = (playerHit.transform.position - transform.position).normalized;
-                playerHit.Health.TakeDamage(1, knockBackDir);
+                playerHit.Health.TakeDamage(1, knockBackDir, _knockback);
+                StartCoroutine(DamagedPlayerCoroutine());
             }
         }
     }

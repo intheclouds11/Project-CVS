@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Linq;
 using Pathfinding;
 using UnityEngine;
@@ -9,10 +10,14 @@ public abstract class BaseEnemy : MonoBehaviour
 {
     [Header("Base Movement")]
     [SerializeField]
+    protected Knockback _knockback;
+    [SerializeField]
     protected float _agroRange = 5f;
     [FormerlySerializedAs("_moveSpeed")]
     [SerializeField]
     protected float _agroSpeed = 3.5f;
+    [SerializeField]
+    protected float _attackCooldownDuration = 0.25f;
     [SerializeField]
     protected float _patrolSpeed = 1f;
 
@@ -26,6 +31,8 @@ public abstract class BaseEnemy : MonoBehaviour
 
     public Health Health { get; protected set; }
 
+    protected bool _applyingDamagedKnockback;
+    protected Coroutine _knockbackCoroutine;
     protected float _distToPlayer;
     protected float _agroPitch;
     protected AudioSource _patrolAudio;
@@ -44,6 +51,7 @@ public abstract class BaseEnemy : MonoBehaviour
         _player = GameManager.Instance?.Player1;
         Health = GetComponent<Health>();
         Health.Died += OnDied;
+        Health.DamageTaken += OnDamageTaken;
         _animator = GetComponent<Animator>();
         _collider = GetComponent<CapsuleCollider>();
         _aiFollower = GetComponent<FollowerEntity>();
@@ -64,6 +72,43 @@ public abstract class BaseEnemy : MonoBehaviour
         }
 
         _agroPitch = Random.Range(0.9f, 1.1f);
+    }
+
+    private void OnDamageTaken(Vector3 knockbackDir, Knockback knockback)
+    {
+        if (!knockback.ApplyKnockback || knockback.KnockbackAmount <= 0) return;
+        
+        if (_knockbackCoroutine != null) StopCoroutine(_knockbackCoroutine);
+        _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(knockbackDir, knockback));
+    }
+    
+    private IEnumerator KnockbackCoroutine(Vector3 dir, Knockback knockback)
+    {
+        _aiFollower.canMove = false;
+        _applyingDamagedKnockback = true;
+        var startTime = Time.time;
+
+        while (Time.time < startTime + knockback.KnockbackDuration && Health.IsAlive())
+        {
+            var targetPos = transform.position + dir * knockback.KnockbackAmount;
+            transform.position = Vector3.Lerp(transform.position, targetPos, 5 * Time.deltaTime);
+            yield return null;
+        }
+        
+        yield return new WaitForSeconds(knockback.StunDuration);
+        
+        _aiFollower.canMove = true;
+        _applyingDamagedKnockback = false;
+        _knockbackCoroutine = null;
+    }
+    
+    protected IEnumerator DamagedPlayerCoroutine()
+    {
+        _aiFollower.canMove = false;
+
+        yield return new WaitForSeconds(_attackCooldownDuration);
+        
+        _aiFollower.canMove = true;
     }
 
     protected void OnEnable()

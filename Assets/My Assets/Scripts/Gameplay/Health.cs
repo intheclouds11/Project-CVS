@@ -13,10 +13,6 @@ public class Health : MonoBehaviour
     protected int _currentHealth;
     [SerializeField]
     protected int _maxHealth;
-    [SerializeField]
-    protected float _damageKnockbackAmount;
-    [SerializeField]
-    protected float _damageKnockbackDuration = 1f;
     
     [Header("FX")]
     [SerializeField]
@@ -42,8 +38,7 @@ public class Health : MonoBehaviour
         protected set => _currentHealth = value;
     }
 
-    /// Vector3: knockbackDir, float: _damageKnockbackAmount, float: _damageKnockbackDuration
-    public event Action<Vector3, float, float> DamageTaken;
+    public event Action<Vector3, Knockback> DamageTaken;
     public event Action<GameObject> Died;
 
 
@@ -57,7 +52,7 @@ public class Health : MonoBehaviour
         return CurrentHealth > 0;
     }
 
-    public virtual void TakeDamage(int damage, Vector3 knockbackDir)
+    public virtual void TakeDamage(int damage, Vector3 knockbackDir, Knockback knockback)
     {
         if (GameManager.Instance.CurrentState is GameManager.GameState.Victory
             or GameManager.GameState.AwaitingWave or GameManager.GameState.GameOver) return;
@@ -67,7 +62,7 @@ public class Health : MonoBehaviour
 
         if (CurrentHealth > 0)
         {
-            OnDamaged(knockbackDir);
+            OnDamaged(knockbackDir, knockback);
         }
         else
         {
@@ -75,7 +70,7 @@ public class Health : MonoBehaviour
         }
     }
 
-    protected virtual void OnDamaged(Vector3 knockbackDir)
+    protected virtual void OnDamaged(Vector3 knockbackDir, Knockback knockback)
     {
         if (_damagedSFX)
         {
@@ -83,7 +78,7 @@ public class Health : MonoBehaviour
             AudioManager.Instance.PlaySound(transform, _damagedSFX, true, false, _damagedSFXVolume, pitch);
         }
 
-        DamageTaken?.Invoke(knockbackDir, _damageKnockbackAmount, _damageKnockbackDuration);
+        DamageTaken?.Invoke(knockbackDir, knockback);
     }
 
     protected virtual void OnDied()

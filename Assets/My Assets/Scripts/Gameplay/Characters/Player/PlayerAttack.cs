@@ -13,6 +13,8 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField]
     private float _attackRate = 0.3f;
     [SerializeField]
+    private Knockback _attackKnockback;
+    [SerializeField]
     private float _playerBasicKnockbackAmount = 2.5f;
     [SerializeField]
     private float _playerCritKnockbackAmount = 5f;
@@ -58,7 +60,7 @@ public class PlayerAttack : MonoBehaviour
     public bool IsCharging => State == AttackState.Charging;
     public bool IsAttacking => State == AttackState.Attacking;
     public event Action EnteredCritThreshold; // todo: could let enemies anticipate the player more
-    public event Action<float> Attacked;
+    public event Action<Knockback> Attacked;
 
     public enum AttackState
     {
@@ -244,7 +246,8 @@ public class PlayerAttack : MonoBehaviour
         }
 
         _lastChargeAmount = _chargeMeter.value / _chargeMeter.maxValue;
-        Attacked?.Invoke(_wasCritAttack ? _playerCritKnockbackAmount : _playerBasicKnockbackAmount);
+        _attackKnockback.KnockbackAmount = _wasCritAttack ? _playerCritKnockbackAmount : _playerBasicKnockbackAmount;
+        Attacked?.Invoke(_attackKnockback);
 
         yield return new WaitForSeconds(_attackRate);
 

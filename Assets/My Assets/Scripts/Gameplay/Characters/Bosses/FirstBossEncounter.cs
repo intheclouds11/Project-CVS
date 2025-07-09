@@ -19,6 +19,8 @@ public class FirstBossEncounter : MonoBehaviour
     [SerializeField]
     private int _AOEDamage = 1;
     [SerializeField]
+    private Knockback _AOEKnockback;
+    [SerializeField]
     private float _AOEDuration = 3f;
     [SerializeField]
     private float _AOEDamageRadius = 5f;
@@ -97,7 +99,7 @@ public class FirstBossEncounter : MonoBehaviour
             if (!_player.IsDashing && _distToPlayer <= _AOEDamageRadius)
             {
                 var knockBackDir = (_player.transform.position - transform.position).normalized;
-                _player.Health.TakeDamage(1, knockBackDir);
+                _player.Health.TakeDamage(1, knockBackDir, _AOEKnockback);
             }
 
             if (Time.time >= _lastImpulseTime + _AOEImpulseRate)

@@ -5,12 +5,29 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
+[Serializable]
+public class Knockback
+{
+    [SerializeField]
+    public bool ApplyKnockback = true;
+    [SerializeField]
+    public float KnockbackAmount = 1f;
+    [SerializeField]
+    public float KnockbackDuration = 0.25f;
+    [SerializeField]
+    public float StunDuration = 0.25f;
+}
 public class SawBlade : MonoBehaviour
 {
+    [Header("Damage")]
+    [SerializeField]
+    private Knockback _knockback;
     [SerializeField]
     private int _baseDamage = 70;
     [SerializeField]
     private int _critDamage = 120;
+    
+    [Header("Movement")]
     [SerializeField]
     private float _shortRangeImpulse = 1f;
     [SerializeField]
@@ -144,8 +161,9 @@ public class SawBlade : MonoBehaviour
                     _player.Health.RecoverHP(1);
                 }
 
-                var knockbackDir = enemyHit.transform.position - transform.position;
-                enemyHit.Health.TakeDamage(_finalDamage, knockbackDir);
+                var knockbackDir = _player.RotationTransform.forward;
+                knockbackDir.y = 0f;
+                enemyHit.Health.TakeDamage(_finalDamage, knockbackDir, _knockback);
                 HitEnemy?.Invoke(IsCritAttack);
             }
 

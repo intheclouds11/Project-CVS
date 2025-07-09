@@ -578,6 +578,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3d4dd07ae22f5f4a82d813421604f6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _knockback:
+    ApplyKnockback: 1
+    KnockbackAmount: 1
+    KnockbackDuration: 0.25
+    StunDuration: 0.25
   _baseDamage: 70
   _critDamage: 120
   _shortRangeImpulse: 1

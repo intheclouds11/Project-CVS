@@ -51,8 +51,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 732158abaa621da4882fadb6a32fe502, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _knockback:
+    ApplyKnockback: 1
+    KnockbackAmount: 10
+    KnockbackDuration: 0.25
+    StunDuration: 0.25
   _agroRange: 5
   _agroSpeed: 6.5
+  _attackCooldownDuration: 0.25
   _patrolSpeed: 1
   _patrolSFX: {fileID: 8300000, guid: 8ba6493c6bbf4374cbee78f819a4a9d1, type: 3}
   _agroSFX: {fileID: 8300000, guid: 9f7aa5ccf137dd040a14777f4acd51a1, type: 3}
@@ -77,8 +83,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _currentHealth: 0
   _maxHealth: 100
-  _damageKnockbackAmount: 0
-  _damageKnockbackDuration: 1
   _damagedSFX: {fileID: 0}
   _damagedSFXVolume: 0.8
   _recoverHealthSFX: {fileID: 0}

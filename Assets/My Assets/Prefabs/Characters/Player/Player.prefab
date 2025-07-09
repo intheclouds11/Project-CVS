@@ -5675,7 +5675,6 @@ MonoBehaviour:
   _maxFallSpeed: 9.81
   _attackMoveSpeedMultiplier: 0.5
   _attackMoveSpeedCooldown: 0.1
-  _applyAttackKnockback: 1
   _knockbackDuration: 0.4
   _knockBackCurve:
     serializedVersion: 2
@@ -5757,8 +5756,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _attackBufferTime: 0.1
   _attackRate: 0.4
+  _attackKnockback:
+    ApplyKnockback: 1
+    KnockbackAmount: 1
+    KnockbackDuration: 0.2
+    StunDuration: 0.25
   _playerBasicKnockbackAmount: -1.5
-  _playerCritKnockbackAmount: -3.5
+  _playerCritKnockbackAmount: -5
   _critChargeTime: 0.4
   _critGraceTime: 0.1
   _sawBlade: {fileID: 5854928001078484491}
@@ -5789,8 +5793,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _currentHealth: 0
   _maxHealth: 2
-  _damageKnockbackAmount: 20
-  _damageKnockbackDuration: 0.2
   _damagedSFX: {fileID: 8300000, guid: b600853e0320c9e4fb7f3c839b603c56, type: 3}
   _damagedSFXVolume: 0.8
   _recoverHealthSFX: {fileID: 8300000, guid: 9a4f2950b30176443afcc3f35a409d6c, type: 3}
@@ -9017,6 +9019,14 @@ PrefabInstance:
     - target: {fileID: 3904565489924947698, guid: 8ed770000db2d6c4e9ab175ff2f907b6, type: 3}
       propertyPath: m_Name
       value: SawBlade
+      objectReference: {fileID: 0}
+    - target: {fileID: 4218975809039462647, guid: 8ed770000db2d6c4e9ab175ff2f907b6, type: 3}
+      propertyPath: _knockback.ApplyKnockback
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4218975809039462647, guid: 8ed770000db2d6c4e9ab175ff2f907b6, type: 3}
+      propertyPath: _knockback.KnockbackAmount
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

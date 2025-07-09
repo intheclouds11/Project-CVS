@@ -39,8 +39,8 @@ public class Dasher : BaseEnemy
     private void Update()
     {
         _distToPlayer = Vector3.Distance(transform.position, _player.transform.position);
-
-        if (_isDashing || !_player.Health.IsAlive()) return;
+        
+        if (_applyingDamagedKnockback || _isDashing || !_player.Health.IsAlive()) return;
 
         if (!_destinationSetter.target && _distToPlayer <= _agroRange)
         {
@@ -75,7 +75,7 @@ public class Dasher : BaseEnemy
             var overlapCount = Physics.OverlapCapsuleNonAlloc(p1, p2, _aiFollower.radius * 1.2f, _overlapColliders, _blockedLayers);
             if (overlapCount > 0)
             {
-                Debug.Log("Enemy overlapping other collider(s)");
+                // Debug.Log("Enemy overlapping other collider(s)");
                 hitObj = _overlapColliders[0].gameObject;
                 return false;
             }
@@ -112,6 +112,16 @@ public class Dasher : BaseEnemy
 
             while (startTime + _dashDuration >= Time.time)
             {
+                if (_applyingDamagedKnockback)
+                {
+                    _dashingAudio.Stop();
+                    _abilityStartAudio.Stop();
+                    _agroAudio = AudioManager.Instance.PlaySound(transform, _agroSFX, true, true, 1f, _agroPitch);
+                    _isDashing = false;
+                    _lastDashCompleteTime = Time.time;
+                    yield break;
+                }
+                
                 if (!blocked)
                 {
                     transform.position = Vector3.Lerp(transform.position, targetPos, _dashSpeed * Time.deltaTime);
@@ -138,7 +148,8 @@ public class Dasher : BaseEnemy
             if (playerHit)
             {
                 var knockBackDir = (playerHit.transform.position - transform.position).normalized;
-                playerHit.Health.TakeDamage(1, knockBackDir);
+                playerHit.Health.TakeDamage(1, knockBackDir, _knockback);
+                StartCoroutine(DamagedPlayerCoroutine());
             }
         }
     }

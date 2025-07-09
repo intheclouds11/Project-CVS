@@ -54,7 +54,7 @@ public class PlayerHealth : Health
         _globalVolume.profile.TryGet(out _colorAdjustments);
     }
 
-    public override void TakeDamage(int damage, Vector3 knockbackDir)
+    public override void TakeDamage(int damage, Vector3 knockbackDir, Knockback knockback)
     {
         if (GameManager.Instance.CurrentState is GameManager.GameState.Victory
             or GameManager.GameState.AwaitingWave or GameManager.GameState.GameOver) return;
@@ -68,7 +68,7 @@ public class PlayerHealth : Health
 
         if (CurrentHealth > 0)
         {
-            OnDamaged(knockbackDir);
+            OnDamaged(knockbackDir, knockback);
         }
         else
         {
@@ -78,9 +78,9 @@ public class PlayerHealth : Health
         _lastDamageTime = Time.time;
     }
 
-    protected override void OnDamaged(Vector3 knockbackDir)
+    protected override void OnDamaged(Vector3 knockbackDir, Knockback knockback)
     {
-        base.OnDamaged(knockbackDir);
+        base.OnDamaged(knockbackDir, knockback);
         _vignette.intensity.value = _damagedVignetteIntensity;
         _colorAdjustments.saturation.value = _damagedSaturation;
     }
