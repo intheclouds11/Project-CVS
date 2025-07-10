@@ -9,6 +9,10 @@ public class Dasher : BaseEnemy
 {
     [Header("Dash")]
     [SerializeField]
+    protected int _dashDamage = 2;
+    [SerializeField]
+    private bool _isInterruptable = true;
+    [SerializeField]
     private float _dashTriggerDistance = 2.5f;
     [SerializeField]
     private float _dashSpeed = 6f;
@@ -40,7 +44,7 @@ public class Dasher : BaseEnemy
     {
         _distToPlayer = Vector3.Distance(transform.position, _player.transform.position);
         
-        if (_applyingDamagedKnockback || _isDashing || !_player.Health.IsAlive()) return;
+        if (_isDashing || !_player.Health.IsAlive()) return;
 
         if (!_destinationSetter.target && _distToPlayer <= _agroRange)
         {
@@ -112,7 +116,7 @@ public class Dasher : BaseEnemy
 
             while (startTime + _dashDuration >= Time.time)
             {
-                if (_applyingDamagedKnockback)
+                if (_isInterruptable && _isGettingKnockedBack)
                 {
                     _dashingAudio.Stop();
                     _abilityStartAudio.Stop();
@@ -148,7 +152,8 @@ public class Dasher : BaseEnemy
             if (playerHit)
             {
                 var knockBackDir = (playerHit.transform.position - transform.position).normalized;
-                playerHit.Health.TakeDamage(1, knockBackDir, _knockback);
+                var damage = _isDashing ? _dashDamage : _baseDamage;
+                playerHit.Health.TakeDamage(damage, knockBackDir, _knockback);
                 StartCoroutine(DamagedPlayerCoroutine());
             }
         }

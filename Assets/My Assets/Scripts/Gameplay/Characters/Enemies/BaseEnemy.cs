@@ -10,8 +10,6 @@ public abstract class BaseEnemy : MonoBehaviour
 {
     [Header("Base Movement")]
     [SerializeField]
-    protected Knockback _knockback;
-    [SerializeField]
     protected float _agroRange = 5f;
     [FormerlySerializedAs("_moveSpeed")]
     [SerializeField]
@@ -20,6 +18,12 @@ public abstract class BaseEnemy : MonoBehaviour
     protected float _attackCooldownDuration = 0.25f;
     [SerializeField]
     protected float _patrolSpeed = 1f;
+    
+    [Header("Base Offense")]
+    [SerializeField]
+    protected int _baseDamage = 1;
+    [SerializeField]
+    protected Knockback _knockback;
 
     [Header("Base FX")]
     [SerializeField]
@@ -31,7 +35,7 @@ public abstract class BaseEnemy : MonoBehaviour
 
     public Health Health { get; protected set; }
 
-    protected bool _applyingDamagedKnockback;
+    protected bool _isGettingKnockedBack;
     protected Coroutine _knockbackCoroutine;
     protected float _distToPlayer;
     protected float _agroPitch;
@@ -85,7 +89,7 @@ public abstract class BaseEnemy : MonoBehaviour
     private IEnumerator KnockbackCoroutine(Vector3 dir, Knockback knockback)
     {
         _aiFollower.canMove = false;
-        _applyingDamagedKnockback = true;
+        _isGettingKnockedBack = true;
         var startTime = Time.time;
 
         while (Time.time < startTime + knockback.KnockbackDuration && Health.IsAlive())
@@ -98,7 +102,7 @@ public abstract class BaseEnemy : MonoBehaviour
         yield return new WaitForSeconds(knockback.StunDuration);
         
         _aiFollower.canMove = true;
-        _applyingDamagedKnockback = false;
+        _isGettingKnockedBack = false;
         _knockbackCoroutine = null;
     }
     
