@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac84f57ed65b3a74ab9f294d06a53c14, type: 3}
+  m_Name: Dasher Pattern 2
+  m_EditorClassIdentifier: 
+  PatternName: Dasher Pattern 1
+  ProjectilePrefab: {fileID: 1454579934101814444, guid: 8744852507999354487d0b741d21861d, type: 3}
+  StartDelay: 3
+  EndDelay: 3
+  FireRate: 0.25
+  Speed: 8
+  FireDuration: 2
+  ChargeSFX: {fileID: 8300000, guid: 651b1dfebc610c44e956b9c74fb8811d, type: 3}
+  ChargeVolume: 1
+  SpawnSFX: {fileID: 8300000, guid: a46cdb78bb95a43e883584dfddb99dbe, type: 3}
+  SpawnVolume: 1
+  CooldownSFX: {fileID: 8300000, guid: 4ff2440fcfa2b9a4a815ad44f64224d1, type: 3}
+  CooldownVolume: 1

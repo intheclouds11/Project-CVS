@@ -126,7 +126,7 @@ Material:
     - _AppearGradientFlipSwitch: 0
     - _AppearGradientOffset: 0
     - _AppearGradientRemapMax: 1
-    - _AppearProgress: -0.125
+    - _AppearProgress: -0.17
     - _BackRampOffsetExp: 2
     - _Cutoff: 0.1
     - _DEPTHMASKENABLED: 0
@@ -137,9 +137,9 @@ Material:
     - _DistortionAmount: 0.125
     - _DistortionScrollSpeedU: 0
     - _DistortionScrollSpeedV: -0.05
-    - _EdgeGlowExp: 1
-    - _EdgeGlowPower: 17.5
-    - _EdgeGlowSubtract: 0.85
+    - _EdgeGlowExp: 0.84
+    - _EdgeGlowPower: 16.19
+    - _EdgeGlowSubtract: 0.86
     - _EdgeRampOffsetMultiply: 0.46
     - _FinalOpacityPower: 1
     - _FinalPower: 4
@@ -149,7 +149,7 @@ Material:
     - _Float3: -0.15
     - _Float4: 1.25
     - _FromSmokeExp: 2
-    - _FrontSmokeExp: 2
+    - _FrontSmokeExp: 4.89
     - _FrontSmokeFlip: 0
     - _INNERRIMENABLED: 0
     - _InnerRimExp: 4
@@ -162,15 +162,15 @@ Material:
     - _Noise01ScaleU: 2
     - _Noise01ScaleV: 1.5
     - _Noise01ScrollSpeedU: 0
-    - _Noise01ScrollSpeedV: -0.125
+    - _Noise01ScrollSpeedV: -0.02
     - _Noise01Twist: 1.5
-    - _Noise02Amount: -0.075
+    - _Noise02Amount: -0.02
     - _Noise02Negate: 0.25
     - _Noise02Power: 0.393
     - _Noise02TilingU: 1
     - _Noise02TilingV: 2
     - _Noise03Bias: 0.0225
-    - _Noise04Amount: 1
+    - _Noise04Amount: -0.07
     - _Noise04ScaleU: 2
     - _Noise04ScaleV: 2
     - _OffsetAdjust: 0.075
@@ -193,10 +193,10 @@ Material:
     - _RampBlend: 0
     - _RampOffsetExp: 8
     - _RampOffsetMultiply: 1
-    - _RampRemapMaxNew: 1.25
+    - _RampRemapMaxNew: 1.301
     - _RampRemapMinOld: 0.5
     - _TRISGLAREENABLED: 0
-    - _TransitionExp: 2
+    - _TransitionExp: 2.46
     - _TransitionFixAmount: 20
     - _TransitionMultiply: 0.45
     - _TrisGlareNegate: 1
