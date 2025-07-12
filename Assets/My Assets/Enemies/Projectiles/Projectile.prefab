@@ -75376,12 +75376,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 962976806279013022}
-  - component: {fileID: 5246896163261584424}
-  - component: {fileID: 349698787356689574}
+  - component: {fileID: -7492469891527720787}
+  - component: {fileID: -4746203949667689610}
   - component: {fileID: 8329523597810865051}
   m_Layer: 11
-  m_Name: DasherProjectile
-  m_TagString: Untagged
+  m_Name: Projectile
+  m_TagString: EnemyProjectile
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -75402,7 +75402,7 @@ Transform:
   - {fileID: 8989784334462728688}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5246896163261584424
+--- !u!114 &-7492469891527720787
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -75411,41 +75411,49 @@ MonoBehaviour:
   m_GameObject: {fileID: 1454579934101814444}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9611407580bf2074aa127266f807f0c1, type: 3}
+  m_Script: {fileID: 11500000, guid: f79449ad19e4af741a96045d935cb60d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _baseDamage: 1
+  _baseDeflectedDamage: 100
+  _critDeflectedDamage: 200
+  _baseDeflectSpeed: 10
   _knockback:
     ApplyKnockback: 1
     KnockbackAmount: 1
     KnockbackDuration: 0.25
     StunDuration: 0.25
-  _dashTriggerDistance: 2.5
-  _dashSpeed: 6
-  _dashDuration: 0.5
-  _dashDelayDuration: 1
---- !u!95 &349698787356689574
-Animator:
-  serializedVersion: 7
+  _deflectedSFX: {fileID: 8300000, guid: ca330cb46edefb545866c55eec5af181, type: 3}
+  _critDeflectedSFX: {fileID: 8300000, guid: b106d210aa1d0d544b1b01df736f77a1, type: 3}
+  _impactSFX: {fileID: 8300000, guid: b2e331145911e7c4f87d6a9d46769373, type: 3}
+  _impactVFX: {fileID: 9049631545069152736, guid: 6a0d9d4912f0e7b43b46b2a49721b4bb, type: 3}
+--- !u!54 &-4746203949667689610
+Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1454579934101814444}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 742ffbf7de11eb740ae403402a672913, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!136 &8329523597810865051
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -75480,13 +75488,13 @@ GameObject:
   - component: {fileID: 3870069988899214041}
   - component: {fileID: 8686748849612563232}
   - component: {fileID: 8474501472876745792}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_PointLight_Animated
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3870069988899214041
 Transform:
   m_ObjectHideFlags: 0

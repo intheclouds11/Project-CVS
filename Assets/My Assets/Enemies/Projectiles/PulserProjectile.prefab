@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 589379234940046133}
   - component: {fileID: 5277553883895683926}
   - component: {fileID: 6013852770105677827}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Sparks_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4927,10 +4927,11 @@ GameObject:
   - component: {fileID: 8370684664253266260}
   - component: {fileID: 1327225323381749821}
   - component: {fileID: 8084813659914369787}
+  - component: {fileID: -860898332357555124}
   - component: {fileID: 741944539909630020}
   m_Layer: 11
   m_Name: PulserProjectile
-  m_TagString: Untagged
+  m_TagString: EnemyProjectile
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4964,11 +4965,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _baseDamage: 1
+  _baseDeflectedDamage: 100
+  _critDeflectedDamage: 200
+  _baseDeflectSpeed: 10
   _knockback:
     ApplyKnockback: 1
     KnockbackAmount: 1
     KnockbackDuration: 0.25
     StunDuration: 0.25
+  _deflectedSFX: {fileID: 8300000, guid: ca330cb46edefb545866c55eec5af181, type: 3}
+  _critDeflectedSFX: {fileID: 0}
+  _impactSFX: {fileID: 8300000, guid: b2e331145911e7c4f87d6a9d46769373, type: 3}
+  _impactVFX: {fileID: 0}
   _pulseTriggerDistance: 2.5
   _pulseDamageRadius: 2.5
   _pulseDuration: 0.3
@@ -4995,6 +5003,33 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!54 &-860898332357555124
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 109227493381812246}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!136 &741944539909630020
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -5027,7 +5062,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8948017488577339424}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: ---------BuildupVFX---------
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5060,7 +5095,7 @@ GameObject:
   - component: {fileID: 7067527057081523301}
   - component: {fileID: 1176309423917108751}
   - component: {fileID: 820937266968315493}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Wave_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9911,7 +9946,7 @@ GameObject:
   - component: {fileID: 6121863579022012018}
   - component: {fileID: 8266531066584496628}
   - component: {fileID: 8729117182458580284}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_WaveHeat_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14811,7 +14846,7 @@ GameObject:
   - component: {fileID: 7764194955349913135}
   - component: {fileID: 73406110032522587}
   - component: {fileID: 5498454222389248715}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Wave_05
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -53827,7 +53862,7 @@ GameObject:
   - component: {fileID: 3355055031282908077}
   - component: {fileID: 2442468751210153186}
   - component: {fileID: 2334236536643310641}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_PointLight_Animated
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -74606,7 +74641,7 @@ GameObject:
   - component: {fileID: 2439852346008929958}
   - component: {fileID: 5415945264032071347}
   - component: {fileID: 1174425826376622984}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Sparks_02_reflected
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -79509,7 +79544,7 @@ GameObject:
   - component: {fileID: 5556658297732252023}
   - component: {fileID: 5171525223690153605}
   - component: {fileID: 2667800700921058868}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Sphere_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -84417,7 +84452,7 @@ GameObject:
   - component: {fileID: 834468184648046087}
   - component: {fileID: 5098634353068751966}
   - component: {fileID: 35235441203883924}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Flare_06
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -89317,7 +89352,7 @@ GameObject:
   - component: {fileID: 8275103073230916393}
   - component: {fileID: 5361015190245242707}
   - component: {fileID: 2919490714180435500}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Flare_04
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -94243,7 +94278,7 @@ GameObject:
   - component: {fileID: 4442445870355832661}
   - component: {fileID: 6857037664141243752}
   - component: {fileID: 7986513969815759324}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Flare_05
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -99175,7 +99210,7 @@ GameObject:
   - component: {fileID: 1151727288319948704}
   - component: {fileID: 8712483905206209249}
   - component: {fileID: 2898938505051433382}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Wave_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -104096,7 +104131,7 @@ GameObject:
   - component: {fileID: 8138127191345187264}
   - component: {fileID: 3304703838213766350}
   - component: {fileID: 5757438856609404375}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Flare_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -108937,7 +108972,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1386800569859106338}
   - component: {fileID: 3056633826071457349}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: AnimatedVFX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -129630,7 +129665,7 @@ GameObject:
   - component: {fileID: 4668939254110567620}
   - component: {fileID: 4545644858410729862}
   - component: {fileID: 3407975797567280095}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Cloud_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -134533,7 +134568,7 @@ GameObject:
   - component: {fileID: 7853066873136559594}
   - component: {fileID: 3352636265494958972}
   - component: {fileID: 1203635334426477164}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Flare_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -139375,7 +139410,7 @@ GameObject:
   - component: {fileID: 2150300237876444829}
   - component: {fileID: 470465693925365243}
   - component: {fileID: 8298229742413486034}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Sparks_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -144240,7 +144275,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5078448604681994171}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: ---------ExplosionVFX---------
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -144273,7 +144308,7 @@ GameObject:
   - component: {fileID: 6740507814341831271}
   - component: {fileID: 8604145628604639490}
   - component: {fileID: 5294758201466543122}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Flare_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -149219,7 +149254,7 @@ GameObject:
   - component: {fileID: 830634773297870175}
   - component: {fileID: 3537106355211977221}
   - component: {fileID: 7499655481990470653}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Wave_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -154139,7 +154174,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3809869537472566099}
   - component: {fileID: 5859829182568999138}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: PulseAttack
   m_TagString: Untagged
   m_Icon: {fileID: 0}

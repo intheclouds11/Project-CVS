@@ -17,6 +17,11 @@ public class PlayerHealth : Health
     [SerializeField]
     protected float _damagedSaturation = -40f;
 
+    public bool IsInvincible()
+    {
+        return _lastDamageTime + _damageInvincibilityDuration >= Time.time;
+    }
+
     protected float _lastDamageTime;
     protected float _startingVignetteIntensity;
     protected float _startingSaturation;
@@ -58,8 +63,7 @@ public class PlayerHealth : Health
     {
         if (GameManager.Instance.CurrentState is GameManager.GameState.Victory
             or GameManager.GameState.AwaitingWave or GameManager.GameState.GameOver) return;
-        if (damage <= 0 || CurrentHealth <= 0) return;
-        if (_lastDamageTime + _damageInvincibilityDuration >= Time.time) return;
+        if (IsInvincible() || damage <= 0 || CurrentHealth <= 0) return;
 
         if (CurrentHealth == _maxHealth) AudioManager.Instance.AdjustMasterLowPass(_damagedLowPassFreq, _damagedLowPassAdjustSpeed);
         

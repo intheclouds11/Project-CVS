@@ -14,6 +14,8 @@ public class DasherProjectile : Projectile
     private AudioClip _dashAlertSFX;
     [SerializeField]
     private AudioClip _dashSFX;
+    [SerializeField]
+    private GameObject _dashAlertVFX;
 
     private bool _isDashing;
     private AudioSource _dashingAudio;
@@ -34,17 +36,20 @@ public class DasherProjectile : Projectile
 
     private IEnumerator DashCoroutine()
     {
+        _isDashing = true;
+        Rb.linearVelocity = Vector3.zero;
         _animator.SetTrigger("Alerted");
+        _dashAlertAudio = AudioManager.Instance.PlaySound(transform, _dashAlertSFX, true, false, 1f, 1.2f);
+        _dashAlertVFX.SetActive(true);
         
-        _dashAlertAudio = AudioManager.Instance.PlaySound(transform, _dashAlertSFX, true, false, 1f);
         yield return new WaitForSeconds(_dashDelayDuration);
 
-        _dashingAudio = AudioManager.Instance.PlaySound(transform, _dashSFX, true, false, 1f);
+        _dashingAudio = AudioManager.Instance.PlaySound(transform, _dashSFX, true, false, 1f, 1.1f);
 
         while (true)
         {
             var dir = (_player.transform.position - transform.position).normalized;
-            var targetPos = _player.transform.position + dir * 4f;
+            var targetPos = _player.LookAt.position + dir * 4f;
             transform.position = Vector3.Lerp(transform.position, targetPos, _dashSpeed * Time.deltaTime);
             yield return null;
         }
@@ -53,7 +58,7 @@ public class DasherProjectile : Projectile
     protected override void OnReturnToPool()
     {
         base.OnReturnToPool();
-        if (_dashAlertAudio) _dashAlertAudio.Stop();
-        if (_dashingAudio) _dashingAudio.Stop();
+        // if (_dashAlertAudio) _dashAlertAudio.Stop();
+        // if (_dashingAudio) _dashingAudio.Stop();
     }
 }

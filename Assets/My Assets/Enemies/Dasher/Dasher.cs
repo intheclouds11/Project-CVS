@@ -26,13 +26,15 @@ public class Dasher : BaseEnemy
     private LayerMask _blockedLayers;
     [SerializeField]
     private AudioClip _dashingSFX;
+    [SerializeField]
+    private AudioClip _interruptedSFX;
 
     private float _lastDashCompleteTime;
     private bool _isDashing;
 
     private AudioSource _dashingAudio;
     private readonly Collider[] _overlapColliders = new Collider[1];
-    
+
 
     private void Update()
     {
@@ -114,6 +116,8 @@ public class Dasher : BaseEnemy
                 {
                     _dashingAudio.Stop();
                     _abilityStartAudio.Stop();
+                    pitch = Random.Range(0.9f, 1.1f);
+                    AudioManager.Instance.PlaySound(transform, _interruptedSFX, true, false, 0.9f, pitch);
                     _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
                     _isDashing = false;
                     _lastDashCompleteTime = Time.time;
@@ -152,7 +156,7 @@ public class Dasher : BaseEnemy
             }
         }
     }
-    
+
     protected override void OnDied(GameObject obj)
     {
         base.OnDied(obj);

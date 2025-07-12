@@ -24,17 +24,19 @@ MonoBehaviour:
     - 709f11a7f3c4041caa4ef136ea32d874
     - ed2cacf393a7b2b48bc16063d7465758
     - 90cfb36f2f10db34fa78d58033a68b44
+    - 1e15d09ebfc631c429466735f164b80d
+    - 566feb29e61a3b8499ace6a3196844f4
     values:
     - iconNameOrGuid: AudioSource Icon
       colorIndex: 0
       isIconRecursive: 0
       isColorRecursive: 0
     - iconNameOrGuid: RawImage Icon
-      colorIndex: 5
+      colorIndex: 6
       isIconRecursive: 0
       isColorRecursive: 1
     - iconNameOrGuid: cs Script Icon
-      colorIndex: 1
+      colorIndex: 0
       isIconRecursive: 0
       isColorRecursive: 1
     - iconNameOrGuid: SceneAsset Icon
@@ -65,8 +67,15 @@ MonoBehaviour:
       colorIndex: 0
       isIconRecursive: 0
       isColorRecursive: 0
+    - iconNameOrGuid: 
+      colorIndex: 1
+      isIconRecursive: 0
+      isColorRecursive: 1
+    - iconNameOrGuid: 
+      colorIndex: 4
+      isIconRecursive: 0
+      isColorRecursive: 1
   bookmarks:
-  - guid: 420b74b53608d5049824b8ace43ede61
-  - guid: 8a6da50aa4fd910488fae1da5ab90669
   - guid: 9c53962885c2c4f449125a979d6ad240
   - guid: 5243ab87e00eb3c4d998003ccd9cf68a
+  - guid: 566feb29e61a3b8499ace6a3196844f4

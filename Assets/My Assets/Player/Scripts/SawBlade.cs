@@ -21,8 +21,8 @@ public class Knockback
 public class SawBlade : MonoBehaviour
 {
     [Header("Damage")]
-    [SerializeField]
-    private Knockback _knockback;
+    [field: SerializeField]
+    public Knockback Knockback { get; private set; }
     [SerializeField]
     private int _baseDamage = 70;
     [SerializeField]
@@ -172,7 +172,9 @@ public class SawBlade : MonoBehaviour
 
                 if (enemyHit)
                 {
-                    enemyHit.Health.TakeDamage(_finalDamage, knockbackDir, _knockback);
+                    var kb = Knockback;
+                    if (IsCritAttack) kb.KnockbackAmount *= 1.5f;
+                    enemyHit.Health.TakeDamage(_finalDamage, knockbackDir, kb);
                 }
                 else
                 {

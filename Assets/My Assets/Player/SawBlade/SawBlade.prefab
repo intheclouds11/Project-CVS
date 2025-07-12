@@ -532,7 +532,7 @@ GameObject:
   - component: {fileID: 5550364341981991014}
   m_Layer: 9
   m_Name: SawBlade
-  m_TagString: Untagged
+  m_TagString: PlayerWeapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -578,7 +578,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3d4dd07ae22f5f4a82d813421604f6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _knockback:
+  <Knockback>k__BackingField:
     ApplyKnockback: 1
     KnockbackAmount: 1
     KnockbackDuration: 0.25
@@ -598,6 +598,7 @@ MonoBehaviour:
   _returnedSFX: {fileID: 8300000, guid: aafcc4dbe3d5b6841b9ee4d3b19fefdd, type: 3}
   _returnedSFXVolume: 0.55
   _impactSFX: {fileID: 8300000, guid: 92aadb14cc314f54db316cc18b68fe36, type: 3}
+  _impactSFXVolume: 0.45
   _impactVfx: {fileID: 9049631545069152736, guid: 6a0d9d4912f0e7b43b46b2a49721b4bb, type: 3}
 --- !u!54 &7434762892271647052
 Rigidbody:
@@ -1233,7 +1234,7 @@ GameObject:
   - component: {fileID: 7753903202309091728}
   m_Layer: 9
   m_Name: COL_SawBlade
-  m_TagString: Untagged
+  m_TagString: PlayerWeapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

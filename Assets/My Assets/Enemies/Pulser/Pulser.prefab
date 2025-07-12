@@ -63,7 +63,7 @@ MonoBehaviour:
     StunDuration: 0.25
   _patrolSFX: {fileID: 8300000, guid: 8ba6493c6bbf4374cbee78f819a4a9d1, type: 3}
   _agroSFX: {fileID: 8300000, guid: 9f7aa5ccf137dd040a14777f4acd51a1, type: 3}
-  _abilityStartSFX: {fileID: 8300000, guid: 625defa160e93884b88a528a8582617f, type: 3}
+  _abilityStartSFX: {fileID: 8300000, guid: fc658bde43eb62145a04e009ef3bf678, type: 3}
   _pulseDamage: 2
   _isInterruptable: 0
   _pulseTriggerDistance: 1.5

@@ -238,13 +238,13 @@ public class PlayerAttack : MonoBehaviour
         {
             _inputManager.Vibrate(0.4f, 1f, 0.2f);
             _critParticle.Play();
-            AudioManager.Instance.PlaySound(transform, _critSFX, true, false, 2f, 1.2f);
+            AudioManager.Instance.PlaySound(transform, _critSFX, true, false, 1f, 1.3f);
             _wasCritAttack = true;
         }
         else
         {
             var pitch = Random.Range(0.8f, 0.9f);
-            AudioManager.Instance.PlaySound(transform, _basicSFX, true, false, 1.5f, pitch);
+            AudioManager.Instance.PlaySound(transform, _basicSFX, true, false, 0.5f, pitch);
         }
 
         _lastChargeAmount = _chargeMeter.value / _chargeMeter.maxValue;

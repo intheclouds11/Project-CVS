@@ -16,7 +16,7 @@ public class FirstBossEncounter : MonoBehaviour
 
     [Header("AOE Settings")]
     [SerializeField]
-    private float _postAttackDelay = 2f;
+    private float _postAOEDelay = 5f;
     [SerializeField]
     private float _AOEAgroRadius = 3f;
     [SerializeField]
@@ -52,8 +52,17 @@ public class FirstBossEncounter : MonoBehaviour
     [SerializeField]
     private float _AOEImpulseRate = 1f;
 
+    [Header("General FX")]
+    [SerializeField]
+    private List<AudioClip> _hitSFX;
+    [SerializeField]
+    private AudioClip _hurtSFX;
+    [SerializeField]
+    private int _playHurtSFXHealthInterval = 400;
+    private int _prevHurtSFXHealth;
+
     public Health Health { get; private set; }
-    
+
     private float _distToPlayer;
     private bool _isPerformingAOE;
     private float _lastImpulseTime;
@@ -72,12 +81,26 @@ public class FirstBossEncounter : MonoBehaviour
         enabled = true;
         Health = GetComponent<Health>();
         Health.Died += OnDied;
+        Health.DamageTaken += OnDamageTaken;
+        _prevHurtSFXHealth = Health.CurrentHealth;
         _animator = GetComponent<Animator>();
         _impulseSource = GetComponent<CinemachineImpulseSource>();
         _multiProjectilePool = GetComponent<MultiProjectilePool>();
         _player = GameManager.Instance.Player1;
 
         StartCoroutine(ProjectilesCoroutine(_phase1ProjectilePatterns[0]));
+    }
+
+    private void OnDamageTaken(Vector3 arg1, Knockback arg2)
+    {
+        var pitch = Random.Range(0.9f, 1.1f);
+        AudioManager.Instance.PlaySound(transform, _hitSFX[Random.Range(0, _hitSFX.Count)], true, false, 1f, pitch);
+
+        if (_prevHurtSFXHealth - Health.CurrentHealth >= _playHurtSFXHealthInterval)
+        {
+            AudioManager.Instance.PlaySound(transform, _hurtSFX, true, false, 1f, 1f);
+            _prevHurtSFXHealth = Health.CurrentHealth;
+        }
     }
 
     private void OnDied(GameObject obj)
@@ -93,9 +116,9 @@ public class FirstBossEncounter : MonoBehaviour
     {
         _distToPlayer = Vector3.Distance(transform.position, _player.transform.position);
 
-        if (!_isPerformingAOE && !_currentProjectilePattern)
+        if (!_currentProjectilePattern)
         {
-            if (_distToPlayer <= _AOEAgroRadius)
+            if (!_isPerformingAOE && _distToPlayer <= _AOEAgroRadius)
             {
                 StartCoroutine(AOECoroutine());
                 return;
@@ -109,7 +132,7 @@ public class FirstBossEncounter : MonoBehaviour
     {
         if (phase == 1)
         {
-             return _phase1ProjectilePatterns[Random.Range(0, _phase1ProjectilePatterns.Count)];
+            return _phase1ProjectilePatterns[Random.Range(0, _phase1ProjectilePatterns.Count)];
         }
         else
         {
@@ -126,19 +149,20 @@ public class FirstBossEncounter : MonoBehaviour
         var spawnPoint = _projectileSpawnPoints[0];
 
         yield return new WaitForSeconds(pattern.StartDelay);
-        
+
         _projectileChargeAudio.Stop();
         _projectileChargeAudio = null;
-        
+
         var startTime = Time.time;
         while (startTime + pattern.FireDuration > Time.time)
         {
-            var proj = pattern.Spawn(spawnPoint, _multiProjectilePool);
-
+            var dir = (_player.transform.position - spawnPoint.position).normalized;
+            var proj = pattern.Spawn(_multiProjectilePool, spawnPoint, dir);
             yield return new WaitForSeconds(pattern.FireRate);
         }
 
-        _projectileCooldownAudio = AudioManager.Instance.PlaySound(transform, pattern.CooldownSFX, true, false, pattern.CooldownVolume);
+        _projectileCooldownAudio =
+            AudioManager.Instance.PlaySound(transform, pattern.CooldownSFX, true, false, pattern.CooldownVolume);
         Debug.Log($"Start Projectile cooldown", _projectileCooldownAudio);
         yield return new WaitForSeconds(pattern.EndDelay);
 
@@ -187,7 +211,7 @@ public class FirstBossEncounter : MonoBehaviour
         _AOEAttackAudio.Stop();
         if (_AOEAttackVFX) _AOEAttackVFX.SetActive(false);
 
-        yield return new WaitForSeconds(_postAttackDelay);
+        yield return new WaitForSeconds(_postAOEDelay);
 
         _isPerformingAOE = false;
     }
