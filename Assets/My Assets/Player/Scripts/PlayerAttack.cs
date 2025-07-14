@@ -27,8 +27,10 @@ public class PlayerAttack : MonoBehaviour
     [Header("Transforms")]
     [SerializeField]
     private SawBlade _sawBlade;
-    [SerializeField]
-    private Transform _sawBladeSpawnPoint;
+    [field: SerializeField]
+    public Transform SawBladeSpawnPoint { get; private set; }
+    [field: SerializeField]
+    public Transform SawBladeReturnPoint { get; private set; }
     [SerializeField]
     private Transform _sawBladePlayerParent;
 
@@ -139,7 +141,7 @@ public class PlayerAttack : MonoBehaviour
             }
             else
             {
-                _player.SetAttackRotateDirection(_player.GetRotateDirection());
+                _player.SetAttackRotateDirection(_player.CalculateRotateDirection());
 
                 if (_exceededCritThreshold)
                 {
@@ -191,7 +193,7 @@ public class PlayerAttack : MonoBehaviour
 
         if (IsAttacking && _inputManager.AttackWasPressed)
         {
-            _bufferedRotateDir = _player.GetRotateDirection();
+            _bufferedRotateDir = _player.CalculateRotateDirection();
             _bufferedNextAttackDirection = true;
             // Debug.Log($"_bufferedNextAttackDirection: {_bufferedRotateDir}");
         }
@@ -264,7 +266,7 @@ public class PlayerAttack : MonoBehaviour
 
     public void ThrowSawBlade()
     {
-        _sawBlade.OnAttack(_sawBladeSpawnPoint, _lastChargeAmount, _wasCritAttack);
+        _sawBlade.OnAttack(SawBladeSpawnPoint, _lastChargeAmount, _wasCritAttack);
     }
 
     private bool WithinCritThreshold()

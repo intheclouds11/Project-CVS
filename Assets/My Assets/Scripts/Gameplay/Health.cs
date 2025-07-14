@@ -58,7 +58,8 @@ public class Health : MonoBehaviour
             or GameManager.GameState.AwaitingWave or GameManager.GameState.GameOver) return;
         if (damage <= 0 || CurrentHealth <= 0) return;
 
-        CurrentHealth -= damage;
+        int newHealth = CurrentHealth - damage;
+        if (GameManager.Instance.EnemyAIEnabled) CurrentHealth = newHealth;
 
         if (CurrentHealth > 0)
         {

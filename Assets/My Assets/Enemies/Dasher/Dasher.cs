@@ -21,9 +21,9 @@ public class Dasher : BaseEnemy
     [SerializeField]
     private float _dashDelayDuration = 1f;
     [SerializeField]
-    private float _dashCooldownDuration = 1.5f;
+    private float _dashRecoveryDuration = 0.35f;
     [SerializeField]
-    private LayerMask _blockedLayers;
+    private float _dashCooldownDuration = 1.5f;
     [SerializeField]
     private AudioClip _dashingSFX;
     [SerializeField]
@@ -33,22 +33,25 @@ public class Dasher : BaseEnemy
     private bool _isDashing;
 
     private AudioSource _dashingAudio;
-    private readonly Collider[] _overlapColliders = new Collider[1];
 
 
-    private void Update()
+    protected override void Update()
     {
+        base.Update();
         _distToPlayer = Vector3.Distance(transform.position, _player.transform.position);
 
-        if (_isDashing || !_player.Health.IsAlive()) return;
+        if (!_aiFollower.canMove || !_player.Health.IsAlive()) return;
 
-        if (!_destinationSetter.target && _distToPlayer <= _agroRange)
+        if (!IsAggroed && _distToPlayer <= _agroRange)
         {
+            IsAggroed = true;
+            _lastDashCompleteTime = Time.time;
             _destinationSetter.target = _player.transform;
             _destinationSetter.enabled = true;
             _aiFollower.maxSpeed = _agroSpeed;
-            _patrol.enabled = false;
+            _aiFollower.canMove = true;
 
+            _patrol.enabled = false;
             if (_patrolAudio) _patrolAudio.Stop();
             _patrolAudio = null;
             _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
@@ -62,28 +65,23 @@ public class Dasher : BaseEnemy
         }
     }
 
-    private bool CanDashReachPlayer(out GameObject hitObj, bool dashing = false)
+    protected bool CanDashReachPlayer(out GameObject hitObj, bool dashing = false)
     {
-        Vector3 centerWorldPos = transform.TransformPoint(_collider.center);
-        float cylinderLength = Mathf.Max(0, _aiFollower.height * 0.5f - _aiFollower.radius);
-        var p1 = centerWorldPos + Vector3.up * cylinderLength;
-        var p2 = centerWorldPos - Vector3.up * cylinderLength;
+        transform.GetCylinderPoints(_collider.center, _aiFollower.height, _aiFollower.radius, out var p1, out var p2);
 
         if (!dashing)
         {
             // First check if already overlapping obstacle
-            var overlapCount = Physics.OverlapCapsuleNonAlloc(p1, p2, _aiFollower.radius * 1.2f, _overlapColliders, _blockedLayers);
-            if (overlapCount > 0)
+            if (IsOverlappingBlockedLayer(p1, p2, out var overlapObj))
             {
-                // Debug.Log("Enemy overlapping other collider(s)");
-                hitObj = _overlapColliders[0].gameObject;
+                hitObj = overlapObj;
                 return false;
             }
         }
 
         // Then check if enemy will hit an obstacle on the way
         var dir = (_player.transform.position - transform.position).normalized;
-        var maxDist = dashing ? _aiFollower.radius : _distToPlayer;
+        var maxDist = dashing ? _aiFollower.radius * 1.25f : _distToPlayer;
         bool blocked = Physics.CapsuleCast(p1, p2, _aiFollower.radius, dir, out var hit, maxDist, _blockedLayers);
         hitObj = blocked ? hit.transform.gameObject : null;
         return !blocked;
@@ -95,7 +93,6 @@ public class Dasher : BaseEnemy
         if (_aiFollower) _aiFollower.canMove = false;
         float pitch = Random.Range(1.1f, 1.3f);
         if (_agroAudio) _agroAudio.Stop();
-        _agroAudio = null;
         _abilityStartAudio = AudioManager.Instance.PlaySound(transform, _abilityStartSFX, true, false, 0.55f, pitch);
         _animator.SetTrigger("Alerted");
 
@@ -110,40 +107,41 @@ public class Dasher : BaseEnemy
             var dir = (_player.transform.position - transform.position).normalized;
             var targetPos = _player.transform.position + dir * 4f;
 
-            while (startTime + _dashDuration >= Time.time)
+            while (!blocked && startTime + _dashDuration >= Time.time)
             {
-                if (_isInterruptable && _isGettingKnockedBack)
+                if (_isInterruptable && IsGettingKnockedBack)
                 {
+                    _isDashing = false;
+                    _lastDashCompleteTime = Time.time;
                     _dashingAudio.Stop();
                     _abilityStartAudio.Stop();
                     pitch = Random.Range(0.9f, 1.1f);
                     AudioManager.Instance.PlaySound(transform, _interruptedSFX, true, false, 0.9f, pitch);
                     _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
-                    _isDashing = false;
-                    _lastDashCompleteTime = Time.time;
                     yield break;
                 }
 
-                if (!blocked)
+                transform.position = Vector3.Lerp(transform.position, targetPos, _dashSpeed * Time.deltaTime);
+                blocked = !CanDashReachPlayer(out var hitObj, true);
+                if (blocked)
                 {
-                    transform.position = Vector3.Lerp(transform.position, targetPos, _dashSpeed * Time.deltaTime);
-                    blocked = !CanDashReachPlayer(out var hitObj, true);
-                    if (blocked) Debug.Log($"Enemy ran into: {hitObj.name}", hitObj);
+                    Debug.Log($"Enemy ran into: {hitObj.name}", hitObj);
                 }
 
                 yield return null;
             }
         }
 
-        yield return new WaitForSeconds(_dashDelayDuration * 0.75f);
+        yield return new WaitForSeconds(_dashRecoveryDuration);
         _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
         _aiFollower.canMove = true;
         _isDashing = false;
         _lastDashCompleteTime = Time.time;
     }
 
-    private void OnTriggerEnter(Collider other)
+    protected override void OnTriggerEnter(Collider other)
     {
+        base.OnTriggerEnter(other);
         if (other.gameObject.CompareTag("Player"))
         {
             var playerHit = other.GetComponent<PlayerController>();
@@ -151,8 +149,8 @@ public class Dasher : BaseEnemy
             {
                 var knockBackDir = (playerHit.transform.position - transform.position).normalized;
                 var damage = _isDashing ? _dashDamage : _baseDamage;
-                playerHit.Health.TakeDamage(damage, knockBackDir, _knockback);
-                StartCoroutine(DamagedPlayerCoroutine());
+                playerHit.Health.TakeDamage(damage, knockBackDir, _damagePlayerKnockback);
+                OnDamagedPlayer();
             }
         }
     }

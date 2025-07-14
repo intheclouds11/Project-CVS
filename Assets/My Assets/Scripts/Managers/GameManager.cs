@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
@@ -21,6 +22,8 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
     public PlayerController Player1 { get; private set; }
     public bool GodMode { get; private set; }
+    public bool EnemyAIEnabled { get; private set; } = true;
+    public static event Action<bool> EnemyAIToggled;
 
 
     private void Awake()
@@ -41,7 +44,14 @@ public class GameManager : MonoBehaviour
             GodMode = !GodMode;
             AudioManager.Instance.MusicAudioSource.volume = GodMode ? 0f : AudioManager.Instance.InitialMusicVolume;
             if (GodMode) Player1.PlayerCharges.ForceFullRecharge();
-            Debug.Log($"GameManager: GodMode set to {GodMode}");
+            Debug.Log($"[GameManager] GodMode {GodMode}");
+        }
+
+        if (InputManager.Instance.ToggleEnemyAIWasPressed)
+        {
+            EnemyAIEnabled = !EnemyAIEnabled;
+            EnemyAIToggled?.Invoke(EnemyAIEnabled);
+            Debug.Log($"[GameManager] EnemyAIEnabled: {EnemyAIEnabled}");
         }
     }
 
@@ -80,7 +90,7 @@ public class GameManager : MonoBehaviour
             HUD.Instance.GetWaveCompleteUI.SetActive(true);
             CurrentState = GameState.AwaitingWave;
             yield return new WaitForSeconds(3f);
-            
+
             CurrentState = GameState.Playing;
             WaveManager.Instance.StartNextWave();
             HUD.Instance.GetWaveCompleteUI.SetActive(false);
@@ -90,13 +100,13 @@ public class GameManager : MonoBehaviour
             CurrentState = GameState.Victory;
             HUD.Instance.GetWinUI.SetActive(true);
             yield return new WaitForSeconds(2f);
-            
+
             HUD.Instance.GetWinUI.SetActive(false);
             Player1.enabled = false;
             UIManager.Instance.ShowEndScreen();
         }
     }
-    
+
     private void OnPlayerDied(GameObject deadObj)
     {
         CurrentState = GameState.GameOver;

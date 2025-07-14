@@ -74,7 +74,7 @@ public class FirstBossEncounter : MonoBehaviour
     private AudioSource _projectileCooldownAudio;
     private AudioSource _AOEChargeAudio;
     private AudioSource _AOEAttackAudio;
-
+    
 
     public void EnteredBossZone()
     {
@@ -87,29 +87,28 @@ public class FirstBossEncounter : MonoBehaviour
         _impulseSource = GetComponent<CinemachineImpulseSource>();
         _multiProjectilePool = GetComponent<MultiProjectilePool>();
         _player = GameManager.Instance.Player1;
-
+        
+        // todo: write it out.. want boss to start attacks on beat
+        // 
+        // StartCoroutine(GetBeatTime());
         StartCoroutine(ProjectilesCoroutine(_phase1ProjectilePatterns[0]));
     }
 
-    private void OnDamageTaken(Vector3 arg1, Knockback arg2)
+    private bool _onBeat;
+    private IEnumerator GetBeatTime()
     {
-        var pitch = Random.Range(0.9f, 1.1f);
-        AudioManager.Instance.PlaySound(transform, _hitSFX[Random.Range(0, _hitSFX.Count)], true, false, 1f, pitch);
-
-        if (_prevHurtSFXHealth - Health.CurrentHealth >= _playHurtSFXHealthInterval)
+        while (true)
         {
-            AudioManager.Instance.PlaySound(transform, _hurtSFX, true, false, 1f, 1f);
-            _prevHurtSFXHealth = Health.CurrentHealth;
+            var musicTime = AudioManager.Instance.MusicAudioSource.time;
+            var bpm = 159.01f;
+            var secondPerQuarterNote = 60f / bpm;
+            _onBeat = musicTime % secondPerQuarterNote <= 0.01f;
+            if (_onBeat)
+            {
+                Debug.Log($"onbeat");
+            }
+            yield return null;
         }
-    }
-
-    private void OnDied(GameObject obj)
-    {
-        gameObject.SetActive(false);
-        _AOEChargeAudio?.Stop();
-        _AOEAttackAudio?.Stop();
-        _projectileChargeAudio?.Stop();
-        _projectileCooldownAudio?.Stop();
     }
 
     private void Update()
@@ -153,11 +152,12 @@ public class FirstBossEncounter : MonoBehaviour
         _projectileChargeAudio.Stop();
         _projectileChargeAudio = null;
 
-        var startTime = Time.time;
-        while (startTime + pattern.FireDuration > Time.time)
+        int count = 0;
+        while (count < pattern.FireCount)
         {
             var dir = (_player.transform.position - spawnPoint.position).normalized;
             var proj = pattern.Spawn(_multiProjectilePool, spawnPoint, dir);
+            count++;
             yield return new WaitForSeconds(pattern.FireRate);
         }
 
@@ -214,6 +214,27 @@ public class FirstBossEncounter : MonoBehaviour
         yield return new WaitForSeconds(_postAOEDelay);
 
         _isPerformingAOE = false;
+    }
+
+    private void OnDamageTaken(Vector3 arg1, Knockback arg2)
+    {
+        var pitch = Random.Range(0.9f, 1.1f);
+        AudioManager.Instance.PlaySound(transform, _hitSFX[Random.Range(0, _hitSFX.Count)], true, false, 1f, pitch);
+
+        if (_prevHurtSFXHealth - Health.CurrentHealth >= _playHurtSFXHealthInterval)
+        {
+            AudioManager.Instance.PlaySound(transform, _hurtSFX, true, false, 1f, 1f);
+            _prevHurtSFXHealth = Health.CurrentHealth;
+        }
+    }
+
+    private void OnDied(GameObject obj)
+    {
+        gameObject.SetActive(false);
+        _AOEChargeAudio?.Stop();
+        _AOEAttackAudio?.Stop();
+        _projectileChargeAudio?.Stop();
+        _projectileCooldownAudio?.Stop();
     }
 
     private void OnDrawGizmosSelected()

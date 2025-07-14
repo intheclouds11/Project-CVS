@@ -38,6 +38,7 @@ public class InputManager : MonoBehaviour
     // Dev tools
     public bool ToggleChargeHUDWasPressed { get; private set; }
     public bool ToggleGodModeWasPressed { get; private set; }
+    public bool ToggleEnemyAIWasPressed { get; private set; }
     public bool TimeScaleUpWasPressed { get; private set; }
     public bool TimeScaleDownWasPressed { get; private set; }
     public bool TimeScaleResetWasPressed { get; private set; }
@@ -98,6 +99,7 @@ public class InputManager : MonoBehaviour
         {
             ToggleChargeHUDWasPressed = _inputs.Player.ToggleChargeHUD.WasPerformedThisFrame();
             ToggleGodModeWasPressed = _inputs.Player.ToggleGodMode.WasPerformedThisFrame();
+            ToggleEnemyAIWasPressed = _inputs.Player.ToggleEnemyAI.WasPerformedThisFrame();
             TimeScaleUpWasPressed = Keyboard.current.equalsKey.wasPressedThisFrame;
             TimeScaleDownWasPressed = Keyboard.current.minusKey.wasPressedThisFrame;
             TimeScaleResetWasPressed = Keyboard.current.digit0Key.wasPressedThisFrame;

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DG.Tweening;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -162,7 +163,7 @@ public class PlayerController : MonoBehaviour
     {
         _movementVector = new Vector3(_inputManager.Translation.x, 0f, _inputManager.Translation.y);
 
-        _rotateDirection = GetRotateDirection();
+        _rotateDirection = CalculateRotateDirection();
 
         if (_inputManager.DashWasPressed && PlayerCharges.IsChargeAvailable())
         {
@@ -170,7 +171,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public Vector3 GetRotateDirection()
+    public Vector3 CalculateRotateDirection()
     {
         if (_inputManager.UsingGamepad)
         {
@@ -252,19 +253,6 @@ public class PlayerController : MonoBehaviour
 
             return;
         }
-
-        if (!_inputManager.AttackHeld) return;
-
-        // if (_inputManager.UsingGamepad)
-        // {
-        //     var lookAtRotation = Quaternion.LookRotation(_rotateDirection);
-        //     RotationTransform.localRotation = lookAtRotation;
-        // }
-        // else
-        // {
-        //     float angle = Mathf.Atan2(_rotateDirection.y, _rotateDirection.x) * Mathf.Rad2Deg;
-        //     RotationTransform.rotation = Quaternion.Euler(0f, -angle + 90f, 0f);
-        // }
     }
 
     private void HandleDash()

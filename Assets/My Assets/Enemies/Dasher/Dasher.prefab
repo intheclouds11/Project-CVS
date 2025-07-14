@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 5642269251756730663}
   - component: {fileID: 2708348165193512040}
   - component: {fileID: 3815405522670323212}
+  - component: {fileID: 8711011516317748288}
   m_Layer: 11
   m_Name: Dasher
   m_TagString: Untagged
@@ -51,29 +52,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6f6b3bdce688a04fbbdf8612d2c5eef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _wander: 0
+  _wanderRadius: 2
+  _wanderRecoveryMaxDuration: 6
   _agroRange: 7
   _agroSpeed: 4
   _attackCooldownDuration: 0.25
-  _patrolSpeed: 1
+  _patrolSpeed: 0.75
+  _blockedLayers:
+    serializedVersion: 2
+    m_Bits: 256
   _baseDamage: 1
-  _knockback:
+  _damagePlayerKnockback:
     ApplyKnockback: 1
     KnockbackAmount: 10
     KnockbackDuration: 0.25
     StunDuration: 0.25
+    KnockbackEasing: 0
+  _damageEnemyKnockback:
+    ApplyKnockback: 1
+    KnockbackAmount: 1.5
+    KnockbackDuration: 0.25
+    StunDuration: 0.25
+    KnockbackEasing: 6
   _patrolSFX: {fileID: 8300000, guid: 8ba6493c6bbf4374cbee78f819a4a9d1, type: 3}
   _agroSFX: {fileID: 8300000, guid: 9f7aa5ccf137dd040a14777f4acd51a1, type: 3}
   _abilityStartSFX: {fileID: 8300000, guid: baa42a3793a623b42bc15d843bdbfd13, type: 3}
   _dashDamage: 2
   _isInterruptable: 1
   _dashTriggerDistance: 3.5
-  _dashSpeed: 4
+  _dashSpeed: 3.5
   _dashDuration: 0.5
   _dashDelayDuration: 0.45
+  _dashRecoveryDuration: 0.35
   _dashCooldownDuration: 1.5
-  _blockedLayers:
-    serializedVersion: 2
-    m_Bits: 256
   _dashingSFX: {fileID: 8300000, guid: b6d3f0aac49764654879e55ed401c6f2, type: 3}
   _interruptedSFX: {fileID: 8300000, guid: ca330cb46edefb545866c55eec5af181, type: 3}
 --- !u!114 &7312698501997549328
@@ -138,7 +150,7 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.4
+  m_Radius: 0.45
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
@@ -232,6 +244,33 @@ MonoBehaviour:
   targets: []
   delay: 1
   updateDestinationEveryFrame: 0
+--- !u!54 &8711011516317748288
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 472305836172240474}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 1
 --- !u!1 &4033030708496550327
 GameObject:
   m_ObjectHideFlags: 0
@@ -96296,13 +96335,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8558992194282641287}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0.7036866, z: -0, w: 0.7105105}
-  m_LocalPosition: {x: 0, y: 0.48, z: 0}
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 3.62, z: 0}
   m_LocalScale: {x: 1.1000003, y: 1.1, z: 1.1000003}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7514874874252445952}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!108 &9082508994120011622
 Light:
   m_ObjectHideFlags: 0
@@ -96312,12 +96351,12 @@ Light:
   m_GameObject: {fileID: 8558992194282641287}
   m_Enabled: 1
   serializedVersion: 11
-  m_Type: 2
-  m_Color: {r: 1, g: 0.040900156, b: 0, a: 1}
-  m_Intensity: 2
-  m_Range: 5
-  m_SpotAngle: 30
-  m_InnerSpotAngle: 21.80208
+  m_Type: 0
+  m_Color: {r: 1, g: 0.039215688, b: 0, a: 1}
+  m_Intensity: 15
+  m_Range: 4.54
+  m_SpotAngle: 106.60365
+  m_InnerSpotAngle: 55.81904
   m_CookieSize: 10
   m_Shadows:
     m_Type: 1
@@ -96326,7 +96365,7 @@ Light:
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.2
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0

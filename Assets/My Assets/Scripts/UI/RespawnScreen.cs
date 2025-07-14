@@ -29,7 +29,6 @@ public class RespawnScreen : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;
         if (Debug.isDebugBuild || Application.isEditor)
         {
-            _delayRespawnInputTime = 0f;
             _fadeInTime = 0.5f;
             _fadeOutTime = 0.5f;
         }

@@ -13,7 +13,7 @@ public class ProjectilePattern : ScriptableObject
     public float EndDelay = 3f;
     public float FireRate = 0.5f;
     public float Speed = 10f;
-    public float FireDuration = 3f;
+    public float FireCount = 10f;
     
     [Header("FX")]
     public AudioClip ChargeSFX;

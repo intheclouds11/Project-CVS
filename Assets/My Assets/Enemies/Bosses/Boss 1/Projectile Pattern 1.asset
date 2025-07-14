@@ -17,9 +17,9 @@ MonoBehaviour:
   AimAtPlayer: 1
   StartDelay: 3
   EndDelay: 3
-  FireRate: 0.5
+  FireRate: 0.3773585
   Speed: 10
-  FireDuration: 3
+  FireCount: 10
   ChargeSFX: {fileID: 8300000, guid: 651b1dfebc610c44e956b9c74fb8811d, type: 3}
   ChargeVolume: 1
   SpawnSFX: {fileID: 8300000, guid: a46cdb78bb95a43e883584dfddb99dbe, type: 3}

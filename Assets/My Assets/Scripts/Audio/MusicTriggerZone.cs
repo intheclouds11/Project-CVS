@@ -24,7 +24,7 @@ public class MusicTriggerZone : MonoBehaviour
     [SerializeField]
     private bool _adjustAmbienceGain;
     [field: SerializeField, ShowIf(nameof(_adjustAmbienceGain))]
-    private float _ambienceGain;
+    private float _ambienceGainOffset;
 
     private bool _wasTriggered;
     private Coroutine _fadeCoroutine;
@@ -49,7 +49,7 @@ public class MusicTriggerZone : MonoBehaviour
 
         if (_adjustAmbienceGain)
         {
-            AudioManager.Instance.AdjustAmbienceGroupGain(_ambienceGain);
+            AudioManager.Instance.AdjustAmbienceGroupGain(_ambienceGainOffset);
         }
     }
 

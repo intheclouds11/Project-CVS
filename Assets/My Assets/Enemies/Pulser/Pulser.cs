@@ -25,25 +25,30 @@ public class Pulser : BaseEnemy
     [SerializeField]
     private GameObject _pulseVFX;
     [SerializeField]
+    private Animator _lightAnimator;
+    [SerializeField]
     private AudioClip _pulseHitSFX;
 
     private float _lastPulseCompleteTime;
-    private bool _isPulsing;
-    
 
-    private void Update()
+
+    protected override void Update()
     {
+        base.Update();
         _distToPlayer = Vector3.Distance(transform.position, _player.transform.position);
+        
+        if (!_aiFollower.canMove || !_player.Health.IsAlive()) return;
 
-        if (_isPulsing || !_player.Health.IsAlive()) return;
-
-        if (_aiFollower && !_destinationSetter.target && _distToPlayer <= _agroRange)
+        if (!IsAggroed && _distToPlayer <= _agroRange)
         {
+            IsAggroed = true;
+            _lastPulseCompleteTime = Time.time;
             _destinationSetter.target = _player.transform;
             _destinationSetter.enabled = true;
             _aiFollower.maxSpeed = _agroSpeed;
-            _patrol.enabled = false;
+            _aiFollower.canMove = true;
 
+            _patrol.enabled = false;
             if (_patrolAudio) _patrolAudio.Stop();
             _patrolAudio = null;
             _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
@@ -56,14 +61,13 @@ public class Pulser : BaseEnemy
 
     private IEnumerator PulseCoroutine()
     {
-        _isPulsing = true;
         _aiFollower.canMove = false;
         _pulseVFX.SetActive(false);
         _pulseVFX.SetActive(true);
+        _lightAnimator.SetTrigger("Pulse");
         _animator.SetTrigger("Alerted");
 
-        _agroAudio.Stop();
-        _agroAudio = null;
+        if (_agroAudio) _agroAudio.Stop();
         _abilityStartAudio = AudioManager.Instance.PlaySound(transform, _abilityStartSFX, true, false, 0.7f);
 
         yield return new WaitForSeconds(_pulseDelayDuration);
@@ -72,44 +76,42 @@ public class Pulser : BaseEnemy
 
         while (startTime + _pulseDuration >= Time.time)
         {
-            if (_isInterruptable && _isGettingKnockedBack)
+            if (_isInterruptable && IsGettingKnockedBack)
             {
+                _lastPulseCompleteTime = Time.time;
                 _pulseVFX.SetActive(false);
                 _abilityStartAudio.Stop();
                 _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
-                _isPulsing = false;
-                _lastPulseCompleteTime = Time.time;
                 yield break;
             }
             
             if (!_player.Health.IsInvincible() && !_player.IsDashing && _distToPlayer <= _pulseDamageRadius)
             {
                 var knockBackDir = (_player.transform.position - transform.position).normalized;
-                _player.Health.TakeDamage(_pulseDamage, knockBackDir, _knockback);
+                _player.Health.TakeDamage(_pulseDamage, knockBackDir, _damagePlayerKnockback);
                 AudioManager.Instance.PlaySound(_player.transform, _pulseHitSFX, true, false, 0.9f);
-                StartCoroutine(DamagedPlayerCoroutine());
+                OnDamagedPlayer();
             }
 
             yield return null;
         }
 
-        _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
-
-        _aiFollower.canMove = true;
-        _isPulsing = false;
         _lastPulseCompleteTime = Time.time;
+        _aiFollower.canMove = true;
+        _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
     }
 
-    private void OnTriggerEnter(Collider other)
+    protected override void OnTriggerEnter(Collider other)
     {
+        base.OnTriggerEnter(other);
         if (other.gameObject.CompareTag("Player"))
         {
             var playerHit = other.GetComponent<PlayerController>();
             if (playerHit)
             {
                 var knockBackDir = (playerHit.transform.position - transform.position).normalized;
-                playerHit.Health.TakeDamage(_baseDamage, knockBackDir, _knockback);
-                StartCoroutine(DamagedPlayerCoroutine());
+                playerHit.Health.TakeDamage(_baseDamage, knockBackDir, _damagePlayerKnockback);
+                OnDamagedPlayer();
             }
         }
     }

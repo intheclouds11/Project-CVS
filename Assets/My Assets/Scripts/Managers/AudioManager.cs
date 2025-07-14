@@ -120,9 +120,10 @@ public class AudioManager : MonoBehaviour
         _audioMixer.SetFloat("MusicGain", newGain);
     }
 
-    public void AdjustAmbienceGroupGain(float newGain)
+    public void AdjustAmbienceGroupGain(float offset)
     {
-        _audioMixer.SetFloat("AmbienceGain", newGain);
+        _audioMixer.GetFloat("AmbienceGain", out float currentGain);
+        _audioMixer.SetFloat("AmbienceGain", currentGain - offset);
     }
 
     public void AdjustMasterLowPass(float cutoffFreq, float duration)

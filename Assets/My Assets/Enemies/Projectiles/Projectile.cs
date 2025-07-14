@@ -97,7 +97,7 @@ public class Projectile : MonoBehaviour
             }
 
             transform.rotation = Quaternion.LookRotation(_player.RotationTransform.forward);
-            var deflectSpeed = _baseDeflectSpeed * sawblade.Knockback.KnockbackAmount * (_isCritDeflected ? 2f : 1f);
+            var deflectSpeed = _baseDeflectSpeed * sawblade.DamageEnemyKnockback.KnockbackAmount * (_isCritDeflected ? 2f : 1f);
             Rb.linearVelocity = _player.RotationTransform.forward * deflectSpeed;
         }
         else

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using DG.Tweening;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -16,17 +17,20 @@ public class Knockback
     public float KnockbackDuration = 0.25f;
     [SerializeField]
     public float StunDuration = 0.25f;
+    [SerializeField]
+    public Ease KnockbackEasing = Ease.InExpo;
 }
 
 public class SawBlade : MonoBehaviour
 {
-    [Header("Damage")]
-    [field: SerializeField]
-    public Knockback Knockback { get; private set; }
     [SerializeField]
     private int _baseDamage = 70;
     [SerializeField]
     private int _critDamage = 120;
+    [Header("Damage")]
+    [field: SerializeField]
+    public Knockback DamageEnemyKnockback { get; private set; }
+    private float _initialKnockbackAmount;
 
     [Header("Movement")]
     [SerializeField]
@@ -47,6 +51,10 @@ public class SawBlade : MonoBehaviour
     private float _critReturnTime = 0.2f;
 
     [Header("FX")]
+    [SerializeField]
+    private TrailRenderer _trailRenderer;
+    [SerializeField]
+    private Transform _objToSpin;
     [SerializeField]
     private AudioClip _swipeSFX;
     [SerializeField]
@@ -81,6 +89,7 @@ public class SawBlade : MonoBehaviour
 
     private void Awake()
     {
+        _initialKnockbackAmount = DamageEnemyKnockback.KnockbackAmount;
         _impulseSource = GetComponent<CinemachineImpulseSource>();
         _player = GameManager.Instance.Player1;
         _player.Health.Died += OnDied;
@@ -100,6 +109,12 @@ public class SawBlade : MonoBehaviour
         Vector3 forceToAdd = transform.forward * _finalImpulseForce;
         _rb.AddForce(forceToAdd, ForceMode.Impulse);
 
+        _trailRenderer.Clear();
+        if (IsCritAttack)
+        {
+            _trailRenderer.emitting = true;
+        }
+
         if (IsLongRangeAttack)
         {
             PlayLoopAudio();
@@ -115,7 +130,7 @@ public class SawBlade : MonoBehaviour
     {
         if (IsLongRangeAttack)
         {
-            transform.rotation *= Quaternion.AngleAxis(transform.eulerAngles.y + Time.deltaTime * 360, Vector3.up);
+            _objToSpin.rotation *= Quaternion.AngleAxis(transform.eulerAngles.y + Time.deltaTime * 360, Vector3.up);
         }
 
         if (!IsReturning)
@@ -127,7 +142,8 @@ public class SawBlade : MonoBehaviour
         }
         else
         {
-            Vector3 newPos = Vector3.MoveTowards(_rb.position, _player.LookAt.position, _returnSpeed * Time.deltaTime);
+            var targetPos = _player.PlayerAttack.SawBladeReturnPoint.position;
+            Vector3 newPos = Vector3.MoveTowards(_rb.position, targetPos, _returnSpeed * Time.deltaTime);
             _rb.MovePosition(newPos);
         }
     }
@@ -136,7 +152,10 @@ public class SawBlade : MonoBehaviour
     {
         IsReturning = true;
         _rb.linearVelocity = Vector3.zero;
-        transform.GetChild(0).gameObject.layer = LayerMask.NameToLayer("Default");
+        if (IsLongRangeAttack)
+        {
+            _trailRenderer.emitting = true;
+        }
     }
 
     private void PlayLoopAudio()
@@ -151,7 +170,7 @@ public class SawBlade : MonoBehaviour
     {
         // Debug.Log($"Hit: {other.transform.name}", other.transform);
 
-        if (other.gameObject.layer == LayerMask.NameToLayer("Player"))
+        if (other.CompareTag("Player"))
         {
             OnReturnedToPlayer();
         }
@@ -172,9 +191,8 @@ public class SawBlade : MonoBehaviour
 
                 if (enemyHit)
                 {
-                    var kb = Knockback;
-                    if (IsCritAttack) kb.KnockbackAmount *= 1.5f;
-                    enemyHit.Health.TakeDamage(_finalDamage, knockbackDir, kb);
+                    DamageEnemyKnockback.KnockbackAmount = IsCritAttack ? _initialKnockbackAmount * 1.5f : _initialKnockbackAmount;
+                    enemyHit.Health.TakeDamage(_finalDamage, knockbackDir, DamageEnemyKnockback);
                 }
                 else
                 {
@@ -204,7 +222,7 @@ public class SawBlade : MonoBehaviour
         if (!_hasInitialized) return;
 
         if (_loopAudio) _loopAudio.Stop();
-        transform.GetChild(0).gameObject.layer = LayerMask.NameToLayer("Weapon");
+        _trailRenderer.emitting = false;
         _rb.linearVelocity = Vector3.zero;
         IsReturning = false;
         transform.parent = _player.transform;
