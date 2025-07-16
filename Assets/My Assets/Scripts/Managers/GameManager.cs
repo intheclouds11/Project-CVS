@@ -57,13 +57,13 @@ public class GameManager : MonoBehaviour
 
     private void OnEnable()
     {
-        PlayerSpawnPoint.PlayerSpawned += OnPlayerSpawned;
+        PlayerSpawnManager.PlayerSpawned += OnPlayerSpawned;
         EnemyManager.AllEnemiesCleared += OnAllEnemiesCleared;
     }
 
     private void OnDisable()
     {
-        PlayerSpawnPoint.PlayerSpawned -= OnPlayerSpawned;
+        PlayerSpawnManager.PlayerSpawned -= OnPlayerSpawned;
         EnemyManager.AllEnemiesCleared -= OnAllEnemiesCleared;
     }
 

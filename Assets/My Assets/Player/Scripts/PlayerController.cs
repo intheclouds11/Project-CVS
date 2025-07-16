@@ -370,10 +370,10 @@ public class PlayerController : MonoBehaviour
         ToggleMeshRenderers(false, 0.25f);
     }
 
-    public void Respawn(Vector3 position, Quaternion rotation)
+    public void Respawn(PlayerSpawnPoint spawnPoint)
     {
-        transform.position = position;
-        transform.rotation = rotation;
+        transform.position = spawnPoint.transform.position;
+        RotationTransform.rotation = spawnPoint.transform.rotation;
         ToggleMeshRenderers(true, 1f);
         Health.OnRespawn();
         PlayerAttack.OnRespawn();

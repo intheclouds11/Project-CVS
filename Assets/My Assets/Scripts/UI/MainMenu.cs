@@ -28,7 +28,7 @@ public class MainMenu : MonoBehaviour
 
     public void Button_NewGame()
     {
-        ES3.DeleteKey("CurrentSpawnPoint");
+        PlayerSpawnManager.ClearSavedSpawnPoint();
         Button_Continue();
     }
 

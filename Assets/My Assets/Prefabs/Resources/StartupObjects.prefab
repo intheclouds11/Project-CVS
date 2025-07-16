@@ -1210,6 +1210,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1620943184862029721}
   - component: {fileID: 8873778994408138310}
+  - component: {fileID: 188922872141758877}
   - component: {fileID: 748137451264701366}
   - component: {fileID: 381263747672286370}
   - component: {fileID: 4648012314726008055}
@@ -1255,6 +1256,19 @@ MonoBehaviour:
   MovementDeadzone: 0.1
   AimActiveThreshold: 0.75
   AimReleaseThreshold: 0.749
+--- !u!114 &188922872141758877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4434078024402439613}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d136839eb44dd0a44ac6cf3cfe715728, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _inputsEnabledDelay: 1
 --- !u!114 &748137451264701366
 MonoBehaviour:
   m_ObjectHideFlags: 0

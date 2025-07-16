@@ -121,7 +121,7 @@ public abstract class BaseEnemy : MonoBehaviour
         Health.Died += OnDied;
         if (!_player)
         {
-            PlayerSpawnPoint.PlayerSpawned += OnPlayerSpawned;
+            PlayerSpawnManager.PlayerSpawned += OnPlayerSpawned;
         }
     }
 
@@ -131,7 +131,7 @@ public abstract class BaseEnemy : MonoBehaviour
         Health.Died -= OnDied;
         if (_player)
         {
-            PlayerSpawnPoint.PlayerSpawned -= OnPlayerSpawned;
+            PlayerSpawnManager.PlayerSpawned -= OnPlayerSpawned;
         }
     }
 

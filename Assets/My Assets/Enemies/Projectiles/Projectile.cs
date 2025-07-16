@@ -44,7 +44,7 @@ public class Projectile : MonoBehaviour
     {
         if (!_player)
         {
-            PlayerSpawnPoint.PlayerSpawned += OnPlayerSpawned;
+            PlayerSpawnManager.PlayerSpawned += OnPlayerSpawned;
         }
     }
 
@@ -52,7 +52,7 @@ public class Projectile : MonoBehaviour
     {
         if (_player)
         {
-            PlayerSpawnPoint.PlayerSpawned -= OnPlayerSpawned;
+            PlayerSpawnManager.PlayerSpawned -= OnPlayerSpawned;
         }
     }
 
