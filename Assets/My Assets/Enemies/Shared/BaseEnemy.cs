@@ -5,6 +5,7 @@ using DG.Tweening;
 using NaughtyAttributes;
 using Pathfinding;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
@@ -73,6 +74,7 @@ public abstract class BaseEnemy : MonoBehaviour
     protected virtual void Awake()
     {
         _startingPos = transform.position;
+        SceneManager.sceneLoaded += OnSceneLoaded;
         Health = GetComponent<Health>();
         Health.Died += OnDied;
         Health.DamageTaken += OnDamageTaken;
@@ -105,6 +107,11 @@ public abstract class BaseEnemy : MonoBehaviour
         _destinationSetter.target = _targetWanderPointHolder;
 
         _agroPitch = Random.Range(0.9f, 1.1f);
+    }
+
+    private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
+    {
+        ClearLoopingAudio();
     }
 
     protected void OnEnable()
@@ -279,9 +286,27 @@ public abstract class BaseEnemy : MonoBehaviour
 
     protected virtual void OnDied(GameObject obj)
     {
-        if (_agroAudio) _agroAudio.Stop();
-        if (_patrolAudio) _patrolAudio.Stop();
-        if (_abilityStartAudio) _abilityStartAudio.Stop();
+        ClearLoopingAudio();
+        if (_abilityStartAudio)
+        {
+            _abilityStartAudio.Stop();
+            _abilityStartAudio = null;
+        }
         gameObject.SetActive(false);
+    }
+
+    private void ClearLoopingAudio()
+    {
+        if (_agroAudio)
+        {
+            _agroAudio.Stop();
+            _agroAudio = null;
+        }
+
+        if (_patrolAudio)
+        {
+            _patrolAudio.Stop();
+            _patrolAudio = null;
+        }
     }
 }

@@ -79,7 +79,6 @@ public class Projectile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        bool returnToPool = false;
         if (gameObject.CompareTag("EnemyProjectile") && other.gameObject.CompareTag("PlayerWeapon"))
         {
             gameObject.tag = "Deflected";
@@ -127,7 +126,6 @@ public class Projectile : MonoBehaviour
                     projHit.transform.rotation = Quaternion.LookRotation(transform.forward);
                     projHit.Rb.linearVelocity = transform.forward * _baseDeflectSpeed;
                     Rb.linearVelocity = projHit.transform.forward * _baseDeflectSpeed * 0.75f;
-                    return;
                 }
                 else if (bossHit)
                 {
