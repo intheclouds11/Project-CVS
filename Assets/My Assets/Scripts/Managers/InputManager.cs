@@ -15,6 +15,8 @@ public class InputManager : MonoBehaviour
     public float AimActiveThreshold = 0.6f;
     public float AimReleaseThreshold = 0.2f;
 
+    public bool InputsAllowed { get; private set; }
+
     public Vector2 Translation { get; private set; }
     public Vector2 Direction { get; private set; }
     public bool DashWasPressed { get; private set; }
@@ -55,9 +57,9 @@ public class InputManager : MonoBehaviour
         _inputs.Enable();
     }
 
-    private void OnDisable()
+    public void ToggleInputsAllowed(bool toggle)
     {
-        _inputs.Disable();
+        InputsAllowed = toggle;
     }
 
     private void Update()

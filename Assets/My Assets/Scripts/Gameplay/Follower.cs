@@ -22,9 +22,9 @@ public class Follower : MonoBehaviour
             transform.position = _target.position + _offset;
             if (_lookTowards) transform.LookAt(_target);
         }
-        else
+        else if (GameManager.Instance.Player1)
         {
-            _target = GameManager.Instance?.Player1?.transform;
+            _target = GameManager.Instance.Player1.transform;
         }
     }
 }

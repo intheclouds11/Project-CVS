@@ -62,7 +62,7 @@ public class UIManager : MonoBehaviour
 
         if (_pauseMenu.activeSelf)
         {
-            PauseScreen.Instance.ResumeGame();
+            PauseScreen.Instance.ReturnToMainMenu();
         }
 
         SceneManager.LoadScene("MainMenu");

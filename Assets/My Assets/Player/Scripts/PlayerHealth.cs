@@ -52,8 +52,9 @@ public class PlayerHealth : Health
     }
 
     // todo: better way to retain reference to scene Volume?
-    protected virtual void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
+    protected virtual void OnSceneLoaded(Scene loadedScene, LoadSceneMode arg1)
     {
+        if (loadedScene.name.Equals("MainMenu")) return;
         _globalVolume = FindAnyObjectByType<Volume>();
         _globalVolume.profile.TryGet(out _vignette);
         _globalVolume.profile.TryGet(out _colorAdjustments);

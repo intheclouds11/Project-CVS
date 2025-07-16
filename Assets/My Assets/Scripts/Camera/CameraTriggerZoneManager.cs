@@ -36,9 +36,12 @@ public class CameraTriggerZoneManager : MonoBehaviour
     private void Init()
     {
         _virtualCam = FindAnyObjectByType<CinemachineCamera>();
-        _isPerspective = !_virtualCam.Lens.Orthographic;
-        _startingFOV = _virtualCam.Lens.FieldOfView;
-        _startingLensSize = _virtualCam.Lens.OrthographicSize;
+        if (_virtualCam)
+        {
+            _isPerspective = !_virtualCam.Lens.Orthographic;
+            _startingFOV = _virtualCam.Lens.FieldOfView;
+            _startingLensSize = _virtualCam.Lens.OrthographicSize;
+        }
     }
 
     private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
@@ -47,14 +50,17 @@ public class CameraTriggerZoneManager : MonoBehaviour
         _currentZone = null;
         _lastExitedZone = null;
         _zonesInRange.Clear();
-        _virtualCam.Lens.FieldOfView = _startingFOV;
-        _virtualCam.Lens.OrthographicSize = _startingLensSize;
+        if (_virtualCam)
+        {
+            _virtualCam.Lens.FieldOfView = _startingFOV;
+            _virtualCam.Lens.OrthographicSize = _startingLensSize;
+        }
     }
 
     private void LateUpdate()
     {
         CameraTriggerZone lastActiveZone = _currentZone ? _currentZone : _lastExitedZone;
-        if (!lastActiveZone) return;
+        if (!lastActiveZone || !_virtualCam) return;
 
         if (_isPerspective)
         {

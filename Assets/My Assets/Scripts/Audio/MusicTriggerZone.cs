@@ -26,15 +26,12 @@ public class MusicTriggerZone : MonoBehaviour
     [field: SerializeField, ShowIf(nameof(_adjustAmbienceGain))]
     private float _ambienceGainOffset;
 
-    private bool _wasTriggered;
     private Coroutine _fadeCoroutine;
 
 
     private void OnTriggerEnter(Collider other)
     {
-        if ((_triggerOnce && _wasTriggered) || other.gameObject.layer != LayerMask.NameToLayer("Player")) return;
-
-        _wasTriggered = true;
+        if (!other.CompareTag("Player")) return;
 
         var musicAudioSource = AudioManager.Instance.MusicAudioSource;
         if (_fadeInMusic || (_fadeOutCurrentMusic && musicAudioSource.volume > 0))
@@ -51,6 +48,8 @@ public class MusicTriggerZone : MonoBehaviour
         {
             AudioManager.Instance.AdjustAmbienceGroupGain(_ambienceGainOffset);
         }
+
+        if (_triggerOnce) GetComponent<Collider>().enabled = false;
     }
 
     private IEnumerator FadeMusicCoroutine(AudioSource audioSource)

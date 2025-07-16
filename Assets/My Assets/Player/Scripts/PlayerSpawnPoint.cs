@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Linq;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -6,6 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.ProBuilder.MeshOperations;
+using UnityEngine.Serialization;
 using Object = UnityEngine.Object;
 
 public class PlayerSpawnPoint : MonoBehaviour
@@ -13,12 +15,14 @@ public class PlayerSpawnPoint : MonoBehaviour
     public static event Action<PlayerController> PlayerSpawned;
 
     [SerializeField]
-    private bool _activeRespawnPoint;
+    private bool _activeSpawnPoint;
     [SerializeField]
     private GameObject _playerPrefab;
+    [SerializeField]
+    private float _allowInputsDelay = 1f;
 
-    private PlayerController _player;
     private Vector3 _spawnPosition;
+    private static PlayerSpawnPoint _savedSpawnPoint;
 
 
     private void Awake()
@@ -37,33 +41,90 @@ public class PlayerSpawnPoint : MonoBehaviour
 
     private void Start()
     {
-        if (!_activeRespawnPoint) return;
-
-        _player = GameObject.FindWithTag("Player")?.GetComponent<PlayerController>();
-
-        if (!_player)
+        if (!_savedSpawnPoint) LoadSavedSpawnPoint();
+        if (!_activeSpawnPoint)
         {
-            _player = Spawn();
+            gameObject.SetActive(false);
+            return;
+        }
+
+        PlayerController spawnedPlayer = GameManager.Instance.Player1;
+        
+        if (!spawnedPlayer)
+        {
+            spawnedPlayer = Spawn();
         }
         else
         {
-            _player.Respawn(_spawnPosition, Quaternion.identity, true);
+            spawnedPlayer.Respawn(_spawnPosition, Quaternion.identity);
         }
 
-        PlayerSpawned?.Invoke(_player);
-        // gameObject.SetActive(false);
+        StartCoroutine(GiveControlCoroutine());
+        PlayerSpawned?.Invoke(spawnedPlayer);
     }
 
-    public PlayerController Spawn()
+    private static void LoadSavedSpawnPoint()
+    {
+        // Debug.Log($"Attempting to load savedSpawnPoint");
+        try
+        {
+            _savedSpawnPoint = ES3.Load<PlayerSpawnPoint>("CurrentSpawnPoint");
+            if (_savedSpawnPoint)
+            {
+                _savedSpawnPoint.ActivateSpawnPoint(false);
+            }
+            else
+            {
+                Debug.Log($"Couldn't load CurrentSpawnPoint");
+            }
+        }
+        catch
+        {
+            // ignored
+        }
+    }
+
+    private PlayerController Spawn()
     {
         var player = Instantiate(_playerPrefab, _spawnPosition, Quaternion.identity).GetComponent<PlayerController>();
         DontDestroyOnLoad(player);
         return player;
     }
+
+    private IEnumerator GiveControlCoroutine()
+    {
+        yield return new WaitForSeconds(_allowInputsDelay);
+        InputManager.Instance.ToggleInputsAllowed(true);
+    }
+
+    public void ActivateSpawnPoint(bool reachedCheckpoint)
+    {
+        _activeSpawnPoint = true;
+        gameObject.SetActive(true);
+        // TODO visual polish: play SpawnPointActivated animation (barrier creeps up to knee height)
+
+        if (reachedCheckpoint)
+        {
+            ES3.Save("CurrentSpawnPoint", this);
+            Debug.Log($"Saved CurrentSpawnPoint");
+        }
+
+        var spawnPoints = FindObjectsByType<PlayerSpawnPoint>(FindObjectsSortMode.None).ToList();
+        foreach (var spawnPoint in spawnPoints.Where(spawnPoint => spawnPoint != this))
+        {
+            spawnPoint.DeactivateSpawnPoint();
+        }
+    }
+
+    public void DeactivateSpawnPoint()
+    {
+        _activeSpawnPoint = false;
+        gameObject.SetActive(false);
+    }
 }
 
-#if UNITY_EDITOR
 
+#if UNITY_EDITOR
 [InitializeOnLoad]
 public static class PlayModeSpawnPointSetter
 {
@@ -81,7 +142,7 @@ public static class PlayModeSpawnPointSetter
                 EditorPrefs.SetBool("spawnAtCursor", false);
                 return;
             }
-            
+
             SceneView sceneView = SceneView.lastActiveSceneView;
 
             if (EditorWindow.focusedWindow != sceneView)

@@ -34,16 +34,22 @@ public class PauseScreen : MonoBehaviour
     private void PauseGame()
     {
         IsPaused = true;
-        // Time.timeScale = 0f;
         EventSystem.current.SetSelectedGameObject(_defaultButton);
         gameObject.SetActive(true);
+        InputManager.Instance.ToggleInputsAllowed(false);
     }
 
     public void ResumeGame()
     {
         IsPaused = false;
-        // Time.timeScale = 1f;
         EventSystem.current.SetSelectedGameObject(null); // prevents last clicked button remaining highlighted
+        gameObject.SetActive(false);
+        InputManager.Instance.ToggleInputsAllowed(true);
+    }
+
+    public void ReturnToMainMenu()
+    {
+        IsPaused = false;
         gameObject.SetActive(false);
     }
 }

@@ -26,7 +26,7 @@ public class RespawnScreen : MonoBehaviour
     private void Awake()
     {
         _canvasGroup = GetComponent<CanvasGroup>();
-        SceneManager.sceneLoaded += OnSceneLoaded;
+        // SceneManager.sceneLoaded += OnSceneLoaded;
         if (Debug.isDebugBuild || Application.isEditor)
         {
             _fadeInTime = 0.5f;
@@ -34,10 +34,11 @@ public class RespawnScreen : MonoBehaviour
         }
     }
 
-    private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
-    {
-        StartCoroutine(OnSceneLoadedCoroutine());
-    }
+    // private void OnSceneLoaded(Scene loadedScene, LoadSceneMode arg1)
+    // {
+    //     if (loadedScene.name.Equals("MainMenu")) return;
+    //     StartCoroutine(OnSceneLoadedCoroutine());
+    // }
 
     private void OnEnable()
     {
@@ -76,11 +77,12 @@ public class RespawnScreen : MonoBehaviour
         Respawn();
     }
 
-    private static void Respawn()
+    private void Respawn()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        GameManager.Instance.OnReturnToMainMenu();
+        GameManager.Instance.OnRespawn();
         GameManager.Instance.GameStart();
+        StartCoroutine(OnSceneLoadedCoroutine());
     }
 
     private IEnumerator OnSceneLoadedCoroutine()

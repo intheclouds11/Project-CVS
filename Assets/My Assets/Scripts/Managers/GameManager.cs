@@ -115,6 +115,18 @@ public class GameManager : MonoBehaviour
 
     public void OnReturnToMainMenu()
     {
+        Destroy(Player1.gameObject);
+        Player1 = null;
+        StopAllCoroutines();
+        HUD.Instance.GetLoseUI.SetActive(false);
+        HUD.Instance.GetWinUI.SetActive(false);
+        HUD.Instance.GetWaveCompleteUI.SetActive(false);
+
+        EnemyManager.Instance.DeregisterAllEnemies();
+    }
+
+    public void OnRespawn()
+    {
         StopAllCoroutines();
         HUD.Instance.GetLoseUI.SetActive(false);
         HUD.Instance.GetWinUI.SetActive(false);

@@ -24,14 +24,14 @@ public class CameraTriggerZone : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.layer != LayerMask.NameToLayer("Player")) return;
+        if (!other.CompareTag("Player")) return;
 
         CameraTriggerZoneManager.Instance.EnteredZone(this);
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.layer != LayerMask.NameToLayer("Player")) return;
+        if (!other.CompareTag("Player")) return;
 
         CameraTriggerZoneManager.Instance.ExitedZone(this);
     }

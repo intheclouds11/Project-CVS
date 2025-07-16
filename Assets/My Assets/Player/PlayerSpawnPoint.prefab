@@ -49,6 +49,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _activeRespawnPoint: 0
   _playerPrefab: {fileID: 1965895980782986867, guid: 6b29c31fb8a464740857e367f25f1437, type: 3}
+  _allowMovementDelay: 1.5
 --- !u!1 &3038104762418570078
 GameObject:
   m_ObjectHideFlags: 0

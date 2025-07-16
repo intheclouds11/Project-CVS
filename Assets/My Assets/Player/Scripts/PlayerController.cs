@@ -58,7 +58,7 @@ public class PlayerController : MonoBehaviour
     private ParticleSystem _dashParticleSystem;
     [SerializeField]
     private AudioClip _dashSFX;
-
+    
     public CharacterController CharacterController { get; private set; }
     public PlayerHealth Health { get; protected set; }
     public PlayerAttack PlayerAttack { get; private set; }
@@ -69,21 +69,6 @@ public class PlayerController : MonoBehaviour
     private Vector3 _movementVector;
     private Vector3 xzVelocity;
     private float yVelocity;
-    private Vector3 _rotateDirection;
-
-    public void SetAttackRotateDirection(Vector3 direction)
-    {
-        if (_inputManager.UsingGamepad)
-        {
-            var lookAtRotation = Quaternion.LookRotation(direction);
-            RotationTransform.localRotation = lookAtRotation;
-        }
-        else
-        {
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-            RotationTransform.rotation = Quaternion.Euler(0f, -angle + 90f, 0f);
-        }
-    }
 
     private float _lastAttackTime;
     private bool _dashWasPressed;
@@ -145,7 +130,7 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (PauseScreen.IsPaused)
+        if (!_inputManager.InputsAllowed)
         {
             xzVelocity = Vector3.zero;
             _playerAnimator.SetSpeed(0f);
@@ -162,9 +147,7 @@ public class PlayerController : MonoBehaviour
     private void CheckInputs()
     {
         _movementVector = new Vector3(_inputManager.Translation.x, 0f, _inputManager.Translation.y);
-
-        _rotateDirection = CalculateRotateDirection();
-
+        
         if (_inputManager.DashWasPressed && PlayerCharges.IsChargeAvailable())
         {
             _dashBufferTimer = _dashBufferTime;
@@ -252,6 +235,20 @@ public class PlayerController : MonoBehaviour
             }
 
             return;
+        }
+    }
+    
+    public void SetAttackRotateDirection(Vector3 direction)
+    {
+        if (_inputManager.UsingGamepad)
+        {
+            var lookAtRotation = Quaternion.LookRotation(direction);
+            RotationTransform.localRotation = lookAtRotation;
+        }
+        else
+        {
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            RotationTransform.rotation = Quaternion.Euler(0f, -angle + 90f, 0f);
         }
     }
 
@@ -357,9 +354,8 @@ public class PlayerController : MonoBehaviour
 
     private void OnDied(GameObject deadObj)
     {
-        enabled = false;
+        _inputManager.ToggleInputsAllowed(false);
         _dashBufferTimer = 0f;
-        PlayerAttack.enabled = false;
         CharacterController.enabled = false;
         PlayerAttack.OnDied();
         _playerAnimator.SetSpeed(0f);
@@ -374,10 +370,8 @@ public class PlayerController : MonoBehaviour
         ToggleMeshRenderers(false, 0.25f);
     }
 
-    public void Respawn(Vector3 position, Quaternion rotation, bool canControl)
+    public void Respawn(Vector3 position, Quaternion rotation)
     {
-        enabled = canControl;
-        PlayerAttack.enabled = canControl;
         transform.position = position;
         transform.rotation = rotation;
         ToggleMeshRenderers(true, 1f);

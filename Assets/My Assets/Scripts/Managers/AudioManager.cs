@@ -5,6 +5,7 @@ using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour
 {
@@ -37,10 +38,6 @@ public class AudioManager : MonoBehaviour
     public void OnPlayerRespawned()
     {
         AdjustMasterLowPass(22000f, 2f);
-        foreach (var loopAudioSource in _loopAudioSources)
-        {
-            loopAudioSource.Stop();
-        }
     }
 
     /// <summary>

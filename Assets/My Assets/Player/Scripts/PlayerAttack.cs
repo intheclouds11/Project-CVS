@@ -110,7 +110,7 @@ public class PlayerAttack : MonoBehaviour
 
     private void Update()
     {
-        if (PauseScreen.IsPaused) return;
+        if (!_inputManager.InputsAllowed) return;
 
         HandleCharging();
         HandleAttacking();
