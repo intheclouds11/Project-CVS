@@ -1,20 +1,20 @@
 using System;
 using System.Collections;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
+    public static MainMenu Instance;
+    
     [SerializeField]
     private GameObject _newGameButton;
     [SerializeField]
     private GameObject _newGameConfirmCanvas;
+    [SerializeField]
+    private GameObject _newGameCancelButton;
     [SerializeField]
     private GameObject _continueButton;
     [SerializeField]
@@ -30,18 +30,40 @@ public class MainMenu : MonoBehaviour
     [SerializeField]
     private float _startGameFadeDuration = 1f;
 
-    private void Start()
+
+    private void OnEnable()
     {
-        if (PlayerSpawnManager.Instance.HasSpawnPointSave)
+        if (SaveLoadManager.SaveFileExists())
         {
             EventSystem.current.SetSelectedGameObject(_continueButton);
         }
         else
         {
-            _continueButton.SetActive(false);
             EventSystem.current.SetSelectedGameObject(_newGameButton);
-        }
+            
+            _continueButton.SetActive(false);
 
+            var newNav = new Navigation();
+            newNav.mode = Navigation.Mode.Explicit;
+            newNav.selectOnUp = _quitButton.GetComponent<Selectable>();
+            newNav.selectOnDown = _settingsButton.GetComponent<Selectable>();
+            _newGameButton.GetComponent<Button>().navigation = newNav;
+
+            newNav = new Navigation();
+            newNav.mode = Navigation.Mode.Explicit;
+            newNav.selectOnUp = _settingsButton.GetComponent<Selectable>();
+            newNav.selectOnDown = _newGameButton.GetComponent<Selectable>();
+            _quitButton.GetComponent<Button>().navigation = newNav;
+        }
+    }
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    private void Start()
+    {
         AudioManager.Instance.MusicAudioSource.volume = _menuMusicVolume;
         AudioManager.Instance.MusicAudioSource.clip = _menuMusic;
         AudioManager.Instance.MusicAudioSource.Play();
@@ -49,10 +71,11 @@ public class MainMenu : MonoBehaviour
 
     public void Button_NewGame()
     {
-        if (PlayerSpawnManager.Instance.HasSpawnPointSave)
+        if (SaveLoadManager.SaveFileExists())
         {
             GetComponent<Canvas>().enabled = false;
             _newGameConfirmCanvas.SetActive(true);
+            EventSystem.current.SetSelectedGameObject(_newGameCancelButton);
         }
         else
         {
@@ -62,7 +85,7 @@ public class MainMenu : MonoBehaviour
 
     public void Button_NewGameConfirm()
     {
-        PlayerSpawnManager.ClearSavedSpawnPoint();
+        SaveLoadManager.ClearSavedSpawnPoint();
         StartGame();
     }
 
@@ -70,6 +93,14 @@ public class MainMenu : MonoBehaviour
     {
         _newGameConfirmCanvas.SetActive(false);
         GetComponent<Canvas>().enabled = true;
+        if (SaveLoadManager.SaveFileExists())
+        {
+            EventSystem.current.SetSelectedGameObject(_continueButton);
+        }
+        else
+        {
+            EventSystem.current.SetSelectedGameObject(_newGameButton);
+        }
     }
 
     public void Button_Continue()
@@ -100,9 +131,6 @@ public class MainMenu : MonoBehaviour
 
     public void Button_ExitGame()
     {
-#if UNITY_EDITOR
-        EditorApplication.isPlaying = false;
-#endif
-        Application.Quit();
+        UIManager.Instance.Button_ExitGame();
     }
 }

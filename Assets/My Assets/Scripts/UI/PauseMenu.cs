@@ -31,7 +31,6 @@ public class PauseMenu : MonoBehaviour
     public void ResumeGame()
     {
         CloseMenu();
-        EventSystem.current.SetSelectedGameObject(null); // prevents last clicked button remaining highlighted
         InputManager.Instance.ToggleInputsAllowed(true);
     }
 

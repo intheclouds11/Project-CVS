@@ -34,19 +34,25 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (InputManager.Instance.ToggleGodModeWasPressed)
+        if (!UIManager.Instance.IsAMenuOpen())
         {
-            GodMode = !GodMode;
-            AudioManager.Instance.MusicAudioSource.volume = GodMode ? 0f : AudioManager.Instance.InitialMusicVolume;
-            if (GodMode) Player1.PlayerCharges.ForceFullRecharge();
-            Debug.Log($"[GameManager] GodMode {GodMode}");
-        }
+            if (InputManager.Instance.ToggleGodModeWasPressed)
+            {
+                GodMode = !GodMode;
+                AudioManager.Instance.MusicAudioSource.volume = GodMode ? 0f : AudioManager.Instance.InitialMusicVolume;
+                if (GodMode) Player1.PlayerCharges.ForceFullRecharge();
+                Debug.Log($"[GameManager] GodMode {GodMode}");
+            }
 
-        if (InputManager.Instance.ToggleEnemyAIWasPressed)
-        {
-            EnemyAIEnabled = !EnemyAIEnabled;
-            EnemyAIToggled?.Invoke(EnemyAIEnabled);
-            Debug.Log($"[GameManager] EnemyAIEnabled: {EnemyAIEnabled}");
+            if (InputManager.Instance.ToggleEnemyAIWasPressed)
+            {
+                EnemyAIEnabled = !EnemyAIEnabled;
+                EnemyAIToggled?.Invoke(EnemyAIEnabled);
+                Debug.Log($"[GameManager] EnemyAIEnabled: {EnemyAIEnabled}");
+            }
+            
+            if (InputManager.Instance.ToggleChargeHUDWasPressed)
+                Player1.PlayerAttack.ToggleChargeHUD();
         }
     }
 

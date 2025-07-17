@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -18,8 +19,11 @@ public class SettingsMenu : MonoBehaviour
 
     private void OnEnable()
     {
+        EventSystem.current.SetSelectedGameObject(_musicVolumeSlider.gameObject);
+
         _musicVolumeSlider.SetValueWithoutNotify(MyExtensions.PerceptualDecibelsToVolume(AudioManager.Instance.GetMusicGroupGain()));
-        _ambienceVolumeSlider.SetValueWithoutNotify(MyExtensions.PerceptualDecibelsToVolume(AudioManager.Instance.GetAmbienceGroupGain()));
+        _ambienceVolumeSlider.SetValueWithoutNotify(
+            MyExtensions.PerceptualDecibelsToVolume(AudioManager.Instance.GetAmbienceGroupGain()));
         _sfxVolumeSlider.SetValueWithoutNotify(MyExtensions.PerceptualDecibelsToVolume(AudioManager.Instance.GetSFXGroupGain()));
         _fullscreenToggle.isOn = Screen.fullScreen;
     }
@@ -30,15 +34,25 @@ public class SettingsMenu : MonoBehaviour
         _ambienceVolumeSlider.onValueChanged.AddListener(OnAmbienceSliderChanged);
         _sfxVolumeSlider.onValueChanged.AddListener(OnSFXSliderChanged);
         _fullscreenToggle.onValueChanged.AddListener(FullscreenToggled);
+
+        if (PlayerPrefs.HasKey("Fullscreen"))
+        {
+            Screen.fullScreen = PlayerPrefs.GetInt("Fullscreen") == 1;
+        }
     }
 
     public void Button_Return()
     {
+        UIManager.Instance.ExitSettingsMenu(true);
+    }
+
+    public void OnExitSettings()
+    {
+        gameObject.SetActive(false);
         PlayerPrefs.SetFloat("MusicVolume", _musicVolumeSlider.value);
         PlayerPrefs.SetFloat("AmbienceVolume", _ambienceVolumeSlider.value);
         PlayerPrefs.SetFloat("SFXVolume", _sfxVolumeSlider.value);
-
-        UIManager.Instance.ExitSettingsMenu();
+        PlayerPrefs.SetInt("Fullscreen", _fullscreenToggle.isOn ? 1 : 0);
     }
 
     private void FullscreenToggled(bool toggle)

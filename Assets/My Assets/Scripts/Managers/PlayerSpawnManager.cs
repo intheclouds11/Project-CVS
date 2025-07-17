@@ -13,7 +13,6 @@ public class PlayerSpawnManager : MonoBehaviour
 {
     public static PlayerSpawnManager Instance;
     public PlayerSpawnPoint ActiveSpawnPoint { get; private set; }
-    public bool HasSpawnPointSave { get; private set; }
     public static event Action<PlayerController> PlayerSpawned;
 
     private List<PlayerSpawnPoint> _spawnPoints = new();
@@ -27,10 +26,22 @@ public class PlayerSpawnManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene loadedScene, LoadSceneMode arg1)
     {
-        _spawnPoints = FindObjectsByType<PlayerSpawnPoint>(FindObjectsSortMode.None).ToList();
-        TryLoadSavedSpawnPoint(loadedScene.name);
-        
         if (loadedScene.name == "MainMenu") return;
+
+        _spawnPoints = FindObjectsByType<PlayerSpawnPoint>(FindObjectsSortMode.None).ToList();
+        if (SaveLoadManager.TryGetSavedSpawnPointName(out var spawnPointName))
+        {
+            LoadSavedSpawnPoint(spawnPointName);
+        }
+        else
+        {
+            ActiveSpawnPoint = _spawnPoints.Find(sp => sp.enabled);
+            if (!ActiveSpawnPoint && loadedScene.name != "MainMenu")
+            {
+                Debug.LogError($"No ActiveSpawnPoint found!");
+                return;
+            }
+        }
 
         PlayerController spawnedPlayer = GameManager.Instance.Player1;
         if (!spawnedPlayer)
@@ -55,33 +66,15 @@ public class PlayerSpawnManager : MonoBehaviour
         PlayerSpawned?.Invoke(spawnedPlayer);
     }
 
-    public void TryLoadSavedSpawnPoint(string loadedSceneName)
+    public void LoadSavedSpawnPoint(string spawnPointName)
     {
-        try
+        foreach (var spawnPoint in _spawnPoints.Where(p => p.name == spawnPointName))
         {
-            var savedSpawnPointName = ES3.Load<string>("SpawnPointName");
-            HasSpawnPointSave = true;
-            
-            foreach (var spawnPoint in _spawnPoints.Where(p => p.name == savedSpawnPointName))
-            {
-                ActivateSpawnPoint(spawnPoint, false);
-                break;
-            }
+            ActivateSpawnPoint(spawnPoint, false);
+            return;
         }
-        catch
-        {
-            HasSpawnPointSave = false;
-            
-            ActiveSpawnPoint = _spawnPoints.Find(sp => sp.enabled);
-            if (!ActiveSpawnPoint && loadedSceneName != "MainMenu" )
-            {
-                Debug.LogError($"No activeSpawnPoint found");
-            }
-            else
-            {
-                // Debug.Log($"Tried loading saved SpawnPointName, but nothing found. _activeSpawnPoint set to {_activeSpawnPoint}");
-            }
-        }
+
+        Debug.LogError($"PlayerSpawnManager couldn't find PlayerSpawnPoint with name {spawnPointName}");
     }
 
     private PlayerController Spawn(PlayerSpawnPoint spawnPoint)
@@ -112,74 +105,60 @@ public class PlayerSpawnManager : MonoBehaviour
             sp.Deactivate(reachedCheckpoint);
         }
     }
-    
-    public static void ClearSavedSpawnPoint()
-    {
-        ES3.DeleteKey("SpawnPointName");
-    }
-
+}
 
 #if UNITY_EDITOR
-
-    [MenuItem("Tools/ClearSavedSpawnPoint")]
-    public static void Menu_ClearSavedSpawnPoint()
+[InitializeOnLoad]
+public static class PlayModeSpawnPointSetter
+{
+    static PlayModeSpawnPointSetter()
     {
-        ClearSavedSpawnPoint();
+        EditorApplication.playModeStateChanged += OnPlayModeChanged;
     }
 
-    [InitializeOnLoad]
-    public static class PlayModeSpawnPointSetter
+    private static void OnPlayModeChanged(PlayModeStateChange state)
     {
-        static PlayModeSpawnPointSetter()
+        if (state == PlayModeStateChange.ExitingEditMode)
         {
-            EditorApplication.playModeStateChanged += OnPlayModeChanged;
-        }
-
-        private static void OnPlayModeChanged(PlayModeStateChange state)
-        {
-            if (state == PlayModeStateChange.ExitingEditMode)
+            if (!Keyboard.current.ctrlKey.isPressed && !Keyboard.current.pKey.isPressed)
             {
-                if (!Keyboard.current.ctrlKey.isPressed && !Keyboard.current.pKey.isPressed)
-                {
-                    EditorPrefs.SetBool("spawnAtCursor", false);
-                    return;
-                }
+                EditorPrefs.SetBool("spawnAtCursor", false);
+                return;
+            }
 
-                SceneView sceneView = SceneView.lastActiveSceneView;
+            SceneView sceneView = SceneView.lastActiveSceneView;
 
-                if (EditorWindow.focusedWindow != sceneView)
-                {
-                    EditorPrefs.SetBool("spawnAtCursor", false);
-                    Debug.LogWarning("[Scene Spawn] Scene View not focused. spawnAtCursor set to false.");
+            if (EditorWindow.focusedWindow != sceneView)
+            {
+                EditorPrefs.SetBool("spawnAtCursor", false);
+                Debug.LogWarning("[Scene Spawn] Scene View not focused. spawnAtCursor set to false.");
 
-                    return;
-                }
+                return;
+            }
 
-                if (sceneView == null)
-                {
-                    Debug.LogWarning("No Scene View available.");
-                    return;
-                }
+            if (sceneView == null)
+            {
+                Debug.LogWarning("No Scene View available.");
+                return;
+            }
 
-                Vector2 mousePos = Event.current?.mousePosition ?? new Vector2(Screen.width / 2f, Screen.height / 2f);
-                Ray ray = HandleUtility.GUIPointToWorldRay(mousePos);
+            Vector2 mousePos = Event.current?.mousePosition ?? new Vector2(Screen.width / 2f, Screen.height / 2f);
+            Ray ray = HandleUtility.GUIPointToWorldRay(mousePos);
 
-                if (Physics.Raycast(ray, out RaycastHit hit, 1000f, LayerMask.GetMask("Ground")))
-                {
-                    Vector3 hitPoint = hit.point;
-                    EditorPrefs.SetBool("spawnAtCursor", true);
-                    EditorPrefs.SetFloat("SpawnX", hitPoint.x);
-                    EditorPrefs.SetFloat("SpawnY", hitPoint.y);
-                    EditorPrefs.SetFloat("SpawnZ", hitPoint.z);
-                    Debug.Log($"[Scene Spawn] Saved spawn point: {hitPoint}. spawnAtCursor set to true!");
-                }
-                else
-                {
-                    Debug.LogWarning("[Scene Spawn] Raycast did not hit ground.");
-                }
+            if (Physics.Raycast(ray, out RaycastHit hit, 1000f, LayerMask.GetMask("Ground")))
+            {
+                Vector3 hitPoint = hit.point;
+                EditorPrefs.SetBool("spawnAtCursor", true);
+                EditorPrefs.SetFloat("SpawnX", hitPoint.x);
+                EditorPrefs.SetFloat("SpawnY", hitPoint.y);
+                EditorPrefs.SetFloat("SpawnZ", hitPoint.z);
+                Debug.Log($"[Scene Spawn] Saved spawn point: {hitPoint}. spawnAtCursor set to true!");
+            }
+            else
+            {
+                Debug.LogWarning("[Scene Spawn] Raycast did not hit ground.");
             }
         }
     }
-
-#endif
 }
+#endif

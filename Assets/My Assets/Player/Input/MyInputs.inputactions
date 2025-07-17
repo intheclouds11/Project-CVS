@@ -517,11 +517,39 @@
                 {
                     "name": "",
                     "id": "3adc1e91-603d-49cf-8e9a-1620f8987711",
-                    "path": "<Gamepad>/buttonEast",
+                    "path": "<Gamepad>/buttonWest",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Toggle Enemy AI",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "UI",
+            "id": "9bfbe9d5-7a4d-4699-bae3-58fce5782208",
+            "actions": [
+                {
+                    "name": "Back",
+                    "type": "Button",
+                    "id": "9d545d6e-e992-4da6-8764-2eb275ec5bf9",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "d4a4889a-c865-4804-a1d9-6b13049c637a",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Back",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

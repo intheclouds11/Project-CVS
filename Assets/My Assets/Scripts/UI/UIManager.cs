@@ -1,5 +1,9 @@
 using System;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
@@ -13,33 +17,57 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private GameObject _respawnScreen;
 
+    private GameObject lastSelected;
+
 
     private void Awake()
     {
         Instance = this;
     }
 
+    private void Start()
+    {
+        lastSelected = EventSystem.current.currentSelectedGameObject;
+    }
+
     private void Update()
     {
-        if (CanShowPauseScreen() && InputManager.Instance.PauseWasPressed)
-        {
-            _pauseMenu.OnPauseButtonPressed();
-        }
+        if (EventSystem.current.currentSelectedGameObject == null) EventSystem.current.SetSelectedGameObject(lastSelected);
+        else lastSelected = EventSystem.current.currentSelectedGameObject;
 
-        if (InputManager.Instance.ToggleChargeHUDWasPressed)
+        if (InputManager.Instance.PauseWasPressed)
         {
-            GameManager.Instance.Player1.PlayerAttack.ToggleChargeHUD();
+            if (CanTogglePauseScreen())
+            {
+                _pauseMenu.OnPauseButtonPressed();
+            }
+            else if (SceneManager.GetActiveScene().name != "MainMenu")
+            {
+                ExitPauseMenu();
+            }
+        }
+        else if (InputManager.Instance.GamepadEastButtonWasPressed)
+        {
+            if (_pauseMenu.isActiveAndEnabled)
+            {
+                _pauseMenu.OnPauseButtonPressed();
+            }
+            else if (_settingsMenu.activeInHierarchy)
+            {
+                ExitSettingsMenu(true);
+            }
         }
     }
 
-    private bool CanShowPauseScreen()
+    private bool CanTogglePauseScreen()
     {
         return SceneManager.GetActiveScene().name != "MainMenu" && !_settingsMenu.activeInHierarchy;
     }
 
-    public bool IsPauseMenuOpen()
+    public bool IsAMenuOpen()
     {
-        return _pauseMenu.gameObject.activeInHierarchy;
+        return _pauseMenu.gameObject.activeInHierarchy || _settingsMenu.activeInHierarchy ||
+               SceneManager.GetActiveScene().name == "MainMenu";
     }
 
     public void ShowRespawnScreen()
@@ -55,7 +83,7 @@ public class UIManager : MonoBehaviour
     public void Button_ReturnToMainMenu()
     {
         GameManager.Instance.OnReturnToMainMenu();
-        
+
         if (_pauseMenu.gameObject.activeSelf)
         {
             _pauseMenu.CloseMenu();
@@ -69,7 +97,7 @@ public class UIManager : MonoBehaviour
         var mainMenu = FindAnyObjectByType<MainMenu>();
         if (mainMenu)
         {
-            mainMenu.GetComponent<Canvas>().enabled = false;
+            mainMenu.gameObject.SetActive(false);
         }
         else if (_pauseMenu.gameObject.activeInHierarchy)
         {
@@ -79,23 +107,35 @@ public class UIManager : MonoBehaviour
         _settingsMenu.SetActive(true);
     }
 
-    public void ExitSettingsMenu()
+    public void ExitPauseMenu()
     {
-        var mainMenu = FindAnyObjectByType<MainMenu>();
-        if (mainMenu)
+        if (_settingsMenu.activeInHierarchy)
         {
-            mainMenu.GetComponent<Canvas>().enabled = true;
+            ExitSettingsMenu();
         }
-        else
+
+        _pauseMenu.gameObject.SetActive(false);
+    }
+
+    public void ExitSettingsMenu(bool returnToPauseMenu = false)
+    {
+        if (MainMenu.Instance)
+        {
+            MainMenu.Instance.gameObject.SetActive(true);
+        }
+        else if (returnToPauseMenu)
         {
             _pauseMenu.OpenMenu();
         }
 
-        _settingsMenu.SetActive(false);
+        _settingsMenu.GetComponent<SettingsMenu>().OnExitSettings();
     }
 
     public void Button_ExitGame()
     {
+#if UNITY_EDITOR
+        EditorApplication.isPlaying = false;
+#endif
         Application.Quit();
     }
 }

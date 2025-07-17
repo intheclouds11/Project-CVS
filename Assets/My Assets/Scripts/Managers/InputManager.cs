@@ -33,6 +33,8 @@ public class InputManager : MonoBehaviour
     public bool ActivateAbilityWasPressed { get; private set; }
 
     public bool InteractWasPressed { get; private set; }
+    public bool GamepadEastButtonWasPressed { get; private set; }
+    
     public bool PauseWasPressed { get; private set; }
     public bool RespawnWasPressed { get; private set; }
     public bool OpenInventoryWasPressed { get; private set; }
@@ -78,7 +80,7 @@ public class InputManager : MonoBehaviour
 
         WaitingToGivePlayerControl = false;
 
-        if (!UIManager.Instance.IsPauseMenuOpen())
+        if (!UIManager.Instance.IsAMenuOpen())
         {
             ToggleInputsAllowed(true);
         }
@@ -113,6 +115,7 @@ public class InputManager : MonoBehaviour
             AttackWasPressed = !PrevAttackHeld && AttackHeld;
             AttackWasReleased = PrevAttackHeld && Direction.magnitude <= AimReleaseThreshold;
             RespawnWasPressed = InteractWasPressed;
+            GamepadEastButtonWasPressed = _inputs.UI.Back.WasPerformedThisFrame();
         }
         else
         {
