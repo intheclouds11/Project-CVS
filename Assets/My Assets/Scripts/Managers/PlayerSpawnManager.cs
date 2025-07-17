@@ -11,11 +11,9 @@ using UnityEngine.SceneManagement;
 
 public class PlayerSpawnManager : MonoBehaviour
 {
-    [SerializeField]
-    private float _inputsEnabledDelay = 1f;
-
     public static PlayerSpawnManager Instance;
-    public PlayerSpawnPoint _activeSpawnPoint { get; private set; }
+    public PlayerSpawnPoint ActiveSpawnPoint { get; private set; }
+    public bool HasSpawnPointSave { get; private set; }
     public static event Action<PlayerController> PlayerSpawned;
 
     private List<PlayerSpawnPoint> _spawnPoints = new();
@@ -29,20 +27,19 @@ public class PlayerSpawnManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene loadedScene, LoadSceneMode arg1)
     {
-        if (loadedScene.name == "MainMenu") return;
-
         _spawnPoints = FindObjectsByType<PlayerSpawnPoint>(FindObjectsSortMode.None).ToList();
-
-        TryLoadSavedSpawnPoint();
+        TryLoadSavedSpawnPoint(loadedScene.name);
+        
+        if (loadedScene.name == "MainMenu") return;
 
         PlayerController spawnedPlayer = GameManager.Instance.Player1;
         if (!spawnedPlayer)
         {
-            spawnedPlayer = Spawn(_activeSpawnPoint);
+            spawnedPlayer = Spawn(ActiveSpawnPoint);
         }
         else
         {
-            spawnedPlayer.Respawn(_activeSpawnPoint);
+            spawnedPlayer.Respawn(ActiveSpawnPoint);
         }
 
 #if UNITY_EDITOR
@@ -55,15 +52,16 @@ public class PlayerSpawnManager : MonoBehaviour
         }
 #endif
 
-        StartCoroutine(GiveControlCoroutine());
         PlayerSpawned?.Invoke(spawnedPlayer);
     }
 
-    public void TryLoadSavedSpawnPoint()
+    public void TryLoadSavedSpawnPoint(string loadedSceneName)
     {
         try
         {
             var savedSpawnPointName = ES3.Load<string>("SpawnPointName");
+            HasSpawnPointSave = true;
+            
             foreach (var spawnPoint in _spawnPoints.Where(p => p.name == savedSpawnPointName))
             {
                 ActivateSpawnPoint(spawnPoint, false);
@@ -72,8 +70,10 @@ public class PlayerSpawnManager : MonoBehaviour
         }
         catch
         {
-            _activeSpawnPoint = _spawnPoints.Find(sp => sp.enabled);
-            if (!_activeSpawnPoint)
+            HasSpawnPointSave = false;
+            
+            ActiveSpawnPoint = _spawnPoints.Find(sp => sp.enabled);
+            if (!ActiveSpawnPoint && loadedSceneName != "MainMenu" )
             {
                 Debug.LogError($"No activeSpawnPoint found");
             }
@@ -93,16 +93,10 @@ public class PlayerSpawnManager : MonoBehaviour
         return player;
     }
 
-    private IEnumerator GiveControlCoroutine()
-    {
-        yield return new WaitForSeconds(_inputsEnabledDelay);
-        InputManager.Instance.ToggleInputsAllowed(true);
-    }
-
     public void ActivateSpawnPoint(PlayerSpawnPoint spawnPoint, bool reachedCheckpoint)
     {
         spawnPoint.Activate(reachedCheckpoint);
-        _activeSpawnPoint = spawnPoint;
+        ActiveSpawnPoint = spawnPoint;
 
         // TODO visual polish: play SpawnPointActivated animation (barrier creeps up to knee height)
         // TODO: play checkpoint unlocked sfx or show save icon in bottom corner of screen
@@ -113,7 +107,7 @@ public class PlayerSpawnManager : MonoBehaviour
             // Debug.Log($"Saved SpawnPointName {spawnPoint.gameObject.name}");
         }
 
-        foreach (var sp in _spawnPoints.Where(p => p != _activeSpawnPoint))
+        foreach (var sp in _spawnPoints.Where(p => p != ActiveSpawnPoint))
         {
             sp.Deactivate(reachedCheckpoint);
         }

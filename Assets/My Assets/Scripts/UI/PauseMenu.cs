@@ -1,29 +1,19 @@
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
-public class PauseScreen : MonoBehaviour
+public class PauseMenu : MonoBehaviour
 {
-    public static PauseScreen Instance;
-    public static bool IsPaused;
     [SerializeField]
     private GameObject _defaultButton;
-    private Canvas _canvas;
 
-
-    private void Awake()
-    {
-        Instance = this;
-        _canvas = gameObject.GetComponent<Canvas>();
-        _canvas.enabled = true;
-        gameObject.SetActive(false);
-    }
 
     public void OnPauseButtonPressed()
     {
         if (!gameObject.activeInHierarchy)
         {
-            PauseGame();
+            OpenMenu();
         }
         else
         {
@@ -31,9 +21,8 @@ public class PauseScreen : MonoBehaviour
         }
     }
 
-    private void PauseGame()
+    public void OpenMenu()
     {
-        IsPaused = true;
         EventSystem.current.SetSelectedGameObject(_defaultButton);
         gameObject.SetActive(true);
         InputManager.Instance.ToggleInputsAllowed(false);
@@ -41,15 +30,13 @@ public class PauseScreen : MonoBehaviour
 
     public void ResumeGame()
     {
-        IsPaused = false;
+        CloseMenu();
         EventSystem.current.SetSelectedGameObject(null); // prevents last clicked button remaining highlighted
-        gameObject.SetActive(false);
         InputManager.Instance.ToggleInputsAllowed(true);
     }
 
-    public void ReturnToMainMenu()
+    public void CloseMenu()
     {
-        IsPaused = false;
         gameObject.SetActive(false);
     }
 }

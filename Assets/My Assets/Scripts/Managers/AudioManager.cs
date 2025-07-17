@@ -35,6 +35,21 @@ public class AudioManager : MonoBehaviour
         InitialMusicVolume = MusicAudioSource.volume;
     }
 
+    private void Start()
+    {
+        LoadAudioPreferences();
+    }
+
+    private void LoadAudioPreferences()
+    {
+        if (PlayerPrefs.HasKey("MusicVolume"))
+            SetMusicGroupGain(MyExtensions.VolumeToPerceptualDecibels(PlayerPrefs.GetFloat("MusicVolume")));
+        if (PlayerPrefs.HasKey("AmbienceVolume"))
+            SetAmbienceGroupGain(MyExtensions.VolumeToPerceptualDecibels(PlayerPrefs.GetFloat("AmbienceVolume")));
+        if (PlayerPrefs.HasKey("SFXVolume"))
+            SetSFXGroupGain(MyExtensions.VolumeToPerceptualDecibels(PlayerPrefs.GetFloat("SFXVolume")));
+    }
+
     public void OnPlayerRespawned()
     {
         AdjustMasterLowPass(22000f, 2f);
@@ -112,15 +127,52 @@ public class AudioManager : MonoBehaviour
         return audioSource;
     }
 
-    public void AdjustMusicGroupGain(float newGain)
+    public float GetMusicGroupGain()
+    {
+        _audioMixer.GetFloat("MusicGain", out var gain);
+        return gain;
+    }
+
+    public void SetMusicGroupGain(float newGain)
     {
         _audioMixer.SetFloat("MusicGain", newGain);
     }
 
+    public void AdjustMusicGroupGain(float offset)
+    {
+        _audioMixer.SetFloat("MusicGain", GetMusicGroupGain() - offset);
+    }
+
+    public float GetAmbienceGroupGain()
+    {
+        _audioMixer.GetFloat("AmbienceGain", out var gain);
+        return gain;
+    }
+
+    public void SetAmbienceGroupGain(float newGain)
+    {
+        _audioMixer.SetFloat("AmbienceGain", newGain);
+    }
+
     public void AdjustAmbienceGroupGain(float offset)
     {
-        _audioMixer.GetFloat("AmbienceGain", out float currentGain);
-        _audioMixer.SetFloat("AmbienceGain", currentGain - offset);
+        _audioMixer.SetFloat("AmbienceGain", GetAmbienceGroupGain() - offset);
+    }
+
+    public float GetSFXGroupGain()
+    {
+        _audioMixer.GetFloat("SFXGain", out var gain);
+        return gain;
+    }
+
+    public void SetSFXGroupGain(float newGain)
+    {
+        _audioMixer.SetFloat("SFXGain", newGain);
+    }
+
+    public void AdjustSFXGroupGain(float offset)
+    {
+        _audioMixer.SetFloat("SFXGain", GetSFXGroupGain() - offset);
     }
 
     public void AdjustMasterLowPass(float cutoffFreq, float duration)

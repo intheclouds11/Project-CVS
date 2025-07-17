@@ -9,6 +9,10 @@ using UnityEngine.Serialization;
 public class InputManager : MonoBehaviour
 {
     public static InputManager Instance;
+    
+    [SerializeField]
+    private float _inputsEnabledDelay = 1f;
+    public bool WaitingToGivePlayerControl { get; private set; } = true;
 
     [Header("Gamepad Settings")]
     public float MovementDeadzone = 0.1f;
@@ -55,10 +59,34 @@ public class InputManager : MonoBehaviour
         Instance = this;
         _inputs = new MyInputs();
         _inputs.Enable();
+        PlayerSpawnManager.PlayerSpawned += OnPlayerSpawned;
+    }
+
+    private void OnPlayerSpawned(PlayerController obj)
+    {
+        DelayGivePlayerControl();
+    }
+
+    public void DelayGivePlayerControl()
+    {
+        StartCoroutine(GiveControlCoroutine());
+    }
+    
+    private IEnumerator GiveControlCoroutine()
+    {
+        yield return new WaitForSeconds(_inputsEnabledDelay);
+
+        WaitingToGivePlayerControl = false;
+
+        if (!UIManager.Instance.IsPauseMenuOpen())
+        {
+            ToggleInputsAllowed(true);
+        }
     }
 
     public void ToggleInputsAllowed(bool toggle)
     {
+        if (WaitingToGivePlayerControl) return;
         InputsAllowed = toggle;
     }
 

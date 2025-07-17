@@ -32,11 +32,6 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(transform.root);
     }
 
-    private void Start()
-    {
-        Cursor.lockState = CursorLockMode.Confined;
-    }
-
     private void Update()
     {
         if (InputManager.Instance.ToggleGodModeWasPressed)
@@ -103,7 +98,6 @@ public class GameManager : MonoBehaviour
 
             HUD.Instance.GetWinUI.SetActive(false);
             Player1.enabled = false;
-            UIManager.Instance.ShowEndScreen();
         }
     }
 

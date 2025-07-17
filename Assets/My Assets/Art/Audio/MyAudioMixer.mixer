@@ -155,6 +155,8 @@ AudioMixerController:
     name: MasterLowpassCutoffFreq
   - guid: 4d96cb85bba70a74c8c204dfb7ef9cf2
     name: MusicGain
+  - guid: cccb7d3d8162e8443af34f841ab0ac91
+    name: SFXGain
   m_AudioMixerGroupViews:
   - guids:
     - 0b7c01ee37c6ca04ba907b6d7784f4ea
@@ -215,7 +217,7 @@ AudioMixerSnapshotController:
     d034ee1054e8be642ba028e12bd57292: 127
     2a826cb0f5aca4b41a1260b0c91dc39e: -5.613014
     46be990167c8ce34eb0bac6353ce028a: -23.5
-    760a4951048658440a6aea6701304422: -1.9655371
+    760a4951048658440a6aea6701304422: 0
     95646de1a7841ea48b300f75f6b00fa2: -24.7
     00245c5290d233d4088cb3b2ab3359c5: 1.898
     94437e72421be6f4eaa91767a3c1677b: 59
@@ -241,7 +243,7 @@ AudioMixerSnapshotController:
     ae440bcc53c4dcf4284e9aa7988a257f: -2.6
     a01b13ec154fd85468b6cc64cbd82568: 0
     292a362de303f124286e82fadcf9db4d: -12.640011
-    cccb7d3d8162e8443af34f841ab0ac91: 1.1960135
+    cccb7d3d8162e8443af34f841ab0ac91: 0
     8595534d3fd88bc4c950a8c60200a1bf: 5.39
     e86c016d77febcd43a575cd86c1d804d: 7716
     a93033bdd6730514bb70b32ee8588ffd: -42

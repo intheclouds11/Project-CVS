@@ -7,9 +7,9 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance;
 
     [SerializeField]
-    private GameObject _pauseMenu;
+    private PauseMenu _pauseMenu;
     [SerializeField]
-    private GameObject _endScreen;
+    private GameObject _settingsMenu;
     [SerializeField]
     private GameObject _respawnScreen;
 
@@ -23,7 +23,7 @@ public class UIManager : MonoBehaviour
     {
         if (CanShowPauseScreen() && InputManager.Instance.PauseWasPressed)
         {
-            PauseScreen.Instance.OnPauseButtonPressed();
+            _pauseMenu.OnPauseButtonPressed();
         }
 
         if (InputManager.Instance.ToggleChargeHUDWasPressed)
@@ -34,7 +34,12 @@ public class UIManager : MonoBehaviour
 
     private bool CanShowPauseScreen()
     {
-        return !_endScreen.activeSelf && SceneManager.GetActiveScene().name != "MainMenu";
+        return SceneManager.GetActiveScene().name != "MainMenu" && !_settingsMenu.activeInHierarchy;
+    }
+
+    public bool IsPauseMenuOpen()
+    {
+        return _pauseMenu.gameObject.activeInHierarchy;
     }
 
     public void ShowRespawnScreen()
@@ -42,30 +47,51 @@ public class UIManager : MonoBehaviour
         _respawnScreen.SetActive(true);
     }
 
-    public void ShowEndScreen()
-    {
-        _endScreen.SetActive(true);
-    }
-
     public void Button_ResumeGame()
     {
-        PauseScreen.Instance.ResumeGame();
+        _pauseMenu.ResumeGame();
     }
 
     public void Button_ReturnToMainMenu()
     {
         GameManager.Instance.OnReturnToMainMenu();
-        if (_endScreen.activeSelf)
+        
+        if (_pauseMenu.gameObject.activeSelf)
         {
-            _endScreen.SetActive(false);
-        }
-
-        if (_pauseMenu.activeSelf)
-        {
-            PauseScreen.Instance.ReturnToMainMenu();
+            _pauseMenu.CloseMenu();
         }
 
         SceneManager.LoadScene("MainMenu");
+    }
+
+    public void Button_ShowSettingsMenu()
+    {
+        var mainMenu = FindAnyObjectByType<MainMenu>();
+        if (mainMenu)
+        {
+            mainMenu.GetComponent<Canvas>().enabled = false;
+        }
+        else if (_pauseMenu.gameObject.activeInHierarchy)
+        {
+            _pauseMenu.gameObject.SetActive(false);
+        }
+
+        _settingsMenu.SetActive(true);
+    }
+
+    public void ExitSettingsMenu()
+    {
+        var mainMenu = FindAnyObjectByType<MainMenu>();
+        if (mainMenu)
+        {
+            mainMenu.GetComponent<Canvas>().enabled = true;
+        }
+        else
+        {
+            _pauseMenu.OpenMenu();
+        }
+
+        _settingsMenu.SetActive(false);
     }
 
     public void Button_ExitGame()
