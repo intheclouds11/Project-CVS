@@ -390,7 +390,8 @@ MonoBehaviour:
   _hitByDeflectedSFX: {fileID: 8300000, guid: ca330cb46edefb545866c55eec5af181, type: 3}
   _critDeflectedSFX: {fileID: 8300000, guid: b106d210aa1d0d544b1b01df736f77a1, type: 3}
   _impactSFX: {fileID: 8300000, guid: b2e331145911e7c4f87d6a9d46769373, type: 3}
-  _impactVFX: {fileID: 9049631545069152736, guid: 6a0d9d4912f0e7b43b46b2a49721b4bb, type: 3}
+  _impactVFXSpawnPoint: {fileID: 3198422194492923817}
+  _impactVFX: {fileID: 9049631545069152736, guid: d5f993c6c11071b47907a4b4b5295c60, type: 3}
 --- !u!54 &-4746203949667689610
 Rigidbody:
   m_ObjectHideFlags: 0

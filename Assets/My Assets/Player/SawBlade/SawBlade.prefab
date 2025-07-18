@@ -566,13 +566,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3d4dd07ae22f5f4a82d813421604f6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <Knockback>k__BackingField:
+  _baseDamage: 70
+  _critDamage: 120
+  <DamageEnemyKnockback>k__BackingField:
     ApplyKnockback: 1
     KnockbackAmount: 1
     KnockbackDuration: 0.25
     StunDuration: 0.25
-  _baseDamage: 70
-  _critDamage: 120
+    KnockbackEasing: 17
   _shortRangeImpulse: 1
   _longRangeImpulse: 4
   _critImpulse: 9
@@ -589,7 +590,7 @@ MonoBehaviour:
   _returnedSFXVolume: 0.55
   _impactSFX: {fileID: 8300000, guid: 92aadb14cc314f54db316cc18b68fe36, type: 3}
   _impactSFXVolume: 0.45
-  _impactVfx: {fileID: 9049631545069152736, guid: 6a0d9d4912f0e7b43b46b2a49721b4bb, type: 3}
+  _impactVfx: {fileID: 9049631545069152736, guid: a5507d2beb31a874b93475d47a303386, type: 3}
 --- !u!54 &7434762892271647052
 Rigidbody:
   m_ObjectHideFlags: 0

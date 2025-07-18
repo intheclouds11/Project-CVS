@@ -233,9 +233,17 @@ public class SawBlade : MonoBehaviour
     {
         ReturnToPlayer();
 
-        Instantiate(_impactVfx, transform.position, Quaternion.LookRotation(-transform.forward));
         var pitch = IsCritAttack ? 1.15f : Random.Range(0.9f, 1.05f);
-        AudioManager.Instance.PlaySound(transform, _impactSFX, true, false, _impactSFXVolume, pitch);
+
+        if (IsCritAttack)
+        {
+            Instantiate(_impactVfx, transform.position, Quaternion.LookRotation(-transform.forward));
+            AudioManager.Instance.PlaySound(transform, _impactSFX, true, false, _impactSFXVolume * 1.2f, pitch);
+        }
+        else
+        {
+            AudioManager.Instance.PlaySound(transform, _impactSFX, true, false, _impactSFXVolume, pitch);
+        }
     }
 
     public void OnAttack(Transform spawnPoint, float chargeAmount, bool crit)

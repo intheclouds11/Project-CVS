@@ -26,6 +26,8 @@ public class Projectile : MonoBehaviour
     [SerializeField]
     protected AudioClip _impactSFX;
     [SerializeField]
+    protected Transform _impactVFXSpawnPoint;
+    [SerializeField]
     protected GameObject _impactVFX;
 
     public Rigidbody Rb { get; private set; }
@@ -74,19 +76,25 @@ public class Projectile : MonoBehaviour
         _poolKey = poolKey;
     }
 
-    public void ReturnToPool(GameObject hitObj)
+    public void ReturnToPool(GameObject hitObj = null, bool deflected = false)
     {
+        AudioManager.Instance.PlaySound(transform, _impactSFX, true, false, 1f, 1f);
+        var particleDirection = (FindAnyObjectByType<FirstBossEncounter>().transform.position - transform.position).normalized;
+        particleDirection = deflected ? -particleDirection : particleDirection;
+        Instantiate(_impactVFX, _impactVFXSpawnPoint.position, Quaternion.LookRotation(particleDirection));
+        
         tag = "EnemyProjectile";
         Rb.linearVelocity = Vector3.zero;
         _isCritDeflected = false;
+        gameObject.SetActive(false);
+        transform.localPosition = Vector3.zero;
         _pool.Return(_poolKey, gameObject);
         OnReturnToPool();
     }
 
     protected virtual void OnReturnToPool()
     {
-        AudioManager.Instance.PlaySound(transform, _impactSFX, true, false, 1f, 1f);
-        Instantiate(_impactVFX, transform.position, Quaternion.LookRotation(-transform.forward));
+        
     }
 
     private void OnTriggerEnter(Collider other)
@@ -130,7 +138,7 @@ public class Projectile : MonoBehaviour
                 if (enemyHit)
                 {
                     enemyHit.Health.TakeDamage(deflectedDamage, Vector3.zero, null);
-                    ReturnToPool(other.gameObject);
+                    ReturnToPool(other.gameObject, true);
                 }
                 else if (projHit)
                 {
@@ -145,7 +153,7 @@ public class Projectile : MonoBehaviour
                 else if (bossHit)
                 {
                     bossHit.Health.TakeDamage(deflectedDamage, Vector3.zero, null);
-                    ReturnToPool(other.gameObject);
+                    ReturnToPool(other.gameObject, true);
                 }
             }
             else if (other.gameObject.layer != LayerMask.NameToLayer("Enemy"))

@@ -62,9 +62,6 @@ public class MultiProjectilePool : MonoBehaviour
 
     public void Return(string key, GameObject obj)
     {
-        obj.SetActive(false);
-        obj.transform.localPosition = Vector3.zero;
-
         if (!poolDict.ContainsKey(key))
         {
             Debug.LogWarning($"[MultiProjectilePool] No pool to return to for key: {key}");
