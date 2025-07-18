@@ -478,7 +478,7 @@ Transform:
   m_GameObject: {fileID: 1454579934101814444}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.82, y: 0, z: -4.16}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.76000005, y: 0.76, z: 0.76000005}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -501,6 +501,7 @@ MonoBehaviour:
   _baseDeflectedDamage: 100
   _critDeflectedDamage: 200
   _baseDeflectSpeed: 10
+  _hitByDeflectedSpeed: 15
   _knockback:
     ApplyKnockback: 1
     KnockbackAmount: 1
@@ -508,6 +509,7 @@ MonoBehaviour:
     StunDuration: 0.25
     KnockbackEasing: 17
   _deflectedSFX: {fileID: 8300000, guid: ca330cb46edefb545866c55eec5af181, type: 3}
+  _hitByDeflectedSFX: {fileID: 0}
   _critDeflectedSFX: {fileID: 0}
   _impactSFX: {fileID: 8300000, guid: b2e331145911e7c4f87d6a9d46769373, type: 3}
   _impactVFX: {fileID: 9049631545069152736, guid: 6a0d9d4912f0e7b43b46b2a49721b4bb, type: 3}

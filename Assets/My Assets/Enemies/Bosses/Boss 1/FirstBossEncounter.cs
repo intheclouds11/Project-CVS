@@ -52,6 +52,8 @@ public class FirstBossEncounter : MonoBehaviour
     [SerializeField]
     private float _AOEImpulseVelocity = 0.3f;
     [SerializeField]
+    private float _AOEImpulseDuration = 1f;
+    [SerializeField]
     private float _AOEImpulseRate = 1f;
 
     [Header("General FX")]
@@ -59,6 +61,10 @@ public class FirstBossEncounter : MonoBehaviour
     private List<AudioClip> _hitSFX;
     [SerializeField]
     private AudioClip _hurtSFX;
+    [SerializeField]
+    private float _hurtImpulseVelocity = 0.2f;
+    [SerializeField]
+    private float _hurtImpulseDuration = 2f;
     [SerializeField]
     private int _playHurtSFXHealthInterval = 400;
     private int _prevHurtSFXHealth;
@@ -190,7 +196,8 @@ public class FirstBossEncounter : MonoBehaviour
 
             if (Time.time >= _lastImpulseTime + _AOEImpulseRate)
             {
-                _impulseSource.GenerateImpulse(new Vector3(0f, _AOEImpulseVelocity, 0f));
+                _impulseSource.ImpulseDefinition.ImpulseDuration = _AOEImpulseDuration;
+                _impulseSource.GenerateImpulseWithVelocity(new Vector3(0f, _AOEImpulseVelocity, 0f));
                 _lastImpulseTime = Time.time;
             }
 
@@ -214,6 +221,9 @@ public class FirstBossEncounter : MonoBehaviour
         if (_prevHurtSFXHealth - Health.CurrentHealth >= _playHurtSFXHealthInterval)
         {
             AudioManager.Instance.PlaySound(transform, _hurtSFX, true, false, 1f, 1f);
+            _impulseSource.ImpulseDefinition.ImpulseDuration = _hurtImpulseDuration;
+            _impulseSource.GenerateImpulseWithVelocity(new Vector3(0f, _hurtImpulseVelocity, 0f));
+
             _prevHurtSFXHealth = Health.CurrentHealth;
         }
     }

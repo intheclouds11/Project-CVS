@@ -14,9 +14,13 @@ public class Projectile : MonoBehaviour
     [SerializeField]
     protected float _baseDeflectSpeed = 10f;
     [SerializeField]
+    protected float _hitByDeflectedSpeed = 15f;
+    [SerializeField]
     protected Knockback _knockback;
     [SerializeField]
     protected AudioClip _deflectedSFX;
+    [SerializeField]
+    protected AudioClip _hitByDeflectedSFX;
     [SerializeField]
     protected AudioClip _critDeflectedSFX;
     [SerializeField]
@@ -35,7 +39,7 @@ public class Projectile : MonoBehaviour
 
     protected void Awake()
     {
-        gameObject.tag = "EnemyProjectile";
+        tag = "EnemyProjectile";
         _animator = GetComponent<Animator>();
         Rb = GetComponent<Rigidbody>();
     }
@@ -56,15 +60,23 @@ public class Projectile : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (Vector3.Distance(transform.position, _player.transform.position) > 30)
+        {
+            ReturnToPool(null);
+        }
+    }
+
     public void Init(MultiProjectilePool pool, string poolKey)
     {
         _pool = pool;
         _poolKey = poolKey;
     }
 
-    public void ReturnToPool()
+    public void ReturnToPool(GameObject hitObj)
     {
-        gameObject.tag = "EnemyProjectile";
+        tag = "EnemyProjectile";
         Rb.linearVelocity = Vector3.zero;
         _isCritDeflected = false;
         _pool.Return(_poolKey, gameObject);
@@ -81,7 +93,7 @@ public class Projectile : MonoBehaviour
     {
         if (CompareTag("EnemyProjectile") && other.CompareTag("PlayerWeapon"))
         {
-            gameObject.tag = "Deflected";
+            tag = "Deflected";
             var sawblade = other.GetComponentInParent<SawBlade>();
             _isCritDeflected = sawblade.IsCritAttack;
 
@@ -106,7 +118,7 @@ public class Projectile : MonoBehaviour
             {
                 var knockBackDir = (playerHit.transform.position - transform.position).normalized;
                 playerHit.Health.TakeDamage(_baseDamage, knockBackDir, _knockback);
-                ReturnToPool();
+                ReturnToPool(other.gameObject);
             }
             else if (CompareTag("Deflected"))
             {
@@ -118,24 +130,27 @@ public class Projectile : MonoBehaviour
                 if (enemyHit)
                 {
                     enemyHit.Health.TakeDamage(deflectedDamage, Vector3.zero, null);
-                    ReturnToPool();
+                    ReturnToPool(other.gameObject);
                 }
                 else if (projHit)
                 {
                     // Debug.Log("Deflected Projectile hit projectile");
+                    projHit.tag = "Deflected";
                     projHit.transform.rotation = Quaternion.LookRotation(transform.forward);
-                    projHit.Rb.linearVelocity = transform.forward * _baseDeflectSpeed;
+                    projHit.Rb.linearVelocity = transform.forward * _hitByDeflectedSpeed;
                     Rb.linearVelocity = projHit.transform.forward * _baseDeflectSpeed * 0.75f;
+                    var pitch = Random.Range(1.2f, 1.3f);
+                    AudioManager.Instance.PlaySound(transform, _hitByDeflectedSFX, true, false, 0.7f, pitch);
                 }
                 else if (bossHit)
                 {
                     bossHit.Health.TakeDamage(deflectedDamage, Vector3.zero, null);
-                    ReturnToPool();
+                    ReturnToPool(other.gameObject);
                 }
             }
             else if (other.gameObject.layer != LayerMask.NameToLayer("Enemy"))
             {
-                ReturnToPool();
+                ReturnToPool(other.gameObject);
             }
         }
     }

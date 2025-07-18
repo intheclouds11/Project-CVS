@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class MultiProjectilePool : MonoBehaviour
@@ -12,7 +13,7 @@ public class MultiProjectilePool : MonoBehaviour
 
     [SerializeField] private PoolEntry[] pools;
 
-    private Dictionary<string, Queue<GameObject>> poolDict = new();
+    private Dictionary<string, List<GameObject>> poolDict = new();
 
     private void Awake()
     {
@@ -20,48 +21,57 @@ public class MultiProjectilePool : MonoBehaviour
         {
             var parent = new GameObject($"{entry.prefab.name} Pool").transform;
             parent.parent = transform;
-            Queue<GameObject> objectQueue = new Queue<GameObject>();
+            parent.localPosition = Vector3.zero;
+            List<GameObject> projectilePool = new List<GameObject>();
 
             for (int i = 0; i < entry.size; i++)
             {
                 GameObject obj = Instantiate(entry.prefab, parent);
                 obj.SetActive(false);
-                objectQueue.Enqueue(obj);
+                projectilePool.Add(obj);
             }
 
-            poolDict[entry.prefab.name] = objectQueue;
+            poolDict[entry.prefab.name] = projectilePool;
         }
     }
 
     public GameObject Get(string key)
     {
-        if (!poolDict.TryGetValue(key, out var queue))
+        if (!poolDict.TryGetValue(key, out List<GameObject> projectilePool))
         {
-            Debug.LogWarning($"No pool found for key: {key}");
+            Debug.LogWarning($"[MultiProjectilePool] No pool found for key: {key}");
             return null;
         }
 
-        if (queue.Count == 0)
+        if (projectilePool.Count == 0)
         {
-            Debug.LogWarning($"Pool for key {key} is empty. Consider increasing pool size.");
+            Debug.LogWarning($"[MultiProjectilePool] Pool for key {key} is empty. Consider increasing pool size.");
             return null;
         }
 
-        var obj = queue.Dequeue();
-        // obj.SetActive(true);
-        return obj;
+        var inactiveProjectile = projectilePool.Find(o => !o.activeInHierarchy);
+        if (!inactiveProjectile)
+        {
+            Debug.LogError($"[MultiProjectilePool] No inactive projectiles available for {key}");
+            return null;
+        }
+
+        projectilePool.Remove(inactiveProjectile);
+        return inactiveProjectile;
     }
 
     public void Return(string key, GameObject obj)
     {
+        obj.SetActive(false);
+        obj.transform.localPosition = Vector3.zero;
+
         if (!poolDict.ContainsKey(key))
         {
-            Debug.LogWarning($"No pool to return to for key: {key}");
+            Debug.LogWarning($"[MultiProjectilePool] No pool to return to for key: {key}");
             Destroy(obj); // last resort
             return;
         }
 
-        obj.SetActive(false);
-        poolDict[key].Enqueue(obj);
+        poolDict[key].Add(obj);
     }
 }
