@@ -79,7 +79,7 @@ public class Projectile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (gameObject.CompareTag("EnemyProjectile") && other.gameObject.CompareTag("PlayerWeapon"))
+        if (CompareTag("EnemyProjectile") && other.CompareTag("PlayerWeapon"))
         {
             gameObject.tag = "Deflected";
             var sawblade = other.GetComponentInParent<SawBlade>();
@@ -108,7 +108,7 @@ public class Projectile : MonoBehaviour
                 playerHit.Health.TakeDamage(_baseDamage, knockBackDir, _knockback);
                 ReturnToPool();
             }
-            else if (gameObject.CompareTag("Deflected"))
+            else if (CompareTag("Deflected"))
             {
                 var enemyHit = other.GetComponentInParent<BaseEnemy>();
                 var projHit = other.GetComponent<Projectile>();
@@ -122,7 +122,7 @@ public class Projectile : MonoBehaviour
                 }
                 else if (projHit)
                 {
-                    Debug.Log("Deflected Projectile hit projectile");
+                    // Debug.Log("Deflected Projectile hit projectile");
                     projHit.transform.rotation = Quaternion.LookRotation(transform.forward);
                     projHit.Rb.linearVelocity = transform.forward * _baseDeflectSpeed;
                     Rb.linearVelocity = projHit.transform.forward * _baseDeflectSpeed * 0.75f;

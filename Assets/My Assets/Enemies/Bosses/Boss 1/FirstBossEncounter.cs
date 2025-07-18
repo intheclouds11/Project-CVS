@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Utils;
+using Random = UnityEngine.Random;
 
 public class FirstBossEncounter : MonoBehaviour
 {
@@ -74,11 +76,10 @@ public class FirstBossEncounter : MonoBehaviour
     private AudioSource _projectileCooldownAudio;
     private AudioSource _AOEChargeAudio;
     private AudioSource _AOEAttackAudio;
-    
 
-    public void EnteredBossZone()
+
+    private void Start()
     {
-        enabled = true;
         Health = GetComponent<Health>();
         Health.Died += OnDied;
         Health.DamageTaken += OnDamageTaken;
@@ -87,28 +88,13 @@ public class FirstBossEncounter : MonoBehaviour
         _impulseSource = GetComponent<CinemachineImpulseSource>();
         _multiProjectilePool = GetComponent<MultiProjectilePool>();
         _player = GameManager.Instance.Player1;
-        
-        // todo: write it out.. want boss to start attacks on beat
-        // 
-        // StartCoroutine(GetBeatTime());
-        StartCoroutine(ProjectilesCoroutine(_phase1ProjectilePatterns[0]));
+        enabled = false;
     }
 
-    private bool _onBeat;
-    private IEnumerator GetBeatTime()
+    public void EnteredBossZone()
     {
-        while (true)
-        {
-            var musicTime = AudioManager.Instance.MusicAudioSource.time;
-            var bpm = 159.01f;
-            var secondPerQuarterNote = 60f / bpm;
-            _onBeat = musicTime % secondPerQuarterNote <= 0.01f;
-            if (_onBeat)
-            {
-                Debug.Log($"onbeat");
-            }
-            yield return null;
-        }
+        StartCoroutine(ProjectilesCoroutine(_phase1ProjectilePatterns[0]));
+        enabled = true;
     }
 
     private void Update()
@@ -123,28 +109,32 @@ public class FirstBossEncounter : MonoBehaviour
                 return;
             }
 
-            StartCoroutine(ProjectilesCoroutine(SelectPattern(1)));
+            StartCoroutine(ProjectilesCoroutine(SelectRandomPattern(1)));
         }
     }
 
-    private ProjectilePattern SelectPattern(int phase)
+    private ProjectilePattern SelectRandomPattern(int phase)
     {
         if (phase == 1)
         {
             return _phase1ProjectilePatterns[Random.Range(0, _phase1ProjectilePatterns.Count)];
         }
-        else
+
+        if (phase == 2)
         {
-            Debug.LogError($"Phase {phase} does not contain any projectile patterns");
+            Debug.LogWarning($"Phase {phase} does not exist yet");
             return null;
         }
+
+        Debug.LogWarning($"Phase {phase} not implemented");
+        return null;
     }
 
     private IEnumerator ProjectilesCoroutine(ProjectilePattern pattern)
     {
+        // Debug.Log($"Start Projectile Charge", _projectileChargeAudio);
         _currentProjectilePattern = pattern;
         _projectileChargeAudio = AudioManager.Instance.PlaySound(transform, pattern.ChargeSFX, true, false, pattern.ChargeVolume);
-        Debug.Log($"Start Projectile Charge", _projectileChargeAudio);
         var spawnPoint = _projectileSpawnPoints[0];
 
         yield return new WaitForSeconds(pattern.StartDelay);
@@ -161,9 +151,9 @@ public class FirstBossEncounter : MonoBehaviour
             yield return new WaitForSeconds(pattern.FireRate);
         }
 
+        // Debug.Log($"Start Projectile cooldown", _projectileCooldownAudio);
         _projectileCooldownAudio =
             AudioManager.Instance.PlaySound(transform, pattern.CooldownSFX, true, false, pattern.CooldownVolume);
-        Debug.Log($"Start Projectile cooldown", _projectileCooldownAudio);
         yield return new WaitForSeconds(pattern.EndDelay);
 
         _projectileCooldownAudio = null;

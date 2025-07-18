@@ -140,7 +140,7 @@ public class AudioManager : MonoBehaviour
 
     public void AdjustMusicGroupGain(float offset)
     {
-        _audioMixer.SetFloat("MusicGain", GetMusicGroupGain() - offset);
+        _audioMixer.SetFloat("MusicGain", GetMusicGroupGain() + offset);
     }
 
     public float GetAmbienceGroupGain()
@@ -156,7 +156,7 @@ public class AudioManager : MonoBehaviour
 
     public void AdjustAmbienceGroupGain(float offset)
     {
-        _audioMixer.SetFloat("AmbienceGain", GetAmbienceGroupGain() - offset);
+        _audioMixer.SetFloat("AmbienceGain", GetAmbienceGroupGain() + offset);
     }
 
     public float GetSFXGroupGain()

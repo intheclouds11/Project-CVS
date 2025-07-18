@@ -7,10 +7,10 @@ using UnityEngine.Serialization;
 public class MusicTriggerZone : MonoBehaviour
 {
     [SerializeField]
-    private AudioClip _newAudioClip;
-
+    private AudioClip _newMusicClip;
     [SerializeField]
-    private bool _triggerOnce = true;
+    private float _musicVolume = 1f;
+    
     [SerializeField]
     private bool _fadeOutCurrentMusic = true;
     [field: SerializeField, ShowIf(nameof(_fadeOutCurrentMusic))]
@@ -19,37 +19,40 @@ public class MusicTriggerZone : MonoBehaviour
     private bool _fadeInMusic = true;
     [field: SerializeField, ShowIf(nameof(_fadeInMusic))]
     private float _fadeInTime = 0.7f;
-    [field: SerializeField, ShowIf(nameof(_fadeInMusic))]
-    private float _fadeInVolumeTarget = 1f;
     [SerializeField]
     private bool _adjustAmbienceGain;
     [field: SerializeField, ShowIf(nameof(_adjustAmbienceGain))]
     private float _ambienceGainOffset;
 
     private Coroutine _fadeCoroutine;
+    private AudioSource _musicAudioSource;
 
+
+    private void Start()
+    {
+        _musicAudioSource = AudioManager.Instance.MusicAudioSource;
+    }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Player")) return;
+        if (!other.CompareTag("Player") || _musicAudioSource.clip == _newMusicClip) return;
 
-        var musicAudioSource = AudioManager.Instance.MusicAudioSource;
-        if (_fadeInMusic || (_fadeOutCurrentMusic && musicAudioSource.volume > 0))
+        if (_fadeInMusic || (_fadeOutCurrentMusic && _musicAudioSource.volume > 0))
         {
             if (_fadeCoroutine != null) StopCoroutine(_fadeCoroutine);
-            _fadeCoroutine = StartCoroutine(FadeMusicCoroutine(musicAudioSource));
+            _fadeCoroutine = StartCoroutine(FadeMusicCoroutine(_musicAudioSource));
         }
         else
         {
-            musicAudioSource.clip = _newAudioClip;
+            _musicAudioSource.clip = _newMusicClip;
+            _musicAudioSource.volume = _musicVolume;
+            _musicAudioSource.Play();
         }
 
         if (_adjustAmbienceGain)
         {
             AudioManager.Instance.AdjustAmbienceGroupGain(_ambienceGainOffset);
         }
-
-        if (_triggerOnce) GetComponent<Collider>().enabled = false;
     }
 
     private IEnumerator FadeMusicCoroutine(AudioSource audioSource)
@@ -66,19 +69,19 @@ public class MusicTriggerZone : MonoBehaviour
             audioSource.volume = 0f;
         }
 
-        audioSource.clip = _newAudioClip;
+        audioSource.clip = _newMusicClip;
 
         if (_fadeInMusic)
         {
             audioSource.Play();
 
-            while (audioSource.volume < _fadeInVolumeTarget)
+            while (audioSource.volume < _musicVolume)
             {
                 audioSource.volume += Time.deltaTime / _fadeInTime;
                 yield return null;
             }
 
-            audioSource.volume = _fadeInVolumeTarget;
+            audioSource.volume = _musicVolume;
         }
 
         _fadeCoroutine = null;
