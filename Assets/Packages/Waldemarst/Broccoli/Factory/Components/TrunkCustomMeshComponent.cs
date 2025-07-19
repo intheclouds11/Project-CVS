@@ -43,8 +43,8 @@ namespace Broccoli.Component
 		Texture2D normalTex = null;
 		Texture2D extraTex = null;
 		bool hasAlbedoTex = false;
-		bool hasNormalTex = false;
-		bool hasExtraTex = false;
+		// bool hasNormalTex = false;
+		// bool hasExtraTex = false;
 		public int BranchMeshVertLength {
 			get {return branchMeshVertLength; }
 		}
@@ -234,8 +234,8 @@ namespace Broccoli.Component
 			normalTex = null;
 			extraTex = null;
 			hasAlbedoTex = false;
-			hasNormalTex = false;
-			hasExtraTex = false;
+			// hasNormalTex = false;
+			// hasExtraTex = false;
 			hasTexturesCollectedRectsCreated = false;
 		}
 		private void CollectTexturesCreateRects (TreeFactory treeFactory)
@@ -257,13 +257,13 @@ namespace Broccoli.Component
 						hasAlbedoTex = true;
 						if (normalTex != null) {
 							normalTextures.Add (normalTex);
-							hasNormalTex = true;
+							// hasNormalTex = true;
 						} else {
 							normalTextures.Add (null);
 						}
 						if (extraTex != null) {
 							extraTextures.Add (extraTex);
-							hasExtraTex = true;
+							// hasExtraTex = true;
 						} else {
 							extraTextures.Add (null);
 						}
@@ -286,14 +286,14 @@ namespace Broccoli.Component
 									if (trunkMat.HasTexture (trunkDesc.normalTexProp)) {
 										normalTex = (Texture2D)trunkMat.GetTexture (trunkDesc.normalTexProp);
 										normalTextures.Add (normalTex);
-										hasNormalTex = true;
+										// hasNormalTex = true;
 									} else {
 										normalTextures.Add (null);
 									}
 									if (trunkMat.HasTexture (trunkDesc.extraTexProp)) {
 										extraTex = (Texture2D)trunkMat.GetTexture (trunkDesc.extraTexProp);
 										extraTextures.Add (extraTex);
-										hasExtraTex = true;
+										// hasExtraTex = true;
 									} else {
 										extraTextures.Add (null);
 									}
