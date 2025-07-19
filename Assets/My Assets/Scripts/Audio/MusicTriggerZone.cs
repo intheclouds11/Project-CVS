@@ -10,7 +10,7 @@ public class MusicTriggerZone : MonoBehaviour
     private AudioClip _newMusicClip;
     [SerializeField]
     private float _musicVolume = 1f;
-    
+
     [SerializeField]
     private bool _fadeOutCurrentMusic = true;
     [field: SerializeField, ShowIf(nameof(_fadeOutCurrentMusic))]
@@ -70,20 +70,18 @@ public class MusicTriggerZone : MonoBehaviour
         }
 
         audioSource.clip = _newMusicClip;
+        audioSource.Play();
 
         if (_fadeInMusic)
         {
-            audioSource.Play();
-
             while (audioSource.volume < _musicVolume)
             {
                 audioSource.volume += Time.deltaTime / _fadeInTime;
                 yield return null;
             }
-
-            audioSource.volume = _musicVolume;
         }
 
+        audioSource.volume = _musicVolume;
         _fadeCoroutine = null;
     }
 }
