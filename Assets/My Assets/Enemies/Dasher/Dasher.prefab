@@ -83,7 +83,7 @@ MonoBehaviour:
   _dashTriggerDistance: 3.5
   _dashSpeed: 3.5
   _dashDuration: 0.5
-  _dashDelayDuration: 0.45
+  _dashDelayDuration: 0.5
   _dashRecoveryDuration: 0.35
   _dashCooldownDuration: 1.5
   _dashingSFX: {fileID: 8300000, guid: b6d3f0aac49764654879e55ed401c6f2, type: 3}

@@ -156,6 +156,8 @@ public class FirstBossEncounter : MonoBehaviour
             count++;
             yield return new WaitForSeconds(pattern.FireRate);
         }
+        
+        pattern.OnPatternEnd();
 
         // Debug.Log($"Start Projectile cooldown", _projectileCooldownAudio);
         _projectileCooldownAudio =

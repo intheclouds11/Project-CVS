@@ -5,6 +5,7 @@ using Random = UnityEngine.Random;
 
 public class Projectile : MonoBehaviour
 {
+    [Header("Base Projectile")]
     [SerializeField]
     protected int _baseDamage = 1;
     [SerializeField]
@@ -17,6 +18,8 @@ public class Projectile : MonoBehaviour
     protected float _hitByDeflectedSpeed = 15f;
     [SerializeField]
     protected Knockback _knockback;
+    
+    [Header("Base FX")]
     [SerializeField]
     protected AudioClip _deflectedSFX;
     [SerializeField]
@@ -31,6 +34,8 @@ public class Projectile : MonoBehaviour
     protected GameObject _impactVFX;
 
     public Rigidbody Rb { get; private set; }
+    
+    protected bool _abilityEnabled;
     protected string _poolKey;
     protected float _distToPlayer;
     protected bool _isCritDeflected;
@@ -39,14 +44,14 @@ public class Projectile : MonoBehaviour
     protected Animator _animator;
 
 
-    protected void Awake()
+    protected virtual void Awake()
     {
         tag = "EnemyProjectile";
         _animator = GetComponent<Animator>();
         Rb = GetComponent<Rigidbody>();
     }
 
-    protected void OnEnable()
+    protected virtual void OnEnable()
     {
         if (!_player)
         {
@@ -54,7 +59,7 @@ public class Projectile : MonoBehaviour
         }
     }
 
-    protected void OnDisable()
+    protected virtual void OnDisable()
     {
         if (_player)
         {
@@ -62,7 +67,7 @@ public class Projectile : MonoBehaviour
         }
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         if (Vector3.Distance(transform.position, _player.transform.position) > 30)
         {
@@ -70,10 +75,15 @@ public class Projectile : MonoBehaviour
         }
     }
 
-    public void Init(MultiProjectilePool pool, string poolKey)
+    public void Init(MultiProjectilePool pool, string poolKey, bool enableAbility)
     {
         _pool = pool;
         _poolKey = poolKey;
+        _abilityEnabled = enableAbility;
+        if (_abilityEnabled)
+        {
+            Debug.Log($"Ability enabled!", gameObject);
+        }
     }
 
     public void ReturnToPool(GameObject hitObj = null, bool deflected = false)
