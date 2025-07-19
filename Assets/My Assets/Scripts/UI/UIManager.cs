@@ -86,7 +86,7 @@ public class UIManager : MonoBehaviour
 
         if (_pauseMenu.gameObject.activeSelf)
         {
-            _pauseMenu.CloseMenu();
+            _pauseMenu.gameObject.SetActive(false);
         }
 
         SceneManager.LoadScene("MainMenu");
@@ -114,7 +114,7 @@ public class UIManager : MonoBehaviour
             ExitSettingsMenu();
         }
 
-        _pauseMenu.gameObject.SetActive(false);
+        _pauseMenu.ResumeGame();
     }
 
     public void ExitSettingsMenu(bool returnToPauseMenu = false)

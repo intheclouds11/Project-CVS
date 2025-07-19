@@ -30,12 +30,7 @@ public class PauseMenu : MonoBehaviour
 
     public void ResumeGame()
     {
-        CloseMenu();
-        InputManager.Instance.ToggleInputsAllowed(true);
-    }
-
-    public void CloseMenu()
-    {
         gameObject.SetActive(false);
+        InputManager.Instance.ToggleInputsAllowed(true);
     }
 }
