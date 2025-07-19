@@ -63,7 +63,8 @@ MonoBehaviour:
   _hitByDeflectedSFX: {fileID: 0}
   _critDeflectedSFX: {fileID: 0}
   _impactSFX: {fileID: 8300000, guid: b2e331145911e7c4f87d6a9d46769373, type: 3}
-  _impactVFX: {fileID: 0}
+  _impactVFXSpawnPoint: {fileID: 0}
+  _impactVFX: {fileID: 9049631545069152736, guid: 9f3e908d61f49014c9d74ddf035fe528, type: 3}
   _pulseTriggerDistance: 2.5
   _pulseDamageRadius: 2.5
   _pulseDuration: 0.3

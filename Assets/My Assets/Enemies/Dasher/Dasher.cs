@@ -38,7 +38,7 @@ public class Dasher : BaseEnemy
     protected override void Update()
     {
         base.Update();
-        _distToPlayer = Vector3.Distance(transform.position, _player.transform.position);
+        _distToPlayer = GameManager.Instance.GetDistanceFromPlayer(transform);
 
         if (!_aiFollower.canMove || !_player.Health.IsAlive()) return;
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
@@ -8,6 +9,16 @@ public enum PatternAbilityUsage
     None,
     First,
     Last,
+    All,
+    Random
+}
+
+public enum BossSpawnPointSelection
+{
+    Left,
+    Center,
+    Right,
+    Alternate,
     Random
 }
 
@@ -24,6 +35,7 @@ public class ProjectilePattern : ScriptableObject
     public float FireRate = 0.5f;
     public float Speed = 10f;
     public int FireCount = 10;
+    public BossSpawnPointSelection SpawnPointSelection;
 
     [Header("Special")]
     public PatternAbilityUsage abilityUsage;
@@ -37,6 +49,7 @@ public class ProjectilePattern : ScriptableObject
     public float CooldownVolume = 1f;
 
     private int _currentFireCount;
+    private Transform _lastUsedSpawnPoint;
 
 
     private void OnEnable()
@@ -44,17 +57,20 @@ public class ProjectilePattern : ScriptableObject
         _currentFireCount = 0;
     }
 
-    public GameObject Spawn(MultiProjectilePool pool, Transform spawnPoint, Vector3 dirToPlayer)
+    public GameObject Spawn(MultiProjectilePool pool, List<Transform> spawnPoints)
     {
         _currentFireCount++;
         bool enableAbility = abilityUsage == PatternAbilityUsage.First && _currentFireCount == 1 ||
                              abilityUsage == PatternAbilityUsage.Last && _currentFireCount == FireCount ||
+                             abilityUsage == PatternAbilityUsage.All ||
                              abilityUsage == PatternAbilityUsage.Random && _currentFireCount == Random.Range(1, FireCount);
 
         if (_currentFireCount > FireCount)
         {
             Debug.LogError("[ProjectilePattern] currentFireCount is somehow greater than FireCount.");
         }
+
+        var spawnPoint = GetSpawnPoint(spawnPoints);
 
         var projObj = pool.Get(ProjectilePrefab.name);
         projObj.transform.position = spawnPoint.position;
@@ -64,6 +80,7 @@ public class ProjectilePattern : ScriptableObject
         proj.Init(pool, ProjectilePrefab.name, enableAbility);
         projObj.SetActive(true);
 
+        var dirToPlayer = (GameManager.Instance.Player1.transform.position - spawnPoint.position).normalized;
         var direction = AimAtPlayer ? dirToPlayer : spawnPoint.forward;
         proj.Rb.linearVelocity = direction * Speed;
 
@@ -71,6 +88,54 @@ public class ProjectilePattern : ScriptableObject
         AudioManager.Instance.PlaySound(proj.transform, SpawnSFX, true, false, SpawnVolume, pitch);
 
         return projObj;
+    }
+
+    private Transform GetSpawnPoint(List<Transform> spawnPoints)
+    {
+        Transform spawnPoint = null;
+        if (SpawnPointSelection == BossSpawnPointSelection.Left)
+        {
+            spawnPoint = spawnPoints[0];
+        }
+        else if (SpawnPointSelection == BossSpawnPointSelection.Center)
+        {
+            spawnPoint = spawnPoints[1];
+        }
+        else if (SpawnPointSelection == BossSpawnPointSelection.Right)
+        {
+            spawnPoint = spawnPoints[2];
+        }
+        else if (SpawnPointSelection == BossSpawnPointSelection.Alternate)
+        {
+            if (!_lastUsedSpawnPoint)
+            {
+                spawnPoint = spawnPoints[0];
+            }
+            else if (_lastUsedSpawnPoint == spawnPoints[0])
+            {
+                spawnPoint = spawnPoints[1];
+            }
+            else if (_lastUsedSpawnPoint == spawnPoints[1])
+            {
+                spawnPoint = spawnPoints[2];
+            }
+            else
+            {
+                spawnPoint = spawnPoints[0];
+            }
+        }
+        else if (SpawnPointSelection == BossSpawnPointSelection.Random)
+        {
+            spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
+            while (spawnPoint == _lastUsedSpawnPoint)
+            {
+                spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
+            }
+        }
+
+        _lastUsedSpawnPoint = spawnPoint;
+
+        return spawnPoint;
     }
 
     public void OnPatternEnd()

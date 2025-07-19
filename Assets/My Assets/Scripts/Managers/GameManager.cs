@@ -68,6 +68,11 @@ public class GameManager : MonoBehaviour
         EnemyManager.AllEnemiesCleared -= OnAllEnemiesCleared;
     }
 
+    public float GetDistanceFromPlayer(Transform fromTransform)
+    {
+        return Vector3.Distance(fromTransform.position, Player1.transform.position);
+    }
+
     public void GameStart()
     {
         CurrentState = GameState.Playing;

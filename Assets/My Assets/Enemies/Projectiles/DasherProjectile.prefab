@@ -513,16 +513,15 @@ MonoBehaviour:
   _critDeflectedSFX: {fileID: 8300000, guid: b106d210aa1d0d544b1b01df736f77a1, type: 3}
   _impactSFX: {fileID: 8300000, guid: b2e331145911e7c4f87d6a9d46769373, type: 3}
   _impactVFXSpawnPoint: {fileID: 3198422194492923817}
-  _impactVFX: {fileID: 9049631545069152736, guid: 6a0d9d4912f0e7b43b46b2a49721b4bb, type: 3}
+  _impactVFX: {fileID: 9049631545069152736, guid: 2c5bca4e2f5c8e04f8b78dd27e341d68, type: 3}
   useAbilityAfterDistanceTraveled: 0
-  _distanceToTravel: 2.5
-  _dashTriggerDistance: 4
-  _dashSpeed: 4
+  _distanceToTravel: 3.5
+  _dashTriggerDistance: 2.5
+  _dashSpeed: 15
   _alertStartDelay: 0.5
   _dashStartDelay: 0.5
   _dashAlertSFX: {fileID: 8300000, guid: baa42a3793a623b42bc15d843bdbfd13, type: 3}
   _dashSFX: {fileID: 8300000, guid: b6d3f0aac49764654879e55ed401c6f2, type: 3}
-  _dashAlertVFX: {fileID: 0}
 --- !u!95 &349698787356689574
 Animator:
   serializedVersion: 7

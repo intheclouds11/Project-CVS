@@ -54,7 +54,7 @@ public class DasherProjectile : Projectile
         }
         else
         {
-            _distToPlayer = Vector3.Distance(transform.position, _player.transform.position);
+            _distToPlayer = GameManager.Instance.GetDistanceFromPlayer(transform);
             if (_distToPlayer <= _dashTriggerDistance)
             {
                 StartCoroutine(DashCoroutine());
@@ -80,18 +80,14 @@ public class DasherProjectile : Projectile
 
         _dashingAudio = AudioManager.Instance.PlaySound(transform, _dashSFX, true, false, 1f, 1.1f);
 
-        while (true)
-        {
-            var dir = (_player.transform.position - transform.position).normalized;
-            var targetPos = _player.LookAt.position + dir * 4f;
-            transform.position = Vector3.Lerp(transform.position, targetPos, _dashSpeed * Time.deltaTime);
-            yield return null;
-        }
+        var dir = (_player.transform.position - transform.position).normalized;
+        Rb.linearVelocity = dir * _dashSpeed;
     }
 
     protected override void OnReturnToPool()
     {
         base.OnReturnToPool();
+        _isDashing = false;
         if (_dashAlertAudio) _dashAlertAudio = null;
         if (_dashingAudio) _dashingAudio = null;
     }

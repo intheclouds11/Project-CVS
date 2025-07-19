@@ -14,7 +14,6 @@ public class FirstBossEncounter : MonoBehaviour
     private List<ProjectilePattern> _phase1ProjectilePatterns;
     [SerializeField]
     private List<Transform> _projectileSpawnPoints;
-    private MultiProjectilePool _multiProjectilePool;
 
     [Header("AOE Settings")]
     [SerializeField]
@@ -75,6 +74,7 @@ public class FirstBossEncounter : MonoBehaviour
     private bool _isPerformingAOE;
     private float _lastImpulseTime;
     private ProjectilePattern _currentProjectilePattern;
+    private MultiProjectilePool _multiProjectilePool;
     private PlayerController _player;
     private Animator _animator;
     private CinemachineImpulseSource _impulseSource;
@@ -105,7 +105,7 @@ public class FirstBossEncounter : MonoBehaviour
 
     private void Update()
     {
-        _distToPlayer = Vector3.Distance(transform.position, _player.transform.position);
+        _distToPlayer = GameManager.Instance.GetDistanceFromPlayer(transform);
 
         if (!_currentProjectilePattern)
         {
@@ -141,7 +141,6 @@ public class FirstBossEncounter : MonoBehaviour
         // Debug.Log($"Start Projectile Charge", _projectileChargeAudio);
         _currentProjectilePattern = pattern;
         _projectileChargeAudio = AudioManager.Instance.PlaySound(transform, pattern.ChargeSFX, true, false, pattern.ChargeVolume);
-        var spawnPoint = _projectileSpawnPoints[0];
 
         yield return new WaitForSeconds(pattern.StartDelay);
 
@@ -151,8 +150,7 @@ public class FirstBossEncounter : MonoBehaviour
         int count = 0;
         while (count < pattern.FireCount)
         {
-            var dir = (_player.transform.position - spawnPoint.position).normalized;
-            var proj = pattern.Spawn(_multiProjectilePool, spawnPoint, dir);
+            pattern.Spawn(_multiProjectilePool, _projectileSpawnPoints);
             count++;
             yield return new WaitForSeconds(pattern.FireRate);
         }
