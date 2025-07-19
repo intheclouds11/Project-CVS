@@ -37,6 +37,7 @@ namespace Broccoli.TreeNodeEditor
 		private static string connectorCandidateClassName = "connector-candidate"; 
 		private static string headerElementClassName = "graph-header";
 		private static string footerElementClassName = "graph-footer";
+		private bool listenPipelineEvents = true;
         #endregion
 
 		#region Delegates
@@ -134,7 +135,6 @@ namespace Broccoli.TreeNodeEditor
 				Undo.undoRedoPerformed -= OnBroccoliUndoRedoPerformed;
 				Undo.undoRedoPerformed += OnBroccoliUndoRedoPerformed;
 			}
-			//onRepaint?.Invoke ();
 
 			nodeXml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(ExtensionManager.extensionPath + "Editor/Resources/GUI/PipelineNodeView.uxml");
 			nodeStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>(ExtensionManager.extensionPath + "Editor/Resources/GUI/PipelineNodeViewStyle.uss");
@@ -194,6 +194,8 @@ namespace Broccoli.TreeNodeEditor
 
                 this.pipeline = pipelineToLoad;
                 CreatePipelineNodes ();
+				this.pipeline.OnElementConnectOrDisconnect = null;
+				this.pipeline.OnElementConnectOrDisconnect += OnPipelineConnection;
 
 				lastUndoProcessed = pipeline.undoControl.undoCount;
 
@@ -207,6 +209,7 @@ namespace Broccoli.TreeNodeEditor
             //base.Clear ();
             ClearNodes ();
 			ClearEdges ();;
+			this.pipeline.OnElementConnectOrDisconnect -= OnPipelineConnection;
             pipeline = null;
         }
 		public override void BuildContextualMenu (ContextualMenuPopulateEvent evt) {
@@ -231,6 +234,10 @@ namespace Broccoli.TreeNodeEditor
 					(e) => { AddNode (PipelineElement.ClassType.SproutMeshGenerator, position); });
 				evt.menu.AppendAction("Add Mesh Generator/Trunk Mesh Generator", 
 					(e) => { AddNode (PipelineElement.ClassType.TrunkMeshGenerator, position); });
+				if (GlobalSettings.experimentalTrunkCustomMesh) {
+					evt.menu.AppendAction("Add Mesh Generator/Trunk Custom Mesh Generator", 
+						(e) => { AddNode (PipelineElement.ClassType.TrunkCustomMesh, position); });
+				}
 				evt.menu.AppendAction("Mapper/Branch Mapper", 
 					(e) => { AddNode (PipelineElement.ClassType.BranchMapper, position); });
 				evt.menu.AppendAction("Mapper/Sprout Mapper", 
@@ -313,6 +320,13 @@ namespace Broccoli.TreeNodeEditor
         #endregion
 
         #region Node Ops
+		public PipelineNode GetNode (int pipelineElementId)
+		{
+			if (idToNode.ContainsKey(pipelineElementId)) {
+				return idToNode[pipelineElementId];
+			}
+			return null;
+		}
         public void ClearNodes () {
             var nodesEnumerator = idToNode.GetEnumerator ();
             while (nodesEnumerator.MoveNext ()) {
@@ -329,7 +343,7 @@ namespace Broccoli.TreeNodeEditor
             if (pipeline != null) {
                 List<PipelineElement> pipelineElements = pipeline.GetElements ();
 				for (int i = 0; i < pipelineElements.Count; i++) {
-                    CreateNode (pipelineElements [i], true);
+                    PipelineNode node = CreateNode (pipelineElements [i], true);
 				}
 				// Connect nodes.
 				for (int i = 0; i < pipelineElements.Count; i++) {
@@ -371,7 +385,9 @@ namespace Broccoli.TreeNodeEditor
 			PipelineElement pipelineElement = GetPipelineElement (classType);
 			if (pipelineElement != null) {
 				onBeforeAddNode?.Invoke (pipelineElement);
+				listenPipelineEvents = false;
 				pipeline.AddElement (pipelineElement);
+				listenPipelineEvents = true;
 				PipelineNode pipelineNode = CreateNode (pipelineElement);
 				if (pipelineNode != null) {
 					pipelineElement.nodePosition = nodePosition;
@@ -390,7 +406,9 @@ namespace Broccoli.TreeNodeEditor
 				PipelineElement pipelineElement = targetPipelineNode.pipelineElement.Clone (true);
 				if (pipelineElement != null) {
 					onBeforeAddNode?.Invoke (pipelineElement);
+					listenPipelineEvents = false;
 					pipeline.AddElement (pipelineElement);
+					listenPipelineEvents = true;
 					PipelineNode pipelineNode = CreateNode (pipelineElement);
 					pipelineNode.pipelineElement.sinkElementId = -1;
 					pipelineNode.pipelineElement.srcElementId = -1;
@@ -423,7 +441,9 @@ namespace Broccoli.TreeNodeEditor
 							idToNode.Remove (pipelineNodesToRemove [i].pipelineElement.id);
 						}
 						if (pipelineNodesToRemove [i].pipelineElement != null) {
+							listenPipelineEvents = false;
 							pipeline.RemoveElement (pipelineNodesToRemove [i].pipelineElement);
+							listenPipelineEvents = true;
 						}
 						RemoveElement (pipelineNodesToRemove [i]);
 					}
@@ -453,6 +473,7 @@ namespace Broccoli.TreeNodeEditor
 				case PipelineElement.ClassType.BranchMeshGenerator: return ScriptableObject.CreateInstance<BranchMeshGeneratorElement> ();
 				case PipelineElement.ClassType.SproutMeshGenerator: return ScriptableObject.CreateInstance<SproutMeshGeneratorElement> ();
 				case PipelineElement.ClassType.TrunkMeshGenerator: return ScriptableObject.CreateInstance<TrunkMeshGeneratorElement> ();
+				case PipelineElement.ClassType.TrunkCustomMesh: return ScriptableObject.CreateInstance<TrunkCustomMeshElement> ();
 				case PipelineElement.ClassType.BranchMapper: return ScriptableObject.CreateInstance<BranchMapperElement> ();
 				case PipelineElement.ClassType.SproutMapper: return ScriptableObject.CreateInstance<SproutMapperElement> ();
 				case PipelineElement.ClassType.WindEffect: return ScriptableObject.CreateInstance<WindEffectElement> ();
@@ -465,25 +486,18 @@ namespace Broccoli.TreeNodeEditor
 			if (srcNode != null && sinkNode != null &&
 				srcNode.pipelineElement != null && sinkNode.pipelineElement != null) 
 			{
-				if (srcNode.pipelineElement.positionWeight < sinkNode.pipelineElement.positionWeight || 
-					(!srcNode.pipelineElement.uniqueOnPipeline && 
-						srcNode.pipelineElement.positionWeight == sinkNode.pipelineElement.positionWeight)) 
+				if (pipeline.CanConnect (srcNode.pipelineElement, sinkNode.pipelineElement)) 
 				{
 					onBeforeAddConnection?.Invoke (srcNode, sinkNode);
-
-					srcNode.pipelineElement.sinkElementId = sinkNode.pipelineElement.id;
-					sinkNode.pipelineElement.srcElementId = srcNode.pipelineElement.id;
-					srcNode.pipelineElement.sinkElement = sinkNode.pipelineElement;
-					sinkNode.pipelineElement.srcElement = srcNode.pipelineElement;
-
+					listenPipelineEvents = false;
+					pipeline.Connect (srcNode.pipelineElement, sinkNode.pipelineElement);
+					listenPipelineEvents = true;
 					pipeline.Validate ();
 
 					onAddConnection?.Invoke (srcNode, sinkNode);
 
 					isDirty = true;
 					return true;
-				} else {
-					//treeFactory.AddLogWarn ("Invalid node connection.");
 				}
 			}
 			return false;
@@ -572,11 +586,9 @@ namespace Broccoli.TreeNodeEditor
 					for (int i = 0; i < edgesToRemove.Count; i++) {
 						PipelineNode sinkNode = edgesToRemove [i].input.node as PipelineNode;
 						PipelineNode srcNode = edgesToRemove [i].output.node as PipelineNode;
-
-						srcNode.pipelineElement.sinkElement = null;
-						srcNode.pipelineElement.sinkElementId = -1;
-						sinkNode.pipelineElement.srcElement = null;
-						sinkNode.pipelineElement.srcElementId = -1;
+						listenPipelineEvents = false;
+						pipeline.Disconnect (srcNode.pipelineElement, sinkNode.pipelineElement);
+						listenPipelineEvents = true;
 					}
 					pipeline.Validate ();
 					onRemoveConnections?.Invoke (edgesToRemove);
@@ -701,26 +713,8 @@ namespace Broccoli.TreeNodeEditor
 		/// Updates the pipeline nodes on the canvas.
 		/// </summary>
 		public void UpdatePipeline () {
-			// If nodes have been added or deleted then load the pipeline again.
-			/*
-			bool reloadPipeline = false;
-			if (idToNode.Count != pipeline.GetElementsCount ()) {
-				reloadPipeline = true;
-			} else {
-				List<PipelineElement> pipelineElements = pipeline.GetElements ();
-				for (int i = 0; i < pipelineElements.Count; i++) {
-					if (!idToNode.ContainsKey (pipelineElements[i].id)) {
-						reloadPipeline = true;
-					}
-				}
-			}
-			if (reloadPipeline) {
-				*/
-				CreatePipelineNodes ();
-			//}
-
+			CreatePipelineNodes ();
 			lastUndoProcessed = pipeline.undoControl.undoCount;
-
 			pipeline.Validate ();
 		}
 		/// <summary>
@@ -739,5 +733,30 @@ namespace Broccoli.TreeNodeEditor
 			}
 		}
         #endregion
+
+		#region Pipeline Events
+		public void OnPipelineConnection (PipelineElement srcElement, PipelineElement sinkElement)
+		{
+			if (listenPipelineEvents) {
+				if (srcElement.sinkElement == sinkElement && sinkElement.srcElement == srcElement) {
+					PipelineNode srcNode = idToNode [srcElement.id];
+					PipelineNode sinkNode = idToNode [sinkElement.id];
+					Edge edge = srcNode.srcPort.ConnectTo (sinkNode.sinkPort);
+					SetEdgeUserData (edge, srcNode, sinkNode);
+					AddElement (edge);
+				} else {
+					Debug.Log ($"Connection removed. Source: {srcElement.classType}, Sink: {sinkElement.classType}");
+					PipelineNode srcNode = idToNode [srcElement.id];
+					PipelineNode sinkNode = idToNode [sinkElement.id];
+					Edge edge = srcNode.srcPort.connections.First<Edge> ();
+					if (edge != null) RemoveElement (edge);
+					edge = sinkNode.sinkPort.connections.First<Edge> ();
+					if (edge != null) RemoveElement (edge);
+					srcNode.srcPort.DisconnectAll ();
+					sinkNode.sinkPort.DisconnectAll ();
+				}
+			}
+		}
+		#endregion
     }
 }

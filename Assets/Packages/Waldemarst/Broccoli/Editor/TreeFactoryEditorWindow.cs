@@ -331,10 +331,13 @@ namespace Broccoli.TreeNodeEditor
 			// Assigns the TreeFactory to this window.
 			if (factoryWindow.treeFactory != null) {
 				treeFactory.onProcessPipelinePreview -= factoryWindow.OnProcessPipeline;
+				treeFactory.onPipelineElementRequiresRedraw -= factoryWindow.OnPipelineElementRequiresRedraw;
 			}
 			factoryWindow.treeFactory = treeFactory;
 			factoryWindow.treeFactory.onProcessPipelinePreview -= factoryWindow.OnProcessPipeline;
 			factoryWindow.treeFactory.onProcessPipelinePreview += factoryWindow.OnProcessPipeline;
+			factoryWindow.treeFactory.onPipelineElementRequiresRedraw -= factoryWindow.OnPipelineElementRequiresRedraw;
+			factoryWindow.treeFactory.onPipelineElementRequiresRedraw += factoryWindow.OnPipelineElementRequiresRedraw;
 
 			factoryWindow.treeFactoryGO = treeFactory.gameObject;
 			treeFactory.SetInstanceAsActive ();
@@ -383,8 +386,10 @@ namespace Broccoli.TreeNodeEditor
 		/// Unloads the tree factory instance associated to this window.
 		/// </summary>
 		void UnloadFactory () {
-			if (treeFactory != null)
+			if (treeFactory != null) {
 				treeFactory.onProcessPipelinePreview -= OnProcessPipeline;
+				treeFactory.onPipelineElementRequiresRedraw -= OnPipelineElementRequiresRedraw;
+			}
 			treeFactory = null;
 		}
 		/// <summary>
@@ -730,7 +735,6 @@ namespace Broccoli.TreeNodeEditor
 				treeFactory.LoadPipeline (ScriptableObject.CreateInstance<Broccoli.Pipe.Pipeline> (), true);
 			} else {
 				LoadPipelineAsset (ExtensionManager.fullExtensionPath + GlobalSettings.templateOnCreateNewPipelinePath);
-				treeFactory.localPipelineFilepath = "";
 			}
 			if (GlobalSettings.moveCameraToPipeline) {
 				SceneView.lastActiveSceneView.LookAt (treeFactory.transform.position);
@@ -820,13 +824,23 @@ namespace Broccoli.TreeNodeEditor
 		private bool SavePipelineAsset (string pathToAsset, bool asNewAsset = false) {
 			if (!string.IsNullOrEmpty (pathToAsset)) {
 				try {
+					// Try loading an existing asset, to see if the Pipeline already exists.
 					Broccoli.Pipe.Pipeline pipelineToAsset = 
 						AssetDatabase.LoadAssetAtPath<Broccoli.Pipe.Pipeline> (pathToAsset);
+					// If the Pipeline already exists but should be saved as new, destroy the old asset.
 					if (pipelineToAsset != null && asNewAsset) {
 						AssetDatabase.DeleteAsset (pathToAsset);
 						DestroyImmediate (pipelineToAsset, true);
+					} else if (pipelineToAsset == null && !asNewAsset) {
+						string errorMsg = "Could not save to:" + pathToAsset + ", the path does not exists. Try a new path.";
+						ShowNotification (new GUIContent (errorMsg));
+						Debug.LogError (errorMsg);
+						return false;
 					}
+					// Clean the local pipeline.
+					treeFactory.localPipeline.filePath = pathToAsset;
 					pipelineToAsset = treeFactory.localPipeline.Clone (pipelineToAsset);
+					// If the Pipeline being saved is a Catalog Pipeline and no edit catalog is enabled, remove the isCatalog flag.
 					if (pipelineToAsset.isCatalogItem && 
 						GlobalSettings.editCatalogEnabled == false && 
 						asNewAsset) 
@@ -834,6 +848,8 @@ namespace Broccoli.TreeNodeEditor
 						pipelineToAsset.isCatalogItem = false;
 					}
 					pipelineToAsset.treeFactoryPreferences = treeFactory.treeFactoryPreferences.Clone ();
+					// Set the Pipeline path.
+					pipelineToAsset.filePath = pathToAsset;
 					if (asNewAsset) {
 						AssetDatabase.CreateAsset (pipelineToAsset, pathToAsset);
 					} else {
@@ -854,7 +870,6 @@ namespace Broccoli.TreeNodeEditor
 					}
 					AssetDatabase.SaveAssets ();
 					Resources.UnloadAsset (pipelineToAsset);
-					//DestroyImmediate (pipelineToAsset, true);
 				} catch (UnityException e) {
 					Debug.LogException (e);
 					return false;
@@ -902,6 +917,16 @@ namespace Broccoli.TreeNodeEditor
 				}
 			}
 			pipelineGraph.SetFooter ("Verts: 0, Tris: 0");
+		}
+		/// <summary>
+		/// Called when a PipelineElement requires its node redrawn.
+		/// </summary>
+		/// <param name="pipelineElement">Pipeline element.</param>
+		public void OnPipelineElementRequiresRedraw (PipelineElement pipelineElement) {
+			PipelineNode node = pipelineGraph.GetNode (pipelineElement.id);
+			if (node != null) {
+				node.RefreshNode ();
+			}
 		}
 		#endregion
 
@@ -1091,20 +1116,22 @@ namespace Broccoli.TreeNodeEditor
 				string panelPath = ExtensionManager.fullExtensionPath + GlobalSettings.pipelineSavePath;
 				string path = EditorUtility.SaveFilePanelInProject ("Save Pipeline", "TreePipeline", "asset", "", panelPath);
 				if (SavePipelineAsset (path, true)) {
-					treeFactory.localPipelineFilepath = path;
+					treeFactory.localPipeline.filePath = path;
 					if (treeFactory.localPipeline.isCatalogItem && !GlobalSettings.editCatalogEnabled) {
 						treeFactory.localPipeline.isCatalogItem = false;
 					}
 					ShowNotification (new GUIContent ("Asset saved at " + path));
+					EditorUtility.SetDirty(treeFactory);
 					GUIUtility.ExitGUI();
 				}
 			}
-			bool filePathEmpty = string.IsNullOrEmpty (treeFactory.localPipelineFilepath);
+			bool filePathEmpty = string.IsNullOrEmpty (treeFactory.localPipeline.filePath);
 			EditorGUI.BeginDisabledGroup (filePathEmpty || 
 				(!GlobalSettings.editCatalogEnabled && treeFactory.localPipeline.isCatalogItem));
 			if (GUILayout.Button (saveBtn)) {
-				if (SavePipelineAsset (treeFactory.localPipelineFilepath)) {
-					ShowNotification (new GUIContent ("Asset saved at " + treeFactory.localPipelineFilepath));
+				if (SavePipelineAsset (treeFactory.localPipeline.filePath)) {
+					ShowNotification (new GUIContent ("Asset saved at " + treeFactory.localPipeline.filePath));
+					EditorUtility.SetDirty (treeFactory);
 					GUIUtility.ExitGUI();
 				}
 			}
@@ -1114,8 +1141,8 @@ namespace Broccoli.TreeNodeEditor
 					!GlobalSettings.editCatalogEnabled) {
 					EditorGUILayout.HelpBox ("To persist changes save this pipeline as a new asset.", MessageType.Info);
 				} else {
-					GUILayout.Label (new GUIContent ("at: " + treeFactory.localPipelineFilepath, 
-						treeFactory.localPipelineFilepath), BroccoEditorGUI.label);
+					GUILayout.Label (new GUIContent ("at: " + treeFactory.localPipeline.filePath, 
+						treeFactory.localPipeline.filePath), BroccoEditorGUI.label);
 				}
 			}
 			EditorGUI.EndDisabledGroup ();
@@ -1214,6 +1241,7 @@ namespace Broccoli.TreeNodeEditor
 				if (treeFactory.localPipeline.state == Broccoli.Pipe.Pipeline.State.Valid) {
 					treeFactory.ProcessPipelinePreview (null, true);
 				}
+				EditorUtility.SetDirty(treeFactory);
 			}
 
 			if (GlobalSettings.showPipelineDebugOption) {
@@ -1242,6 +1270,7 @@ namespace Broccoli.TreeNodeEditor
 				factoryScale = (Mathf.RoundToInt (factoryScale * 1000)) / 1000f;
 				treeFactory.treeFactoryPreferences.factoryScale = factoryScale;
 				TreeFactory.GetActiveInstance ().ProcessPipelinePreview (null, true);
+				EditorUtility.SetDirty(treeFactory);
 			}
 			if (treeFactory.localPipeline.IsValid ()) {
 				EditorGUILayout.Space ();
@@ -1261,6 +1290,7 @@ namespace Broccoli.TreeNodeEditor
 				EditorGUILayout.EndHorizontal ();
 				if (customSeed != treeFactory.treeFactoryPreferences.customSeed) {
 					treeFactory.treeFactoryPreferences.customSeed = customSeed;
+					EditorUtility.SetDirty(treeFactory);
 				}
 			}
 		}
@@ -1345,6 +1375,7 @@ namespace Broccoli.TreeNodeEditor
 				char[] invalidChars = Path.GetInvalidFileNameChars();
 				string sanitizedPrefix = new string(prefabPrefix.Where(c => !invalidChars.Contains(c)).ToArray());
 				treeFactory.treeFactoryPreferences.prefabSavePrefix = sanitizedPrefix.Trim ();
+				EditorUtility.SetDirty(treeFactory);
 			}
 			EditorGUILayout.EndHorizontal ();
 			EditorGUILayout.HelpBox (treeFactory.treeFactoryPreferences.prefabSavePrefix + "000.prefab", MessageType.None);
@@ -1366,6 +1397,7 @@ namespace Broccoli.TreeNodeEditor
 					}
 					if (selectedPath.CompareTo (treeFactory.treeFactoryPreferences.prefabSavePath) != 0) {
 						treeFactory.treeFactoryPreferences.prefabSavePath = selectedPath;
+						EditorUtility.SetDirty(treeFactory);
 					}
 				}
 				GUIUtility.ExitGUI();
@@ -1377,30 +1409,35 @@ namespace Broccoli.TreeNodeEditor
 			bool cloneCustomMaterials = GUILayout.Toggle (treeFactory.treeFactoryPreferences.prefabCloneCustomMaterialEnabled, prefabCloneMaterialsLabel);
 			if (cloneCustomMaterials != treeFactory.treeFactoryPreferences.prefabCloneCustomMaterialEnabled) {
 				treeFactory.treeFactoryPreferences.prefabCloneCustomMaterialEnabled = cloneCustomMaterials;
+				EditorUtility.SetDirty(treeFactory);
 			}
 
 			// Meshes to folder enabled.
 			bool includeMeshesInsidePrefab = GUILayout.Toggle (treeFactory.treeFactoryPreferences.prefabIncludeMeshesInsidePrefab, prefabIncludeMeshesInPrefabLabel);
 			if (includeMeshesInsidePrefab != treeFactory.treeFactoryPreferences.prefabIncludeMeshesInsidePrefab) {
 				treeFactory.treeFactoryPreferences.prefabIncludeMeshesInsidePrefab = includeMeshesInsidePrefab;
+				EditorUtility.SetDirty(treeFactory);
 			}
 
 			// Materials to folder enabled.
 			bool includeMaterialsInsidePrefab = GUILayout.Toggle (treeFactory.treeFactoryPreferences.prefabIncludeMaterialsInsidePrefab, prefabIncludeMaterialsInPrefabLabel);
 			if (includeMaterialsInsidePrefab != treeFactory.treeFactoryPreferences.prefabIncludeMaterialsInsidePrefab) {
 				treeFactory.treeFactoryPreferences.prefabIncludeMaterialsInsidePrefab = includeMaterialsInsidePrefab;
+				EditorUtility.SetDirty(treeFactory);
 			}
 
 			// Copy textures from a bark custom material with shader override to the prefab folder.
 			bool copyCustomMaterialTextures = GUILayout.Toggle (treeFactory.treeFactoryPreferences.prefabCopyCustomMaterialBarkTexturesEnabled, prefabCopyBranchTexturesLabel);
 			if (copyCustomMaterialTextures != treeFactory.treeFactoryPreferences.prefabCopyCustomMaterialBarkTexturesEnabled) {
 				treeFactory.treeFactoryPreferences.prefabCopyCustomMaterialBarkTexturesEnabled = copyCustomMaterialTextures;
+				EditorUtility.SetDirty(treeFactory);
 			}
 
 			// Create atlas.
 			bool createAtlas = GUILayout.Toggle (treeFactory.treeFactoryPreferences.prefabCreateAtlas, prefabCreateSproutAtlasLabel);
 			if (createAtlas != treeFactory.treeFactoryPreferences.prefabCreateAtlas) {
 				treeFactory.treeFactoryPreferences.prefabCreateAtlas = createAtlas;
+				EditorUtility.SetDirty(treeFactory);
 			}
 			if (treeFactory.treeFactoryPreferences.prefabCreateAtlas) {
 				// Atlas size.
@@ -1411,6 +1448,7 @@ namespace Broccoli.TreeNodeEditor
 				EditorGUILayout.EndHorizontal ();
 				if (atlasTextureSize != treeFactory.treeFactoryPreferences.atlasTextureSize) {
 					treeFactory.treeFactoryPreferences.atlasTextureSize = atlasTextureSize;
+					EditorUtility.SetDirty(treeFactory);
 				}
 			}
 
@@ -1429,12 +1467,14 @@ namespace Broccoli.TreeNodeEditor
 				EditorGUILayout.EndHorizontal ();
 				if (billboardTextureSize != treeFactory.treeFactoryPreferences.billboardTextureSize) {
 					treeFactory.treeFactoryPreferences.billboardTextureSize = billboardTextureSize;
+					EditorUtility.SetDirty(treeFactory);
 				}
 			}
 			// Reposition root.
 			bool repositionEnabled = GUILayout.Toggle (treeFactory.treeFactoryPreferences.prefabRepositionEnabled, repositionEnabledLabel);
 			if (repositionEnabled != treeFactory.treeFactoryPreferences.prefabRepositionEnabled) {
 				treeFactory.treeFactoryPreferences.prefabRepositionEnabled = repositionEnabled;
+				EditorUtility.SetDirty(treeFactory);
 			}
 			EditorGUILayout.Space ();
 		}

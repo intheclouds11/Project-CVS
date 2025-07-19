@@ -45,6 +45,13 @@ namespace Broccoli.Examples
             }
             EditorGUILayout.Space ();
 
+            // Replace SproutMesh.
+            EditorGUILayout.LabelField ("Current SproutMesh: " + 
+                ModifyPipeline.sproutMeshKeyNames [modifyPipelineController.sproutMeshSelected]);
+            if (GUILayout.Button ("Switch SproutMeshs")) {
+                modifyPipelineController.SwitchSproutMesh ();
+            }
+
             // Replace SproutMappers.
             EditorGUILayout.LabelField ("Current SproutMapper: " + 
                 ModifyPipeline.sproutMapperKeyNames [modifyPipelineController.sproutMapperSelected]);

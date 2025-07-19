@@ -67,6 +67,11 @@ namespace Broccoli.Factory
 			List<AssetManager.AssetInfo> assetInfos);
 		public delegate void OnLODEvent (GameObject lodGameObject);
 		/// <summary>
+		/// Delegate for a Pipeline element.
+		/// </summary>
+		/// <param name="pipelineElement">Pipeline element instance.</param>
+		public delegate void PipelineElementEvent (Broccoli.Pipe.PipelineElement pipelineElement);
+		/// <summary>
 		/// Event called before a Pipeline gets processed by this TreeFactory.
 		/// </summary>
 		public ProcessPipelineDelegate onBeforeProcessPipeline;
@@ -90,6 +95,10 @@ namespace Broccoli.Factory
 		/// Event called after a prefab has been created.
 		/// </summary>
 		public ProcessPrefabDelegate onEndPrefabCommit;
+		/// <summary>
+		/// Event called when a PipelineElement has changes that require redrawing.
+		/// </summary>
+		public PipelineElementEvent onPipelineElementRequiresRedraw;
 		public OnLODEvent onLODReady;
 		/// <summary>
 		/// How many steps should branch curve should contain per length unit.
@@ -176,11 +185,6 @@ namespace Broccoli.Factory
 		[System.NonSerialized]
 		public string prefabProcessAction = "";
 		/// <summary>
-		/// The local pipeline filepath.
-		/// </summary>
-		[System.NonSerialized]
-		public string localPipelineFilepath = "";
-		/// <summary>
 		/// The tree used for previewing pipelines.
 		/// </summary>
 		[System.NonSerialized]
@@ -260,6 +264,10 @@ namespace Broccoli.Factory
 		/// </summary>
 		MeshManager _meshManager = new MeshManager ();
 		/// <summary>
+		/// The extra mesh manager (for meshes used as helpers in the building process).
+		/// </summary>
+		MeshManager _extraMeshManager = new MeshManager ();
+		/// <summary>
 		/// The texture manager.
 		/// </summary>
 		TextureManager _textureManager = new TextureManager ();
@@ -268,9 +276,17 @@ namespace Broccoli.Factory
 		/// </summary>
 		MaterialManager _materialManager = new MaterialManager ();
 		/// <summary>
+		/// The extra material manager (for materials used as helpers in the building process).
+		/// </summary>
+		MaterialManager _extraMaterialManager = new MaterialManager ();
+		/// <summary>
 		/// The asset manager.
 		/// </summary>
 		AssetManager _assetManager = new AssetManager ();
+		/// <summary>
+		/// The GameObject manager.
+		/// </summary>
+		GameObjectManager _gameObjectManager = new GameObjectManager ();
 		#endregion
 
 		#region Subfactories
@@ -322,6 +338,13 @@ namespace Broccoli.Factory
 			get { return _meshManager; }
 		}
 		/// <summary>
+		/// Access to the extra mesh manager.
+		/// </summary>
+		/// <value>The extra mesh manager.</value>
+		public MeshManager extraMeshManager {
+			get { return _extraMeshManager; }
+		}
+		/// <summary>
 		/// Access to the texture manager.
 		/// </summary>
 		/// <value>The texture manager.</value>
@@ -336,11 +359,24 @@ namespace Broccoli.Factory
 			get { return _materialManager; }
 		}
 		/// <summary>
+		/// Access to the extra materials manager.
+		/// </summary>
+		/// <value>The extra material manager.</value>
+		public MaterialManager extraMaterialManager {
+			get { return _extraMaterialManager; }
+		}
+		/// <summary>
 		/// Access to the asset manager.
 		/// </summary>
 		/// <value>The asset manager.</value>
 		public AssetManager assetManager {
 			get { return _assetManager; }
+		}
+		public GameObjectManager gameObjectManager {
+			get {
+				_gameObjectManager.SetParent (this.gameObject);
+				return _gameObjectManager;
+			}
 		}
 		/// <summary>
 		/// Checks if the current process is to generate a preview tree.
@@ -413,8 +449,6 @@ namespace Broccoli.Factory
 			TreeFactory treeFactory = go.AddComponent<Broccoli.Factory.TreeFactory> ();
 			return treeFactory;
 		}
-#if UNITY_EDITOR
-
 		/// <summary>
 		/// Loads a pipeline from an asset path.
 		/// </summary>
@@ -446,7 +480,6 @@ namespace Broccoli.Factory
 			}
 			return _localPipeline;
 		}
-#endif
 		/// <summary>
 		/// Spawns vegetation from a pipeline.
 		/// </summary>
@@ -537,8 +570,10 @@ namespace Broccoli.Factory
 							_localPipeline = null;
 							_componentManager = new ComponentManager ();
 							_meshManager = new MeshManager ();
+							_extraMeshManager = new MeshManager ();
 							_textureManager = new TextureManager ();
 							_materialManager = new MaterialManager ();
+							_extraMaterialManager = new MaterialManager ();
 							_assetManager = new AssetManager ();
 
 							pipelineClone.treeFactoryPreferences = prefencesClone;
@@ -915,14 +950,15 @@ namespace Broccoli.Factory
 		public void LoadPipeline (Pipeline pipeline, string filePath, bool buildPreview, bool useLastSeed = false) {
 			_componentManager.Clear ();
 			_meshManager.Clear ();
+			_extraMeshManager.Clear ();
 			_materialManager.Clear ();
+			_extraMaterialManager.Clear ();
 			_assetManager.Clear ();
 			if (pipeline != null && _localPipeline != null) {
 				DestroyImmediate (_localPipeline, true);
 			}
 			_localPipeline = pipeline;
 			_localPipeline.Init ();
-			localPipelineFilepath = filePath;
 			firstReprocess = 2;
 			// Set tree factory preferences
 			treeFactoryPreferences = pipeline.treeFactoryPreferences.Clone ();
@@ -982,6 +1018,8 @@ namespace Broccoli.Factory
 				_componentManager.CallClearOnComponents ();
 				_meshManager.Clear ();
 				_materialManager.Clear ();
+				_extraMeshManager.Clear ();
+				_extraMaterialManager.Clear ();
 				CleanTreeGameObject (tree);
 				InitPreviewTree ();
 			}
@@ -992,6 +1030,8 @@ namespace Broccoli.Factory
 			_componentManager.BeginUsage ();
 			_meshManager.BeginUsage ();
 			_materialManager.BeginUsage (treeFactoryPreferences);
+			_extraMeshManager.BeginUsage ();
+			_extraMaterialManager.BeginUsage (treeFactoryPreferences);
 			if (pipeline != null) {
 				if (ValidatePipeline (pipeline)) {
 					// Save the current random state.
@@ -1036,8 +1076,10 @@ namespace Broccoli.Factory
 				}
 			}
 			_meshManager.EndUsage ();
+			_extraMeshManager.EndUsage ();
 			ProcessMesh (tree);
 			_materialManager.EndUsage ();
+			_extraMaterialManager.EndUsage ();
 			ProcessMaterials (tree);
 			_componentManager.EndUsage ();
 
@@ -1505,9 +1547,9 @@ namespace Broccoli.Factory
 				int meshId = _meshManager.GetMergedMeshId (i);
 				if ((treeFactoryPreferences.previewMode == PreviewMode.Colored || forcePreviewModeColored) && GlobalSettings.structureViewEnabled) {
 					// Colored materials.
-					MeshManager.MeshData meshData = _meshManager.GetMeshData (meshId);
+					MeshManager.MeshData meshData = _meshManager.GetMeshDataByMeshId (meshId);
 					if (meshData != null) {
-						if (meshData.type == MeshManager.MeshData.Type.Sprout) {
+						if (meshData.type == MeshManager.MeshData.TYPE_SPROUT) {
 							// For sprout meshes.
 							int groupId = _meshManager.GetMeshGroupId (meshId);
 							materials [i] = _materialManager.GetColoredMaterial (
@@ -1536,10 +1578,10 @@ namespace Broccoli.Factory
 								bool isSprout = _meshManager.IsSproutMesh (meshId);
 								materials [i] = _materialManager.GetOverridedMaterial (meshId, isSprout);
 							} else {
-								materials [i] = _materialManager.GetMaterial (meshId);
+								materials [i] = _materialManager.GetMaterialByMeshId (meshId);
 							}
 						} else {
-							materials [i] = _materialManager.GetMaterial (meshId, true);
+							materials [i] = _materialManager.GetMaterialByMeshId (meshId, true);
 						}
 					} else {
 						hasUnassignedMaterials = true;

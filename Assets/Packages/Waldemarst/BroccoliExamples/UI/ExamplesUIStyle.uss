@@ -2,7 +2,7 @@
   position: absolute;
   left: 10px;
   top: 10px;
-  width: 320px;
+  width: 360px;
   color: rgba(0.9, 0.9, 0.9, 1);
   background-color: rgba(0, 0, 0, 0.85); /* Semi-transparent background */
   padding: 8px;

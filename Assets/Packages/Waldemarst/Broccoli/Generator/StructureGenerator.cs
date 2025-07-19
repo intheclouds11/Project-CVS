@@ -637,8 +637,8 @@ namespace Broccoli.Generator
 			/// <summary>
 			/// Clone this instance.
 			/// </summary>
-			public StructureLevel Clone() {
-				StructureLevel clone = new StructureLevel ();
+			public StructureLevel Clone (StructureLevel clone = null) {
+				if (clone == null) clone = new StructureLevel ();
 				clone.id = id;
 				clone.parentId = parentId;
 				clone.sharingGroupId = sharingGroupId;
@@ -710,7 +710,7 @@ namespace Broccoli.Generator
 			#endregion
 
 			#region Debug
-			public string GetDebugInfo () {
+			public virtual string GetDebugInfo () {
 				string info = string.Format ("id: {0}, parentId: {1}. sharingGroupId: {2}, sharingNextId: {3}\n",
 					id, parentId, sharingGroupId, sharingNextId);
 				info += string.Format ("enabled: {0}, isSprout: {1}, isRoot: {2}\n", enabled, isSprout, isRoot);
@@ -719,57 +719,6 @@ namespace Broccoli.Generator
 				info += string.Format ("distribution: {0}, distOrigin: {1}, distSpacVar: {2}, distAngleVar: {3}, chldPerNode: {4}\n", 
 					distribution, distributionOrigin, distributionSpacingVariance, distributionAngleVariance, childrenPerNode);
 				return info;
-				/*
-				clone.radius = radius;
-				clone.fromBranchCenter = fromBranchCenter;
-				clone.sproutGroupId = sproutGroupId;
-				clone.probability = probability;
-				clone.sharedProbability = sharedProbability;
-				clone.randomTwirlOffsetEnabled = randomTwirlOffsetEnabled;
-				clone.twirlOffset = twirlOffset;
-				clone.maxTwirl = maxTwirl;
-				clone.minTwirl = minTwirl;
-				clone.maxParallelAlignAtTop = maxParallelAlignAtTop;
-				clone.minParallelAlignAtTop = minParallelAlignAtTop;
-				clone.maxParallelAlignAtBase = maxParallelAlignAtBase;
-				clone.minParallelAlignAtBase = minParallelAlignAtBase;
-				clone.parallelAlignCurve = new AnimationCurve (parallelAlignCurve.keys);
-				clone.maxGravityAlignAtTop = maxGravityAlignAtTop;
-				clone.minGravityAlignAtTop = minGravityAlignAtTop;
-				clone.maxGravityAlignAtBase = maxGravityAlignAtBase;
-				clone.minGravityAlignAtBase = minGravityAlignAtBase;
-				clone.gravityAlignCurve = new AnimationCurve (gravityAlignCurve.keys);
-				clone.maxHorizontalAlignAtTop = maxHorizontalAlignAtTop;
-				clone.minHorizontalAlignAtTop = minHorizontalAlignAtTop;
-				clone.maxHorizontalAlignAtBase = maxHorizontalAlignAtBase;
-				clone.minHorizontalAlignAtBase = minHorizontalAlignAtBase;
-				clone.horizontalAlignCurve = new AnimationCurve (horizontalAlignCurve.keys);
-				clone.flipSproutAlign = flipSproutAlign;
-				clone.flipSproutDirection = flipSproutDirection;
-				clone.normalSproutRandomness = normalSproutRandomness;
-				clone.maxLengthAtTop = maxLengthAtTop;
-				clone.minLengthAtTop = minLengthAtTop;
-				clone.maxLengthAtBase = maxLengthAtBase;
-				clone.minLengthAtBase = minLengthAtBase;
-				clone.lengthCurve = new AnimationCurve (lengthCurve.keys);
-				clone.minGirthScale = minGirthScale;
-				clone.maxGirthScale = maxGirthScale;
-				clone.actionRangeEnabled = actionRangeEnabled;
-				clone.minRange = minRange;
-				clone.maxRange = maxRange;
-				clone.minMaskRange = minMaskRange;
-				clone.maxMaskRange = maxMaskRange;
-				clone.applyBranchBreak = applyBranchBreak;
-				clone.breakBranchProbability = new AnimationCurve (breakBranchProbability.keys);
-				clone.minBreakRange = minBreakRange;
-				clone.maxBreakRange = maxBreakRange;
-				clone.nodePosition = nodePosition;
-				clone.isLocked = isLocked;
-				clone.overrideNoise = overrideNoise;
-				clone.noise = noise;
-				clone.noiseScale = noiseScale;
-				
-				*/
 			}
 			#endregion
 		}
@@ -974,6 +923,10 @@ namespace Broccoli.Generator
 		/// <typeparam name="int">Id of the tuned structure.</typeparam>
 		/// <returns>List of ids assigned to tuned structures.</returns>
 		List<int> existingStructureId = new List<int> ();
+		/// <summary>
+		/// True to enable processing root structure levels.
+		/// </summary>
+		bool processRootsEnabled = false;
 		#endregion
 
 		#region Singleton
@@ -1086,14 +1039,74 @@ namespace Broccoli.Generator
 		/// Generates the branch and sprout structures to be used to build a the tree.
 		/// </summary>
 		/// <param name="structures">List of root structures.</param>
-		/// <param name="structureLevel">Structure level containing the root rules to build branches.</param>
+		/// <param name="trunkStructureLevel">Structure level containing the root rules to build branches.</param>
 		/// <returns>List of structures to build a tree.</returns>
-		public List<Structure> GenerateStructures (List<Structure> structures, StructureLevel structureLevel) {
+		public List<Structure> GenerateStructures (List<Structure> structures, TrunkStructureLevel trunkStructureLevel, List<BezierCurve> trunkCurves = null )
+		{
 			Clear ();
-			PrepareStructureLevelsRecursive (structureLevel, 0);
+			PrepareStructureLevelsRecursive (trunkStructureLevel, 0);
 			PrepareStructuresRecursive (structures);
-			structures = GenerateStructuresRecursive (structures, structureLevel, null);
+			// TRUNK CUSTOM MODE
+			if (trunkStructureLevel.trunkMode == TrunkStructureLevel.TrunkMode.CustomMesh) {
+				// Override structures as tuned (one per custom trunk custom branch).
+				structures = GenerateCustomTrunkStructures (trunkStructureLevel, trunkCurves, structures);
+				processRootsEnabled = false;
+			} else {
+				processRootsEnabled = true;
+			}
+			structures = GenerateStructuresRecursive (structures, trunkStructureLevel, null);
 			return structures;
+		}
+		/// <summary>
+		/// Generate tuned structures to be user as trunk definitions.
+		/// </summary>
+		/// <param name="trunkStructureLevel">TrunkStructureLevel instance producing the structures.</param>
+		/// <param name="trunkCurves">List of curves for the trunks.</param>
+		/// <returns>List oc tuned trunk structures.</returns>
+		List<Structure> GenerateCustomTrunkStructures (TrunkStructureLevel trunkStructureLevel, List<BezierCurve> trunkCurves, List<Structure> originalStructures)
+		{
+			List<Structure> customTrunkStructures = new List<Structure>();
+			int trunkFrequency = trunkCurves.Count;
+			bool occurred = false;
+			List<BroccoTree.Branch> trunks = GenerateBranchCandidates (trunkStructureLevel, null, out occurred, trunkFrequency);
+			BezierCurve trunkCurve = null;
+			for (int i = 0; i < trunks.Count; i++) {
+				// Get the curve to use as trunk.
+				trunkCurve = trunkCurves [i];
+				trunkCurve.Process ();
+				trunks[i].curve = trunkCurve;
+
+				// Check if original structures already contain a trunk (based on branch.curve.guid)
+				bool trunkStructureExists = false; 
+				if (originalStructures != null && originalStructures.Count == trunkCurves.Count) {
+					trunkStructureExists = originalStructures[i].branch.curve.guid == trunkCurve.guid;
+				}
+				// Structure exists.
+				if (trunkStructureExists) {
+					customTrunkStructures.Add (originalStructures [i]);
+				}
+				// Structure need to be created.
+				else {
+					Structure trunkStructure = new Structure ();
+					trunkStructure.id = GetNextStructureId ();
+					trunkStructure.branch = trunks[i];
+					trunkStructure.branch.id = trunks[i].id;
+					trunkStructure.branch.isRoot = false;
+					trunkStructure.generatorId = trunkStructureLevel.id;
+					trunkStructure.mainGeneratorId = trunkStructureLevel.GetMainId ();
+					trunkStructure.parentStructureId = -1;
+					trunkStructure.parentStructure = null;
+					trunkStructure.isSharedGenerator = false;
+					trunkStructure.randomState = Random.state;
+					trunkStructure.isTuned = true;
+					trunkStructure.branch.isTuned = true;
+					trunkStructure.branch.isTrunk = true;
+					trunkStructure.branch.meshingEnabled = false;
+					trunkStructure.branch.girthScale = trunkCurves[i].valueA;
+					customTrunkStructures.Add (trunkStructure);
+				}
+			}
+			return customTrunkStructures;
 		}
 		/// <summary>
 		/// Generate the children structures for a parent structure using a StructureLevel as rules.
@@ -1105,7 +1118,7 @@ namespace Broccoli.Generator
 		/// <returns>List of generated structures.</returns>
 		private List<Structure> GenerateStructuresRecursive (List<Structure> structures, 
 			StructureLevel structureLevel, 
-			Structure parentStructure) 
+			Structure parentStructure)
 		{
 			// OnBefore delegate.
 			onBeforeGenerateStructures?.Invoke (structures, structureLevel, parentStructure);
@@ -1113,7 +1126,11 @@ namespace Broccoli.Generator
 
 			// Validation
 			if (structures == null) return structures;
-			if (parentStructure != null && parentStructure.isTuned && structures.Count == 0) return structures;
+			if (!processRootsEnabled && structureLevel.isRoot) {
+				structures.Clear ();
+				return structures;
+			}
+			//if (parentStructure != null && parentStructure.isTuned && structures.Count == 0) return structures;
 
 			// If parent structure is tuned then set random init state.
 			if (useParentStructureRandomState && parentStructure != null && parentStructure.isTuned) {
@@ -1489,20 +1506,7 @@ namespace Broccoli.Generator
 									childBranch.breakPosition = Random.Range (structureLevel.minBreakRange, structureLevel.maxBreakRange);
 								}
 							}
-							/* CLEAR
-							childBranch.maxLength = GetLength (spawnedSprouts [i].position, structureLevel);
-							*/
 							childBranch.girthScale = Random.Range (structureLevel.minGirthScale, structureLevel.maxGirthScale);
-							/*
-							if (structureLevel.id == 0) {
-								childBranch.direction = Base.GlobalSettings.againstGravityDirection;
-							} else {
-								childBranch.direction = spawnedSprouts [i].sproutDirection;
-								//TODO RE: check for direction, normal and forward vectors.
-								childBranch.rollAngle = spawnedSprouts [i].rollAngle;
-								//childBranch.forward = spawnedSprouts [i].forward;
-							}
-							*/
 							Vector3 childBranchDirection = Base.GlobalSettings.againstGravityDirection;
 							if (structureLevel.id != 0) {
 								childBranchDirection = spawnedSprouts [i].sproutDirection;
@@ -1511,8 +1515,6 @@ namespace Broccoli.Generator
 							float directionalLength = GetLength (spawnedSprouts [i].position, structureLevel);
 							childBranch.ApplyDirectionalLength (childBranchDirection, directionalLength);
 							childBranch.position = spawnedSprouts [i].position;
-							//childBranch.Update ();
-							//childBranch.UpdatePosition (parentBranch);
 							childBranch.UpdateGirth ();
 							branches.Add (childBranch);
 						}

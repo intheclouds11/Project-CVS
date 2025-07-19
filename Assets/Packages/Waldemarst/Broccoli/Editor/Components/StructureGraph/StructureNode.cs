@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using UnityEngine;
 using UnityEditor;
@@ -24,7 +23,7 @@ namespace Broccoli.TreeNodeEditor
         public StructurePort downstreamParentPort = null;
         public StructurePort downstreamChildrenPort = null;
         public bool tagColorEnabled = true;
-        public new class UxmlFactory : UxmlElementAttribute {}
+        public new class UxmlFactory : UxmlFactory<StructureNode, VisualElement.UxmlTraits> {}
         public enum NodeType {
             Trunk = 0,
             Branch = 1,

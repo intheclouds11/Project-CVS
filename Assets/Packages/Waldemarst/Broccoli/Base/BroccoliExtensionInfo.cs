@@ -28,7 +28,7 @@ namespace Broccoli.Base
 		public static string minorVersion = "10";
 		/// <summary>
 		/// The patch version.
-		public static string patchVersion = "2";
+		public static string patchVersion = "3";
 		/// <summary>
 		/// Version compound string with major, minor and patch version.
 		/// </summary>

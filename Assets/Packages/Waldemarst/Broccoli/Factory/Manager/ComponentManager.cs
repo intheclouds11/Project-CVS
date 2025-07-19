@@ -68,6 +68,9 @@ namespace Broccoli.Manager
 			case PipelineElement.ClassType.TrunkMeshGenerator:
 				factoryComponent = new TrunkMeshGeneratorComponent ();
 				break;
+			case PipelineElement.ClassType.TrunkCustomMesh:
+				factoryComponent = new TrunkCustomMeshComponent ();
+				break;
 			case PipelineElement.ClassType.GirthTransform:
 				factoryComponent = new GirthTransformComponent ();
 				break;

@@ -120,7 +120,7 @@
                         if (_IsLinearColorSpace)
                             col.rgb = pow (col.rgb, 2.2);
                     }
-
+                    col.rgb = col.rgb * i.color.r;
                     col.a = alpha;
                     return  col;
                 }

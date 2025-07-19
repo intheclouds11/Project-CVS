@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: fd49daf96e54c5abcb3b8a01b6324a0b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.3
+  assetPath: Assets/Packages/Waldemarst/Broccoli/Factory/Manager/GameObjectManager.cs
+  uploadId: 767891

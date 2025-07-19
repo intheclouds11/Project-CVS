@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 207d93e8e423c315781eebe8c82d83aa
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.3
+  assetPath: Assets/Packages/Waldemarst/Broccoli/Generator/TrunkStructureLevel.cs
+  uploadId: 767891

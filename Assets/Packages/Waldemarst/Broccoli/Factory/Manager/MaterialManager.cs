@@ -471,10 +471,11 @@ namespace Broccoli.Manager
 		/// <param name="material">Material.</param>
 		/// <param name="groupId">Group identifier.</param>
 		/// <param name="areaId">Area identifier.</param>
-		public bool RegisterCustomMaterial (MeshManager.MeshData.Type type, 
+		public bool RegisterCustomMaterial (int type, 
 			Material material, 
 			int groupId = 0, 
-			int areaId = 0) 
+			int areaId = 0,
+			bool destroyable = true) 
 		{
 			return RegisterCustomMaterial (MeshManager.MeshData.GetMeshDataId (type, groupId, areaId), material);
 		}
@@ -509,7 +510,7 @@ namespace Broccoli.Manager
 		/// <param name="type">Type.</param>
 		/// <param name="groupId">Group identifier.</param>
 		/// <param name="areaId">Area identifier.</param>
-		public bool DeregisterMaterial (MeshManager.MeshData.Type type, int groupId = 0, int areaId = 0) {
+		public bool DeregisterMaterial (int type, int groupId = 0, int areaId = 0) {
 			return DeregisterMaterial (MeshManager.MeshData.GetMeshDataId (type, groupId, areaId));
 		}
 		/// <summary>
@@ -517,7 +518,7 @@ namespace Broccoli.Manager
 		/// </summary>
 		/// <returns><c>true</c>, if material by type was deregistered, <c>false</c> otherwise.</returns>
 		/// <param name="type">Type.</param>
-		public bool DeregisterMaterialByType (MeshManager.MeshData.Type type) {
+		public bool DeregisterMaterialByType (int type) {
 			toDeleteMaterialIds.Clear ();
 			var materialsEnumerator = materials.GetEnumerator ();
 			int materialId;
@@ -554,7 +555,7 @@ namespace Broccoli.Manager
 		/// <param name="type">Type.</param>
 		/// <param name="groupId">Group identifier.</param>
 		/// <param name="areaId">Area identifier.</param>
-		public bool HasMaterial (MeshManager.MeshData.Type type, int groupId = 0, int areaId = 0) {
+		public bool HasMaterial (int type, int groupId = 0, int areaId = 0) {
 			return HasMaterial (MeshManager.MeshData.GetMeshDataId (type, groupId, areaId));
 		}
 		/// <summary>
@@ -572,7 +573,7 @@ namespace Broccoli.Manager
 		/// <param name="type">Type.</param>
 		/// <param name="groupId">Group identifier.</param>
 		/// <param name="areaId">Area identifier.</param>
-		public bool IsCustomMaterial (MeshManager.MeshData.Type type, int groupId = 0, int areaId = 0) {
+		public bool IsCustomMaterial (int type, int groupId = 0, int areaId = 0) {
 			return IsCustomMaterial (MeshManager.MeshData.GetMeshDataId (type, groupId, areaId));
 		}
 		/// <summary>
@@ -590,7 +591,7 @@ namespace Broccoli.Manager
 		/// <param name="type">Type.</param>
 		/// <param name="groupId">Group identifier.</param>
 		/// <param name="areaId">Area identifier.</param>
-		public bool IsOwnedMaterial (MeshManager.MeshData.Type type, int groupId = 0, int areaId = 0) {
+		public bool IsOwnedMaterial (int type, int groupId = 0, int areaId = 0) {
 			return IsOwnedMaterial (MeshManager.MeshData.GetMeshDataId (type, groupId, areaId));
 		}
 		/// <summary>
@@ -656,7 +657,7 @@ namespace Broccoli.Manager
 		/// <returns>The material.</returns>
 		/// <param name="id">Identifier.</param>
 		/// <param name="makeClone">If set to <c>true</c> return a clone of the material.</param>
-		public Material GetMaterial (int id, bool makeClone = false) {
+		public Material GetMaterialByMeshId (int id, bool makeClone = false) {
 			if (materials.ContainsKey (id)) {
 				if (!keepAliveMaterials.Contains (id)) {
 					keepAliveMaterials.Add (id);
@@ -677,12 +678,12 @@ namespace Broccoli.Manager
 		/// <param name="makeClone">If set to <c>true</c> return a clone of the material.</param>
 		/// <param name="groupId">Group identifier.</param>
 		/// <param name="areaId">Area identifier.</param>
-		public Material GetMaterial (MeshManager.MeshData.Type type, 
+		public Material GetMaterial (int type, 
 			bool makeClone = false,
 			int groupId = 0, 
 			int areaId = 0) 
 		{
-			return GetMaterial (MeshManager.MeshData.GetMeshDataId (type, groupId, areaId), makeClone);
+			return GetMaterialByMeshId (MeshManager.MeshData.GetMeshDataId (type, groupId, areaId), makeClone);
 		}
 		/// <summary>
 		/// Gets materials by type.
@@ -690,7 +691,7 @@ namespace Broccoli.Manager
 		/// <returns>The materials by type.</returns>
 		/// <param name="type">Type.</param>
 		/// <param name="makeClones">If set to <c>true</c> return clones.</param>
-		public Dictionary<int, Material> GetMaterialsByType (MeshManager.MeshData.Type type, bool makeClones = false) {
+		public Dictionary<int, Material> GetMaterialsByType (int type, bool makeClones = false) {
 			Dictionary<int, Material> mats = new Dictionary<int, Material> ();
 			var materialsEnumerator = materials.GetEnumerator ();
 			int materialId;
@@ -768,14 +769,17 @@ namespace Broccoli.Manager
 		/// Gets the default unlit material.
 		/// </summary>
 		/// <returns>Default unlit material.</returns>
-		public static Material[] GetUnlitMaterials (Material[] originalMaterials) {
+		public static Material[] GetUnlitMaterials (Material[] originalMaterials, Color tint, int applyTintAfterIndex = 1) {
 			Shader unlitShader = GetUnlitShader ();
 			Material[] unlitMaterials = new Material [originalMaterials.Length];
 			for (int i = 0; i < unlitMaterials.Length; i++) {
 				unlitMaterials [i] = new Material (unlitShader);
 				if (originalMaterials [i].HasProperty ("_Color")) {
-					unlitMaterials [i].SetColor ("_Color", originalMaterials [i].GetColor ("_Color"));
-					unlitMaterials [i].SetColor ("_BaseColor", originalMaterials [i].GetColor ("_Color"));
+					Color tintColor = originalMaterials [i].GetColor ("_Color");
+					if (i >= applyTintAfterIndex) tintColor *= tint;
+					unlitMaterials [i].SetColor ("_Color", tintColor);
+					unlitMaterials [i].SetColor ("_BaseColor", tintColor);
+					unlitMaterials [i].SetColor ("_UnlitColor", tintColor);
 				}
 				if (originalMaterials [i].HasProperty ("_MainTex")) {
 					unlitMaterials [i].SetTexture ("_MainTex", originalMaterials [i].GetTexture ("_MainTex"));
@@ -784,8 +788,11 @@ namespace Broccoli.Manager
 				unlitMaterials [i].SetFloat ("_Cutoff", 0.2f);
 				if (ExtensionManager.isURP || ExtensionManager.isHDRP) {
 					if (originalMaterials [i].HasProperty ("_Color")) {
-						unlitMaterials [i].SetColor ("_BaseColor", originalMaterials [i].GetColor ("_Color"));
-						unlitMaterials [i].SetColor ("_Color", originalMaterials [i].GetColor ("_Color"));
+						Color tintColor = originalMaterials [i].GetColor ("_Color");
+						if (i >= applyTintAfterIndex) tintColor *= tint;
+						unlitMaterials [i].SetColor ("_BaseColor", tintColor);
+						unlitMaterials [i].SetColor ("_Color", tintColor);
+						unlitMaterials [i].SetColor ("_UnlitColor", tintColor);
 					}
 					if (originalMaterials [i].HasProperty ("_MainTex")) {
 						unlitMaterials [i].SetTexture ("_BaseMap", originalMaterials [i].GetTexture ("_MainTex"));

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: br_sl_pine_dry
   m_EditorClassIdentifier: 
   branchDescriptorCollection:
-    descriptorImplId: -1
+    descriptorImplId: 0
     descriptorImplName: Undefined Descriptor
     snapshots: []
     variations: []

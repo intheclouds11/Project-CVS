@@ -41,6 +41,8 @@ namespace Broccoli.TreeNodeEditor
 		SerializedProperty propLodFade;
 		SerializedProperty propLodFadeAnimate;
 		SerializedProperty propLodTransitionWidth;
+		SerializedProperty propBillboardIncludeController;
+		SerializedProperty propBillboardSproutTint;
 		SerializedProperty propUnwrapUV1sAtRuntime;
 		SerializedProperty propUnwrapUV1sAtPrefab;
 		SerializedProperty propSplitSubmeshes;
@@ -53,6 +55,8 @@ namespace Broccoli.TreeNodeEditor
 		SerializedProperty propColliderMaxLevel;
 		private static GUIContent lodFadingGUIContent = new GUIContent ("LOD Fading Mode");
 		private static GUIContent lodFadingAnimateGUIContent = new GUIContent ("LOD Fading Animation");
+		private static GUIContent billboardIncludeControllerGUIContent = new GUIContent ("Include Controller", "Includes a BroccoliTreeController component on the final billboard asset, enabling the wind effect on it.");
+		private static GUIContent billboardSproutTintGUIContent = new GUIContent ("Additional Sprout Tint", "Applies an additional tint to the sprouts when rendering the Albedo Texture for the Billboard asset.");
 		private static GUIContent unwrapUV1sAtRuntimeGUIContent = new GUIContent ("Uwrap UV1 at Runtime", "Unwraps the mesh creating a unique UV set on the UV1 (ch. 1) mapping at runtime.");
 		private static GUIContent unwrapUV1sAtPrefabGUIContent = new GUIContent ("Uwrap Prefab UV1", "Unwraps the mesh creating a unique UV set on the UV1 (ch. 1) mapping on the Prefab export process.");
 		private static GUIContent splitSubmeshesGUIContent = new GUIContent ("Split Submeshes", "Creates individual GameObjects for each submesh.");
@@ -61,6 +65,7 @@ namespace Broccoli.TreeNodeEditor
 
 		#region GUI Content and Labels
 		private static string labelLODPanelTitle = "LOD Group Settings";
+		private static string labelBillboardPanelTitle = "Billboard Processing Settings";
 		private static string labelMeshPanelTitle = "Mesh Processing Settings";
 		private static string labelColliderPanelTitle = "Collider Settings";
 		private static string labelAOPanelTitle = "Ambient Occlusion Settings";
@@ -98,6 +103,8 @@ namespace Broccoli.TreeNodeEditor
 			propLodFade = GetSerializedProperty ("lodFade");
 			propLodFadeAnimate = GetSerializedProperty ("lodFadeAnimate");
 			propLodTransitionWidth = GetSerializedProperty ("lodTransitionWidth");
+			propBillboardIncludeController = GetSerializedProperty ("billboardIncludeController");
+			propBillboardSproutTint = GetSerializedProperty ("billboardSproutTint");
 			propUnwrapUV1sAtRuntime = GetSerializedProperty ("unwrapUV1sAtRuntime");
 			propUnwrapUV1sAtPrefab = GetSerializedProperty ("unwrapUV1sAtPrefab");
 			propSplitSubmeshes = GetSerializedProperty ("splitSubmeshes");
@@ -130,6 +137,10 @@ namespace Broccoli.TreeNodeEditor
 				ShowHelpBox (MSG_LOD_FADE_ANIMATE);
 				EditorGUILayout.Slider (propLodTransitionWidth, 0f, 1f, "Transition Width");
 				ShowHelpBox (MSG_LOD_TRANSITION_WIDTH);
+				EditorGUILayout.Space ();
+				EditorGUILayout.LabelField (labelBillboardPanelTitle, EditorStyles.boldLabel);
+				EditorGUILayout.PropertyField (propBillboardIncludeController, billboardIncludeControllerGUIContent);
+				EditorGUILayout.PropertyField (propBillboardSproutTint, billboardSproutTintGUIContent);
 				EditorGUILayout.Space ();
 				EditorGUILayout.LabelField (labelMeshPanelTitle, EditorStyles.boldLabel);
 				EditorGUILayout.PropertyField (propUnwrapUV1sAtRuntime, unwrapUV1sAtRuntimeGUIContent);
@@ -203,9 +214,6 @@ namespace Broccoli.TreeNodeEditor
 			}
 			EditorGUILayout.Space ();
 
-			// Seed options.
-			//DrawSeedOptions ();
-			// Field descriptors option.
 			DrawFieldHelpOptions ();
 		}
 		/// <summary>

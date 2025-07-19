@@ -19,7 +19,8 @@ namespace Broccoli.Examples
         private Slider branchGirthSlider;
         private Slider factoryScaleSlider;
         private Slider cameraPositionSlider;
-        private Button switchSproutsButton;
+        private Button switchSproutMeshButton;
+        private Button switchSproutMapperButton;
         private Button toggleSproutsButton;
         private Button randomizeButton;
 
@@ -27,7 +28,8 @@ namespace Broccoli.Examples
         private const string branchGirthSliderName = "branchGirthSlider";
         private const string factoryScaleSliderName = "factoryScaleSlider";
         private const string cameraPositionSliderName = "cameraPositionSlider";
-        private const string switchSproutsButtonName = "sproutMapperButton";
+        private const string switchSproutMapperButtonName = "sproutMapperButton";
+        private const string switchSproutMeshButtonName = "sproutMeshButton";
         private const string toggleSproutsButtonName = "toggleSproutsButton";
         private const string randomizeButtonName = "randomizeButton";
 
@@ -65,8 +67,11 @@ namespace Broccoli.Examples
                 cameraPositionSlider.RegisterValueChangedCallback (OnCameraPositionChanged);
             }
 
-            switchSproutsButton = uiDocument.rootVisualElement.Q<Button>(switchSproutsButtonName);
-            switchSproutsButton.clicked += OnSwitchSproutsButtonClicked;
+            switchSproutMeshButton = uiDocument.rootVisualElement.Q<Button>(switchSproutMeshButtonName);
+            switchSproutMeshButton.clicked += OnSwitchSproutMeshButtonClicked;
+            
+            switchSproutMapperButton = uiDocument.rootVisualElement.Q<Button>(switchSproutMapperButtonName);
+            switchSproutMapperButton.clicked += OnSwitchSproutMapperButtonClicked;
 
             toggleSproutsButton = uiDocument.rootVisualElement.Q<Button>(toggleSproutsButtonName);
             toggleSproutsButton.clicked += OnToggleSproutsButtonClicked;
@@ -97,7 +102,12 @@ namespace Broccoli.Examples
         {
             UpdateCamera (evt.newValue);
         }
-        private void OnSwitchSproutsButtonClicked ()
+        private void OnSwitchSproutMeshButtonClicked ()
+        {
+            modifyPipelineController?.SwitchSproutMesh ();
+            UpdateInfo ();
+        }
+        private void OnSwitchSproutMapperButtonClicked ()
         {
             modifyPipelineController?.SwitchSproutMappers ();
             UpdateInfo ();
@@ -116,8 +126,10 @@ namespace Broccoli.Examples
         {
             string sproutsInfo = "";
             if (modifyPipelineController.isSproutMeshGeneratorActive) {
-                if (modifyPipelineController.sproutMapperSelected == 0) sproutsInfo = "autumn";
-                else sproutsInfo = "green";
+                if (modifyPipelineController.sproutMeshSelected == 0) sproutsInfo = "Map: autumn";
+                else sproutsInfo = "Map: green";
+                if (modifyPipelineController.sproutMapperSelected == 0) sproutsInfo += ", Mesh: Grid";
+                else sproutsInfo += ", Mesh: green";
             } else {
                 sproutsInfo = "inactive";
             }

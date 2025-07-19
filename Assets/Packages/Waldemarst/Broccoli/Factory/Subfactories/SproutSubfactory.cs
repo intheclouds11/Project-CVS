@@ -13,6 +13,8 @@ using Broccoli.Generator;
 using Broccoli.Manager;
 using Broccoli.Utils;
 
+using UnityEditorInternal.Profiling.Memory.Experimental;
+
 namespace Broccoli.Factory
 {
     using Pipeline = Broccoli.Pipe.Pipeline;
@@ -345,14 +347,14 @@ namespace Broccoli.Factory
 
             // Set working pipeline.
             if (snapshot != null && !string.IsNullOrEmpty (snapshot.snapshotType)) {
-                treeFactory.localPipeline.SetPreferredSrcElement (snapshot.snapshotType);
+                treeFactory.localPipeline.SetPreferredSrcElement (PipelineElement.ClassType.StructureGenerator, snapshot.snapshotType);
             } else {
-                treeFactory.localPipeline.SetPreferredSrcElement ("Main");
+                treeFactory.localPipeline.SetPreferredSrcElement (PipelineElement.ClassType.StructureGenerator, "Main");
             }
 
             // t structures for branches and sprouts.
             StructureGeneratorElement structureGeneratorElement = (StructureGeneratorElement)treeFactory.localPipeline.root;
-            AnalyzePipelineStructure (structureGeneratorElement.rootStructureLevel);
+            AnalyzePipelineStructure (structureGeneratorElement.trunkStructureLevel);
 
             // Get sprout meshes.
             SproutMeshGeneratorElement sproutMeshGeneratorElement = 
@@ -1034,7 +1036,7 @@ namespace Broccoli.Factory
             int submeshIndex = 0;
             while (enumMeshDatas.MoveNext ()) {
                 meshData = enumMeshDatas.Current.Value;
-                if (meshData.type == MeshManager.MeshData.Type.Sprout) {
+                if (meshData.type == MeshManager.MeshData.TYPE_SPROUT) {
                     for (int sproutStructureI = 0; sproutStructureI < snapshot.sproutStructures.Count; sproutStructureI++) {
                         if (sproutStructureI + 1 == meshData.groupId) {
                             BranchDescriptor.SproutStructure sproutStructure = snapshot.sproutStructures[sproutStructureI];
@@ -1657,7 +1659,7 @@ namespace Broccoli.Factory
                     atlas = new Texture2D (2, 2);
                     TexturePacker.PackTextures (out atlas, texturesForAtlas.ToArray (), defaultPackMode, texPackParams);
                     atlas.alphaIsTransparency = true;
-                    TextureUtil.SaveTextureToFile (atlas, albedoPath);
+                    TextureUtil.SaveTextureToFile (atlas, albedoPath, true);
                     TextureUtil.CleanTextures (texturesForAtlas);
                     UnityEngine.Object.DestroyImmediate (atlas);
                     ReportProgress ("Creating albedo atlas texture.", 10f);
@@ -1694,7 +1696,7 @@ namespace Broccoli.Factory
                     texPackParams.bgColor = NORMAL_BG_COLOR;
                     TexturePacker.PackTextures (out atlas, texturesForAtlas.ToArray (), defaultPackMode, texPackParams);
                     atlas.alphaIsTransparency = false;
-                    TextureUtil.SaveTextureToFile (atlas, normalPath);
+                    TextureUtil.SaveTextureToFile (atlas, normalPath, true);
                     TextureUtil.SetTextureAsNormalMap (atlas, normalPath);
                     TextureUtil.CleanTextures (texturesForAtlas);
                     UnityEngine.Object.DestroyImmediate (atlas);
@@ -1735,7 +1737,7 @@ namespace Broccoli.Factory
                     texPackParams.bgColor = EXTRAS_BG_COLOR;
                     TexturePacker.PackTextures (out atlas, texturesForAtlas.ToArray (), defaultPackMode, texPackParams);
                     atlas.alphaIsTransparency = false;
-                    TextureUtil.SaveTextureToFile (atlas, extrasPath);
+                    TextureUtil.SaveTextureToFile (atlas, extrasPath, true);
                     TextureUtil.CleanTextures (texturesForAtlas);
                     UnityEngine.Object.DestroyImmediate (atlas);
                     ReportProgress ("Creating extras atlas texture.", 10f);
@@ -1777,7 +1779,7 @@ namespace Broccoli.Factory
                     texPackParams.bgColor = SUBSURFACE_BG_COLOR;
                     TexturePacker.PackTextures (out atlas, texturesForAtlas.ToArray (), defaultPackMode, texPackParams);
                     atlas.alphaIsTransparency = false;
-                    TextureUtil.SaveTextureToFile (atlas, subsurfacePath);
+                    TextureUtil.SaveTextureToFile (atlas, subsurfacePath, true);
                     TextureUtil.CleanTextures (texturesForAtlas);
                     UnityEngine.Object.DestroyImmediate (atlas);
                     ReportProgress ("Creating subsurface atlas texture.", 10f);
@@ -1816,7 +1818,7 @@ namespace Broccoli.Factory
                     texPackParams.bgColor = Color.clear;
                     TexturePacker.PackTextures (out atlas, texturesForAtlas.ToArray (), defaultPackMode, texPackParams);
                     atlas.alphaIsTransparency = true;
-                    TextureUtil.SaveTextureToFile (atlas, compositePath);
+                    TextureUtil.SaveTextureToFile (atlas, compositePath, true);
                     TextureUtil.CleanTextures (texturesForAtlas);
                     UnityEngine.Object.DestroyImmediate (atlas);
                     ReportProgress ("Creating composite atlas texture.", 10f);

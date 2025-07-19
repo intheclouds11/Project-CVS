@@ -74,11 +74,11 @@ namespace Broccoli.Component
 		/// <param name="treeFactory">Parent tree factory.</param>
 		/// <param name="useCache">If set to <c>true</c> use cache.</param>
 		/// <param name="useLocalCache">If set to <c>true</c> use local cache.</param>
-		/// <param name="ProcessControl">Process control.</param>
+		/// <param name="processControl">Process control.</param>
 		public override bool Process (TreeFactory treeFactory, 
 			bool useCache = false, 
 			bool useLocalCache = false, 
-			TreeFactoryProcessControl ProcessControl = null) {
+			TreeFactoryProcessControl processControl = null) {
 			if (pipelineElement != null && tree != null) {
 				branchMapperElement = pipelineElement as BranchMapperElement;
 				BranchMeshGeneratorElement branchMeshGeneratorElement = 
@@ -86,6 +86,24 @@ namespace Broccoli.Component
 				if (branchMeshGeneratorElement != null && branchMeshGeneratorElement.isActive) {
 					BuildMaterials (treeFactory);
 					AssignUVs (treeFactory);
+
+					// If building a prefab check if there is a Custom Trunk Mesh to remap branch UVs.
+					if (processControl.isPrefabProcess) {
+						TrunkCustomMeshElement trunkCustomMeshElement = 
+							(TrunkCustomMeshElement) branchMapperElement.GetUpstreamElement (PipelineElement.ClassType.TrunkCustomMesh);
+						if (trunkCustomMeshElement != null) {
+							TrunkCustomMeshComponent trunkCustomMeshComponent =
+								(TrunkCustomMeshComponent)treeFactory.componentManager.GetFactoryComponent (trunkCustomMeshElement);
+							if (trunkCustomMeshComponent != null && trunkCustomMeshComponent.RectIndex >= 0) {
+								Mesh branchMesh = treeFactory.meshManager.GetMeshByType (MeshManager.MeshData.TYPE_BRANCH);
+								TrunkCustomMeshComponent.RemapUVs (
+									branchMesh,
+									trunkCustomMeshComponent.BranchMeshVertLength,
+									trunkCustomMeshComponent.Rects [0],
+									trunkCustomMeshComponent.Rects[trunkCustomMeshComponent.RectIndex]);
+							}
+						}
+					}
 				}
 				return true;
 			}
@@ -96,8 +114,8 @@ namespace Broccoli.Component
 		/// </summary>
 		/// <param name="treeFactory">Tree factory.</param>
 		public override void Unprocess (TreeFactory treeFactory) {
-			treeFactory.meshManager.DeregisterMeshByType (MeshManager.MeshData.Type.Branch);
-			treeFactory.materialManager.DeregisterMaterialByType (MeshManager.MeshData.Type.Branch);
+			treeFactory.meshManager.DeregisterMeshByType (MeshManager.MeshData.TYPE_BRANCH);
+			treeFactory.materialManager.DeregisterMaterialByType (MeshManager.MeshData.TYPE_BRANCH);
 		}
 		/// <summary>
 		/// Process a special command or subprocess on this component.
@@ -125,12 +143,12 @@ namespace Broccoli.Component
 					treeFactory.treeFactoryPreferences.overrideMaterialShaderEnabled) {
 					AssetManager.MaterialParams materialParams;
 					if (treeFactory.treeFactoryPreferences.overrideMaterialShaderEnabled) {
-						int meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.Type.Branch);
+						int meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.TYPE_BRANCH);
 						material = treeFactory.materialManager.GetOverridedMaterial (meshId, false);
 						materialParams = new AssetManager.MaterialParams (AssetManager.MaterialParams.ShaderType.Native);
 						material.name = "Optimized Bark Material";
 					} else {
-						material = treeFactory.materialManager.GetMaterial (MeshManager.MeshData.Type.Branch, true);
+						material = treeFactory.materialManager.GetMaterial (MeshManager.MeshData.TYPE_BRANCH, true);
 						materialParams = new AssetManager.MaterialParams (AssetManager.MaterialParams.ShaderType.Custom);
 					}
 					if (treeFactory.treeFactoryPreferences.prefabCopyCustomMaterialBarkTexturesEnabled) {
@@ -138,24 +156,24 @@ namespace Broccoli.Component
 						materialParams.copyTexturesName = "bark";
 					}
 					treeFactory.assetManager.AddMaterialToPrefab (material, 
-						treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.Type.Branch));
+						treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.TYPE_BRANCH));
 					treeFactory.assetManager.AddMaterialParams (materialParams,
-						treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.Type.Branch));
+						treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.TYPE_BRANCH));
 				} else {
-					material = treeFactory.materialManager.GetMaterial (MeshManager.MeshData.Type.Branch, false);
+					material = treeFactory.materialManager.GetMaterial (MeshManager.MeshData.TYPE_BRANCH, false);
 					AssetManager.MaterialParams materialParams;
 					materialParams = new AssetManager.MaterialParams (AssetManager.MaterialParams.ShaderType.Custom);
 					treeFactory.assetManager.AddMaterialToPrefab (material, 
-						treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.Type.Branch));
+						treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.TYPE_BRANCH));
 					treeFactory.assetManager.AddMaterialParams (materialParams,
-						treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.Type.Branch));
+						treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.TYPE_BRANCH));
 				}
 			} else {
-				Material material = treeFactory.materialManager.GetMaterial (MeshManager.MeshData.Type.Branch, true);
+				Material material = treeFactory.materialManager.GetMaterial (MeshManager.MeshData.TYPE_BRANCH, true);
 				if (material != null) {
 					material.name = "Optimized Bark Material";
 					treeFactory.assetManager.AddMaterialToPrefab (material, 
-						treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.Type.Branch));
+						treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.TYPE_BRANCH));
 					if (treeFactory.treeFactoryPreferences.prefabCreateAtlas) {
 						AssetManager.MaterialParams materialParams = 
 							new AssetManager.MaterialParams (AssetManager.MaterialParams.ShaderType.Native, false);
@@ -164,7 +182,7 @@ namespace Broccoli.Component
 							materialParams.copyTexturesName = "bark";
 						}
 						treeFactory.assetManager.AddMaterialParams (materialParams,
-							treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.Type.Branch));
+							treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.TYPE_BRANCH));
 					}
 				}
 			}
@@ -181,7 +199,7 @@ namespace Broccoli.Component
 				// MATERIAL MODE
 				if (branchMapperElement.materialMode == BranchMapperElement.MaterialMode.Custom)
 				{
-					treeFactory.materialManager.RegisterCustomMaterial (MeshManager.MeshData.Type.Branch,
+					treeFactory.materialManager.RegisterCustomMaterial (MeshManager.MeshData.TYPE_BRANCH,
 						branchMapperElement.customMaterial, 0, 0);
 				} 
 				
@@ -203,21 +221,22 @@ namespace Broccoli.Component
 			}
 			// NO MATERIAL 
 			else {
-				treeFactory.materialManager.DeregisterMaterial (MeshManager.MeshData.Type.Branch);
+				treeFactory.materialManager.DeregisterMaterial (MeshManager.MeshData.TYPE_BRANCH);
 			}
 
 			if (updatePreviewTree) {
 				MeshRenderer renderer = tree.obj.GetComponent<MeshRenderer> ();
 				Material[] materials = renderer.sharedMaterials;
-				for (int j = 0; j < treeFactory.meshManager.GetMeshesCount (); j++) {
+				int meshCount = treeFactory.meshManager.GetMeshesCount ();
+				for (int j = 0; j < meshCount; j++) {
 					int meshId = treeFactory.meshManager.GetMergedMeshId (j);
-					if (treeFactory.materialManager.GetMaterial (meshId)) {
+					if (treeFactory.materialManager.GetMaterialByMeshId (meshId)) {
 						if (treeFactory.materialManager.IsCustomMaterial (meshId) &&
 						    treeFactory.treeFactoryPreferences.overrideMaterialShaderEnabled) {
 							bool isSproutMesh = treeFactory.meshManager.IsSproutMesh (meshId);
 							materials [j] = treeFactory.materialManager.GetOverridedMaterial (meshId, isSproutMesh);
 						} else {
-							materials [j] = treeFactory.materialManager.GetMaterial (meshId, true);
+							materials [j] = treeFactory.materialManager.GetMaterialByMeshId (meshId, true);
 						}
 					}
 				}
@@ -232,12 +251,12 @@ namespace Broccoli.Component
 		/// <param name="normalTexture">Normal texture.</param>
 		/// <param name="extrasTexture">Extras texture.</param>
 		private void SetTexturedMaterial (TreeFactory treeFactory, Texture2D albedoTexture, Texture2D normalTexture, Texture2D extrasTexture) {
-			int meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.Type.Branch);
+			int meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.TYPE_BRANCH);
 			Material material;
 			if (treeFactory.materialManager.HasMaterial (meshId) && 
 				!treeFactory.materialManager.IsCustomMaterial (meshId) &&
-				treeFactory.materialManager.GetMaterial (meshId) != null) {
-				material = treeFactory.materialManager.GetMaterial (meshId);
+				treeFactory.materialManager.GetMaterialByMeshId (meshId) != null) {
+				material = treeFactory.materialManager.GetMaterialByMeshId (meshId);
 			} else {
 				material = treeFactory.materialManager.GetOwnedMaterial (meshId, treeFactory.materialManager.GetBarkShader ().name);
 			}
@@ -297,7 +316,7 @@ namespace Broccoli.Component
 				(BranchMeshGeneratorElement) branchMapperElement.GetUpstreamElement (
 					PipelineElement.ClassType.BranchMeshGenerator);
 			if (branchMeshGeneratorElement != null &&
-				treeFactory.meshManager.HasMesh (MeshManager.MeshData.Type.Branch)) {
+				treeFactory.meshManager.HasMesh (MeshManager.MeshData.TYPE_BRANCH)) {
 				
 				List<Vector4> originalUVs = new List<Vector4> ();
 				MeshFilter meshFilter = null;
@@ -309,7 +328,7 @@ namespace Broccoli.Component
 				List<Vector4> uvs = new List<Vector4> ();
 				if (branchMapperElement.materialMode == BranchMapperElement.MaterialMode.MultiTexture && branchMapperElement.isValidMode) {
 					BranchMap branchMap = branchMapperElement.branchMaps [buildingBranchMapperIndex];
-					uvs = treeMeshMetaBuilder.SetMeshUVs (treeFactory.meshManager.GetMesh (MeshManager.MeshData.Type.Branch),
+					uvs = treeMeshMetaBuilder.SetMeshUVs (treeFactory.meshManager.GetMeshByType (MeshManager.MeshData.TYPE_BRANCH),
 						0f, branchMapperElement.mappingYDisplacement,
 						1, branchMapperElement.mappingYTiles,
 						treeFactory.previewTree.minGirth,
@@ -319,7 +338,7 @@ namespace Broccoli.Component
 						branchMap.x, branchMap.y, 
 						branchMap.width, branchMap.height);
 				} else if (branchMapperElement.isValidMode) {
-					uvs = treeMeshMetaBuilder.SetMeshUVs (treeFactory.meshManager.GetMesh (MeshManager.MeshData.Type.Branch),
+					uvs = treeMeshMetaBuilder.SetMeshUVs (treeFactory.meshManager.GetMeshByType (MeshManager.MeshData.TYPE_BRANCH),
 						branchMapperElement.mappingXDisplacement, branchMapperElement.mappingYDisplacement,
 						branchMapperElement.mappingXTiles, branchMapperElement.mappingYTiles,
 						treeFactory.previewTree.minGirth,
@@ -327,7 +346,7 @@ namespace Broccoli.Component
 						branchMapperElement.isGirthSensitive);
 				}
 				if (updatePreviewTree) {
-					int meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.Type.Branch);
+					int meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.TYPE_BRANCH);
 					int vertexOffset = treeFactory.meshManager.GetMergedMeshVertexOffset (meshId);
 					for (int j = 0; j < uvs.Count; j++) {
 						originalUVs [vertexOffset + j] = uvs [j];

@@ -28,6 +28,10 @@ namespace Broccoli.Base
 		/// </summary>
 		public static bool prefabAddController = true;
 		/// <summary>
+		/// Experimental flag to define custom mesh GameObjecst as trunk.
+		/// </summary>
+		public static bool experimentalTrunkCustomMesh = false;
+		/// <summary>
 		/// The experimental flag to add probability to break a branch.
 		/// </summary>
 		public static bool experimentalBranchBreak = false;

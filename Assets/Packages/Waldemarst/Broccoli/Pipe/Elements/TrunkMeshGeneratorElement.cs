@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 
 namespace Broccoli.Pipe {
 	/// <summary>
-	/// Girth transform element.
+	/// Generate the trunk section of the main branch.
 	/// </summary>
 	[System.Serializable]
 	public class TrunkMeshGeneratorElement : PipelineElement {

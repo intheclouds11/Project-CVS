@@ -408,6 +408,10 @@ namespace Broccoli.Model {
 			/// </summary>
 			public float shaperOffset = 0f;
 			/// <summary>
+			/// True to enable mesh building for this branch.
+			/// </summary>
+			public bool meshingEnabled = true;
+			/// <summary>
 			/// Class to define the shape of a branch.
 			/// </summary>
 			private BranchShaper _shaper = null;
@@ -1311,6 +1315,7 @@ namespace Broccoli.Model {
 				clone.rollAngle = rollAngle;
 				clone.helperStructureLevelId = helperStructureLevelId;
 				clone.shaperOffset = shaperOffset;
+				clone.meshingEnabled = meshingEnabled;
 				clone.curve = curve.Clone ();
 				clone.phase = phase;
 				clone.phaseDir = phaseDir;

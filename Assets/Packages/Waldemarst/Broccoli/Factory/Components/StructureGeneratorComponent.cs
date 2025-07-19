@@ -5,6 +5,7 @@ using UnityEngine;
 using Broccoli.Pipe;
 using Broccoli.Generator;
 using Broccoli.Factory;
+using Broccoli.Model;
 
 namespace Broccoli.Component
 {
@@ -46,7 +47,7 @@ namespace Broccoli.Component
 			TreeFactoryProcessControl processControl = null) 
 		{
 			base.PrepareParams (treeFactory, useCache, useLocalCache, processControl);
-			structureGeneratorElement.rootStructureLevel.structureLevels = structureGeneratorElement.structureLevels;
+			structureGeneratorElement.trunkStructureLevel.structureLevels = structureGeneratorElement.structureLevels;
 			generator.useParentStructureRandomState = useLocalCache;
 			//generator.useParentStructureRandomState = true;
 			availableRootPositions = 0;
@@ -126,28 +127,45 @@ namespace Broccoli.Component
 		/// <param name="treeFactory">Tree factory.</param>
 		/// <param name="useCache">If set to <c>true</c> use cache.</param>
 		private void StructureTree (TreeFactory treeFactory, bool useCache = false) {
-			// Check if there is a positioner element to position the trees.
-			PositionerElement positionerElement = 
-				(PositionerElement) structureGeneratorElement.GetDownstreamElement (PipelineElement.ClassType.Positioner);
+			// Clear the generator before begining the structure creation process.
 			generator.Clear ();
-			if (positionerElement != null && positionerElement.useCustomPositions) {
-				generator.positions.Clear ();
-				for (int i = 0; i < positionerElement.positions.Count; i++) {
-					if (positionerElement.positions[i].enabled) {
-						generator.positions.Add (positionerElement.positions[i].Clone ());
-					}
+			List<BezierCurve> trunkCurves = null;
+
+			// CUSTOM TRUNK MODE
+			if (structureGeneratorElement.trunkStructureLevel.trunkMode ==TrunkStructureLevel.TrunkMode.CustomMesh) {
+				// Check if there is a TrunkCustomMeshElement.
+				TrunkCustomMeshElement trunkCustomMeshElement = 
+					(TrunkCustomMeshElement) structureGeneratorElement.GetDownstreamElement (PipelineElement.ClassType.TrunkCustomMesh);
+				if (trunkCustomMeshElement != null) {
+					trunkCurves = trunkCustomMeshElement.GetTrunkBranchCurves (0);
 				}
-				generator.referencePosition = treeFactory.transform.position;
-				availableRootPositions = generator.positions.Count;
-				if (availableRootPositions == 1) {
-					uniqueRootPosition = generator.positions [0].rootPosition;
-				}
-				generator.positionIndex = Random.Range (0, generator.positions.Count);
-			} else {
-				generator.positions.Clear ();
 			}
+			// FREQUENCY TRUNK MODE
+			else {
+				// Check if there is a positioner element to position the trees.
+				PositionerElement positionerElement = 
+					(PositionerElement) structureGeneratorElement.GetDownstreamElement (PipelineElement.ClassType.Positioner);
+				if (positionerElement != null && positionerElement.useCustomPositions) {
+					generator.positions.Clear ();
+					for (int i = 0; i < positionerElement.positions.Count; i++) {
+						if (positionerElement.positions[i].enabled) {
+							generator.positions.Add (positionerElement.positions[i].Clone ());
+						}
+					}
+					generator.referencePosition = treeFactory.transform.position;
+					availableRootPositions = generator.positions.Count;
+					if (availableRootPositions == 1) {
+						uniqueRootPosition = generator.positions [0].rootPosition;
+					}
+					generator.positionIndex = Random.Range (0, generator.positions.Count);
+				} else {
+					generator.positions.Clear ();
+				}
+			}
+
+			// GET TREE STRUCTURES
 			structureGeneratorElement.structures = 
-					generator.GenerateStructures (structureGeneratorElement.structures, structureGeneratorElement.rootStructureLevel);
+					generator.GenerateStructures (structureGeneratorElement.structures, structureGeneratorElement.trunkStructureLevel, trunkCurves);
 			structureGeneratorElement.OnBeforeSerialize ();
 			structureGeneratorElement.DeserializeStructures ();
 		}

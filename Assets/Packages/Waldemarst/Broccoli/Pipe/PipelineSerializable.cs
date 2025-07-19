@@ -16,6 +16,7 @@ namespace Broccoli.Pipe {
 		public List<SparsingTransformElement> sparsingTransforms = new List<SparsingTransformElement> ();
 		public List<BranchMeshGeneratorElement> branchMeshGenerators = new List<BranchMeshGeneratorElement> ();
 		public List<TrunkMeshGeneratorElement> trunkMeshGenerators = new List<TrunkMeshGeneratorElement> ();
+		public List<TrunkCustomMeshElement> trunkCustomMeshes = new List<TrunkCustomMeshElement> ();
 		public List<BranchMapperElement> barkMappers = new List<BranchMapperElement> ();
 		public List<SproutMapperElement> sproutMappers = new List<SproutMapperElement> ();
 		public List<SproutGeneratorElement> sproutGenerators = new List<SproutGeneratorElement> ();
@@ -47,6 +48,10 @@ namespace Broccoli.Pipe {
 			case PipelineElement.ClassType.TrunkMeshGenerator:
 				trunkMeshGenerators.Add ((TrunkMeshGeneratorElement)element);
 				element.index = trunkMeshGenerators.Count - 1;
+				break;
+			case PipelineElement.ClassType.TrunkCustomMesh:
+				trunkCustomMeshes.Add ((TrunkCustomMeshElement)element);
+				element.index = trunkCustomMeshes.Count - 1;
 				break;
 			case PipelineElement.ClassType.GirthTransform:
 				girthTransforms.Add ((GirthTransformElement)element);
@@ -134,6 +139,8 @@ namespace Broccoli.Pipe {
 					return (index < branchMeshGenerators.Count ? branchMeshGenerators [index] : null);
 				case PipelineElement.ClassType.TrunkMeshGenerator:
 					return (index < trunkMeshGenerators.Count ? trunkMeshGenerators [index] : null);
+				case PipelineElement.ClassType.TrunkCustomMesh:
+					return (index < trunkCustomMeshes.Count ? trunkCustomMeshes [index] : null);
 				case PipelineElement.ClassType.GirthTransform:
 					return (index < girthTransforms.Count ? girthTransforms [index] : null);
 				case PipelineElement.ClassType.BranchBender:
@@ -174,6 +181,9 @@ namespace Broccoli.Pipe {
 			}
 			for (i = 0; i < trunkMeshGenerators.Count; i++) {
 				yield return trunkMeshGenerators[i];
+			}
+			for (i = 0; i < trunkCustomMeshes.Count; i++) {
+				yield return trunkCustomMeshes[i];
 			}
 			for (i = 0; i < girthTransforms.Count; i++) {
 				yield return girthTransforms[i];
@@ -216,6 +226,7 @@ namespace Broccoli.Pipe {
 			structureGenerators.Clear ();
 			branchMeshGenerators.Clear ();
 			trunkMeshGenerators.Clear ();
+			trunkCustomMeshes.Clear ();
 			girthTransforms.Clear ();
 			branchBenders.Clear ();
 			sparsingTransforms.Clear ();

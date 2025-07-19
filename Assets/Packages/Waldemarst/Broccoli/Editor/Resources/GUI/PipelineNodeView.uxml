@@ -10,7 +10,8 @@
                 </ui:VisualElement>
                 <ui:VisualElement name="divider" class="horizontal" />
                 <ui:VisualElement name="title">
-                    <ui:Label name="title-label" text="SequencerNode" class="unity-text-element unity-label" />
+                    <ui:Label name="title-label" text="NodeName" class="unity-text-element unity-label" />
+                    <ui:Label name="key-label" text="KeyName" class="unity-text-element unity-label-small" />
                     <!--ui:VisualElement name="title-button-container">
                         <ui:VisualElement name="collapse-button">
                             <ui:VisualElement name="icon" />

@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Broccoli.Factory;
+using System.IO;
+using UnityEngine.AI;
+using Unity.VisualScripting;
 
 namespace Broccoli.Pipe {
 	/// <summary>
@@ -123,6 +126,10 @@ namespace Broccoli.Pipe {
 		/// </summary>
 		public Random.State randomState;
 		/// <summary>
+		/// Filepath for the pipeline Asset, begins with the Assets/ folder.
+		/// </summary>
+		public string filePath = string.Empty;
+		/// <summary>
 		/// Maintains a relationship between pipeline elements and their keynames.
 		/// </summary>
 		/// <typeparam name="string">Pipeline element keyname.</typeparam>
@@ -133,6 +140,36 @@ namespace Broccoli.Pipe {
 		/// Flag to check if OnValidate has been called (required to be fully deserialized).
 		/// </summary>
 		private bool _onValidateCalled = false;
+		/// <summary>
+		/// Flag to cancel events.
+		/// </summary>
+		private bool raiseEvents = true;
+		#endregion
+
+		#region Delegates
+		/// <summary>
+		/// Delegate for events involving a PipelineElement on a Pipeline.
+		/// </summary>
+		/// <param name="element">PipelineElement instance.</param>
+		public delegate void ElementDelegate (PipelineElement element);
+		/// <summary>
+		/// Delegate for events involving two PipelineElements (source and sink).
+		/// </summary>
+		/// <param name="srcElement">Source PipelineElement instance.</param>
+		/// <param name="sinkElement">Sink Pipelineelement instance.</param>
+		public delegate void ElementsDelegate (PipelineElement srcElement, PipelineElement sinkElement);
+		/// <summary>
+		/// Called when a PipelineElement is added to the Pipeline.
+		/// </summary>
+		public ElementDelegate OnElementAdded;
+		/// <summary>
+		/// Called when a PipelineElement is removed from the Pipeline.
+		/// </summary>
+		public ElementDelegate OnElementRemoved;
+		/// <summary>
+		/// Called when two PipelineElements change their connection state.
+		/// </summary>
+		public ElementsDelegate OnElementConnectOrDisconnect;
 		#endregion
 
 		#region Events
@@ -179,6 +216,7 @@ namespace Broccoli.Pipe {
 			if (!idToElement.ContainsKey (pipelineElement.id)) {
 				idToElement.Add (pipelineElement.id, pipelineElement);
 				pipelineElement.OnAddToPipeline ();
+				if (raiseEvents) OnElementAdded?.Invoke (pipelineElement);
 				return true;
 			} else {
 				// Repeated element with repeated id.
@@ -224,6 +262,7 @@ namespace Broccoli.Pipe {
 			elements.Remove (pipelineElement);
 			if (selectedElement == pipelineElement)
 				selectedElement = null;
+			OnElementRemoved?.Invoke (pipelineElement);
 		}
 		/// <summary>
 		/// Removes all elements.
@@ -251,9 +290,11 @@ namespace Broccoli.Pipe {
 					toDeletePipelineElements.Add (elements[i]);
 				}
 			}
+			raiseEvents = false;
 			for (int i = 0; i < toDeletePipelineElements.Count; i++) {
 				RemoveElement (toDeletePipelineElements[i]);
 			}
+			raiseEvents = true;
 		}
 		/// <summary>
 		/// Updates all elements of certain type on the pipeline.
@@ -278,7 +319,7 @@ namespace Broccoli.Pipe {
 					if (elements[i].classType == classType) {
 						if (connectionValid && elements[i].isOnValidPipeline) {
 							return elements[i];
-						} else {
+						} else if (!connectionValid) {
 							return elements[i];
 						}
 					}
@@ -423,9 +464,11 @@ namespace Broccoli.Pipe {
 			// Fill elements.
 			IEnumerable<PipelineElement> pipelineElements = _serializedPipeline.GetElements ();
 			var pipelineElementsEnumerator = pipelineElements.GetEnumerator ();
+			raiseEvents = false;
 			while (pipelineElementsEnumerator.MoveNext ()) {
 				AddElement (pipelineElementsEnumerator.Current);
 			}
+			raiseEvents = true;
 			// Make connections.
 			for (int i = 0; i < elements.Count; i++) {
 				if (elements[i].connectionType == PipelineElement.ConnectionType.Source ||
@@ -643,6 +686,7 @@ namespace Broccoli.Pipe {
 
 			// Tree factory preferences.
 			clone.treeFactoryPreferences = treeFactoryPreferences.Clone ();
+			clone.filePath = filePath;
 			clone.isCatalogItem = isCatalogItem;
 			clone.sproutGroups.BuildIndexes ();
 			clone.sproutGroups.BuildPopupOptions ();
@@ -665,13 +709,25 @@ namespace Broccoli.Pipe {
 			}
 		}
 		/// <summary>
+		/// Gets the internal key name for a PipelineElement.
+		/// </summary>
+		/// <param name="classType">Class type of the PipelineElement.</param>
+		/// <param name="keyName">KeyName assigned to the PipelineElement.</param>
+		/// <returns></returns>
+		string GetInternalKeyName (PipelineElement.ClassType classType, string keyName)
+		{
+			return $"{classType}_{keyName}";
+		}
+		/// <summary>
 		/// Add element to the key name dictionary.
 		/// </summary>
 		/// <param name="pipelineElement">Pipeline element.</param>
 		void AddPipelineElementToIndex (PipelineElement pipelineElement) {
-			if (pipelineElement.hasKeyName && 
-				!keyNameToPipelineElement.ContainsKey (pipelineElement.keyName)) {
-					keyNameToPipelineElement.Add (pipelineElement.keyName, pipelineElement);
+			if (pipelineElement.hasKeyName) {
+				string internalKeyName = GetInternalKeyName (pipelineElement.classType, pipelineElement.keyName);
+				if (!keyNameToPipelineElement.ContainsKey (internalKeyName)) {
+					keyNameToPipelineElement.Add (internalKeyName, pipelineElement);
+				}
 			}
 		}
 		/// <summary>
@@ -679,65 +735,22 @@ namespace Broccoli.Pipe {
 		/// </summary>
 		/// <param name="pipelineElement">Pipeline element.</param>
 		void RemovePipelineElementFromIndex (PipelineElement pipelineElement) {
-			if (keyNameToPipelineElement.ContainsKey (pipelineElement.keyName)) {
-				keyNameToPipelineElement.Remove (pipelineElement.keyName);
+			string internalKeyName = GetInternalKeyName (pipelineElement.classType, pipelineElement.keyName);
+			if (keyNameToPipelineElement.ContainsKey (internalKeyName)) {
+				keyNameToPipelineElement.Remove (internalKeyName);
 			}
 		}
 		/// <summary>
 		/// Gets an element from this pipeline given its key name.
 		/// </summary>
+		/// <param name="classType">Pipeline element class type.</param>
 		/// <param name="keyName">Key name of the element.</param>
 		/// <returns>PipelineElement instane if found, otherwise null.</returns>
-		public PipelineElement GetElementByKeyName (string keyName) {
+		public PipelineElement GetElementByKeyName (PipelineElement.ClassType classType, string keyName) {
 			if (keyNameToPipelineElement.ContainsKey (keyName)) {
 				return keyNameToPipelineElement [keyName];
 			}
 			return null;
-		}
-		/// <summary>
-		/// Replaces elements on a pipeline given their key names, if both of them are found
-		/// and are of the same type.
-		/// </summary>
-		/// <param name="targetKeyName">Target element key name.</param>
-		/// <param name="replacementKeyName">Element key name to repace the target.</param>
-		/// <returns>True if the elements where found, compatible and replaced, otherwise false.</returns>
-		public bool ReplaceElements (string targetKeyName, string replacementKeyName) {
-			if (keyNameToPipelineElement.ContainsKey (targetKeyName) &&
-				keyNameToPipelineElement.ContainsKey (replacementKeyName))
-			{
-				PipelineElement targetElement = keyNameToPipelineElement [targetKeyName];
-				PipelineElement replacementElement = keyNameToPipelineElement [replacementKeyName];
-				if (targetElement.classType == replacementElement.classType) {
-					PipelineElement targetSrcElement = targetElement.srcElement;
-					PipelineElement targetSinkElement = targetElement.sinkElement;
-					PipelineElement replacementSrcElement = replacementElement.srcElement;
-					PipelineElement replacementSinkElement = replacementElement.sinkElement;
-					targetElement.srcElement = null;
-					targetElement.sinkElement = null;
-					replacementElement.srcElement = null;
-					replacementElement.sinkElement = null;
-
-					if (targetSrcElement != null) {
-						targetSrcElement.sinkElement = replacementElement;
-						replacementElement.srcElement = targetSrcElement;
-					}
-					if (targetSinkElement != null) {
-						targetSinkElement.srcElement = replacementElement;
-						replacementElement.sinkElement = targetSinkElement;
-					}
-
-					if (replacementSrcElement != null) {
-						replacementSrcElement.sinkElement = targetElement;
-						targetElement.srcElement = replacementSrcElement;
-					}
-					if (replacementSinkElement != null) {
-						replacementSinkElement.srcElement = targetElement;
-						targetElement.sinkElement = replacementSinkElement;
-					}
-					return true;
-				}
-			}
-			return false;
 		}
 		/// <summary>
 		/// Gets the number of valid source elements (valid pipelines).
@@ -745,6 +758,19 @@ namespace Broccoli.Pipe {
 		/// <returns>Number of src elements connected in a valid pipeline.</returns>
 		public int GetValidSrcElementsCount () {
 			return validSrcElements.Count;
+		}
+		#endregion
+
+		#region Node Ops
+		/// <summary>
+		/// Checks if two elements can be connected.
+		/// </summary>
+		/// <param name="srcElement">Source element instance.</param>
+		/// <param name="sinkElement">Sink element instance.</param>
+		/// <returns>True if the connection is possible, false otherwise.</returns>
+		public bool CanConnect (PipelineElement srcElement, PipelineElement sinkElement) {
+			return srcElement.positionWeight < sinkElement.positionWeight || 
+				(!srcElement.uniqueOnPipeline && srcElement.positionWeight == sinkElement.positionWeight);
 		}
 		/// <summary>
 		/// Set the probability of a src element to 1, making it 
@@ -768,12 +794,151 @@ namespace Broccoli.Pipe {
 		/// <summary>
 		/// Set the probability of a src element to 1, making it 
 		/// the root element when multiple valid pipelines are available.
+		/// <param name="classType">Class type of the elements to replace.</param>
 		/// <param name="srcElementKeyName">Key name for the source element to mark as preferred.</param>
 		/// <returns><c>True</c> if the element was found.</returns>
-		public bool SetPreferredSrcElement (string srcElementKeyName) {
-			PipelineElement srcElement = GetElementByKeyName (srcElementKeyName);
+		public bool SetPreferredSrcElement (PipelineElement.ClassType classType, string srcElementKeyName) {
+			PipelineElement srcElement = GetElementByKeyName (classType, srcElementKeyName);
 			if (srcElement != null) {
 				return SetPreferredSrcElement (srcElement);
+			}
+			return false;
+		}
+		/// <summary>
+		/// Disconnects an element from their source and/or sink elements.
+		/// </summary>
+		/// <param name="element">Element to disconnect.</param>
+		public void Disconnect (PipelineElement element, bool validatePipeline = true)
+		{
+			PipelineElement srcElement = null;
+			PipelineElement sinkElement = null;
+			if (element.srcElement != null) {
+				srcElement = element.srcElement;
+				element.srcElement.sinkElement = null;
+				element.srcElement.sinkElementClassType = PipelineElement.ClassType.Base;
+				element.srcElement.sinkElementId = -1;
+				element.srcElement.sinkElementIndex = -1;
+			}
+			if (element.sinkElement != null) {
+				sinkElement = element.sinkElement;
+				element.sinkElement.srcElement = null;
+				element.sinkElement.srcElementClassType = PipelineElement.ClassType.Base;
+				element.sinkElement.srcElementId = -1;
+				element.sinkElement.srcElementIndex = -1;
+			}
+			element.srcElement = null;
+			element.srcElementId = -1;
+			element.srcElementIndex = -1;
+			element.sinkElement = null;
+			element.sinkElementId = -1;
+			element.sinkElementIndex = -1;
+
+			if (validatePipeline) Validate ();
+
+			if (srcElement != null) {
+				OnElementConnectOrDisconnect (srcElement, element);
+			}
+			if (sinkElement != null) {
+				OnElementConnectOrDisconnect (element, sinkElement);
+			}
+		}
+		/// <summary>
+		/// Disconnects two elements.
+		/// </summary>
+		/// <param name="srcElement">Element to disconnect.</param>
+		/// <param name="sinkElement">Element to disconnect.</param>
+		public void Disconnect (PipelineElement srcElement, PipelineElement sinkElement, bool validatePipeline = true)
+		{
+			if (srcElement != null) {
+				srcElement.sinkElement = null;
+				srcElement.sinkElementClassType = PipelineElement.ClassType.Base;
+				srcElement.sinkElementId = -1;
+				srcElement.sinkElementIndex = -1;
+			}
+			if (sinkElement != null) {
+				sinkElement.srcElement = null;
+				sinkElement.srcElementClassType = PipelineElement.ClassType.Base;
+				sinkElement.srcElementId = -1;
+				sinkElement.srcElementIndex = -1;
+			}
+			if (validatePipeline) Validate ();
+			OnElementConnectOrDisconnect (srcElement, sinkElement);
+		}
+		/// <summary>
+		/// Connects two pipeline elements.
+		/// </summary>
+		/// <param name="srcElement">Source element (upstream).</param>
+		/// <param name="sinkElement">Sink element (downstream).</param>
+		/// <returns></returns>
+		public bool Connect (PipelineElement srcElement, PipelineElement sinkElement, bool validatePipeline = true)
+		{
+			if (srcElement != null && sinkElement != null && 
+				srcElement.connectionType != PipelineElement.ConnectionType.Sink && 
+				sinkElement.connectionType != PipelineElement.ConnectionType.Source &&
+				srcElement.positionWeight <= sinkElement.positionWeight)
+			{
+				srcElement.sinkElement = sinkElement;
+				srcElement.sinkElementClassType = sinkElement.classType;
+				srcElement.sinkElementIndex = sinkElement.index;
+				srcElement.sinkElementId = sinkElement.id;
+
+				sinkElement.srcElement = srcElement;
+				sinkElement.srcElementClassType = srcElement.classType;
+				sinkElement.srcElementIndex = srcElement.index;
+				sinkElement.srcElementId = srcElement.id;
+
+				if (validatePipeline) Validate ();
+				OnElementConnectOrDisconnect?.Invoke (srcElement, sinkElement);
+				return true;
+			}
+			return false;
+		}
+		/// <summary>
+		/// Replaces elements on a pipeline given a replacement key name. 
+		/// Searches an element of classType on the first valid pipeline and replaces it with another element (by key name) if both are found.
+		/// </summary>
+		/// <param name="classType">Class type of the elements to replace.</param>
+		/// <param name="replacementKeyName">Element key name to repace the target.</param>
+		/// <returns>True if the elements where found, compatible and replaced, otherwise false.</returns>
+		public bool ReplaceElements (PipelineElement.ClassType classType, string replacementKeyName) {
+			// Search target element.
+			PipelineElement targetElement = GetElement (classType, true);
+			if (targetElement != null && targetElement.hasKeyName && !string.IsNullOrEmpty(targetElement.keyName)) {
+				return ReplaceElements (classType, targetElement.keyName, replacementKeyName);
+			}
+			return false;
+		}
+		/// <summary>
+		/// Replaces elements on a pipeline given their key names, if both of them are found
+		/// and are of the same type.
+		/// </summary>
+		/// <param name="classType">Class type of the elements to replace.</param>
+		/// <param name="targetKeyName">Target element key name.</param>
+		/// <param name="replacementKeyName">Element key name to repace the target.</param>
+		/// <returns>True if the elements where found, compatible and replaced, otherwise false.</returns>
+		public bool ReplaceElements (PipelineElement.ClassType classType, string targetKeyName, string replacementKeyName) {
+			targetKeyName = GetInternalKeyName (classType, targetKeyName);
+			replacementKeyName = GetInternalKeyName (classType, replacementKeyName);
+
+			if (keyNameToPipelineElement.ContainsKey (targetKeyName) &&
+				keyNameToPipelineElement.ContainsKey (replacementKeyName))
+			{
+				PipelineElement targetElement = keyNameToPipelineElement [targetKeyName];
+				PipelineElement replacementElement = keyNameToPipelineElement [replacementKeyName];
+				if (targetElement.classType == replacementElement.classType) {
+					PipelineElement targetSrcElement = targetElement.srcElement;
+					PipelineElement targetSinkElement = targetElement.sinkElement;
+
+					Disconnect (targetElement, false);
+					Disconnect (replacementElement, false);
+
+					Connect (targetSrcElement, replacementElement, false);
+					Connect (replacementElement, targetSinkElement, false);
+
+					Validate ();
+
+					return true;
+				}
 			}
 			return false;
 		}

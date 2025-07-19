@@ -22,7 +22,7 @@ namespace Broccoli.Examples
 		/// </summary>
 		void Start () {
             // Get only one BroccoTerrainController per scene to update wind.
-            BroccoTerrainController[] treeControllers = FindObjectsByType<BroccoTerrainController>(FindObjectsSortMode.None);
+            BroccoTerrainController[] treeControllers = FindObjectsByType<BroccoTerrainController> (FindObjectsSortMode.None);
             if (treeControllers != null && treeControllers.Length > 0) {
                 broccoTerrainController = treeControllers [0];
                 broccoTerrainController.UpdateWind (0f, 0f, Vector3.right);

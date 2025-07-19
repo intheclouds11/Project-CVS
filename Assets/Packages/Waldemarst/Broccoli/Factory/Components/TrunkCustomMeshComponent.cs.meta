@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 02f4f531cf5d756f7b13c62c7e00dd25
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.3
+  assetPath: Assets/Packages/Waldemarst/Broccoli/Factory/Components/TrunkCustomMeshComponent.cs
+  uploadId: 767891

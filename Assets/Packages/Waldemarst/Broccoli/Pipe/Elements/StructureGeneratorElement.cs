@@ -5,6 +5,7 @@ using UnityEngine;
 
 using Broccoli.Utils;
 using Broccoli.Generator;
+using UnityEngine.Serialization;
 
 namespace Broccoli.Pipe {
 	[System.Serializable]
@@ -74,7 +75,7 @@ namespace Broccoli.Pipe {
 		/// </summary>
 		[System.NonSerialized]
 		public List<StructureGenerator.Structure> structures = 
-			new List<StructureGenerator.Structure> ();
+			new List<StructureGenerator.Structure> (); 
 		/// <summary>
 		/// Id to structure dictionary.
 		/// </summary>
@@ -105,7 +106,8 @@ namespace Broccoli.Pipe {
 		/// Root structure level with instructions to build the root branches of the tree.
 		/// </summary>
 		/// <returns>Root structure level.</returns>
-		public StructureGenerator.StructureLevel rootStructureLevel = new StructureGenerator.StructureLevel ();
+		[FormerlySerializedAs("rootStructureLevel")]
+		public TrunkStructureLevel trunkStructureLevel = new TrunkStructureLevel ();
 		/// <summary>
 		/// Id to structure level dictionary.
 		/// </summary>
@@ -218,11 +220,6 @@ namespace Broccoli.Pipe {
 		}
 		public void SetStructureLevelRecursive (StructureGenerator.StructureLevel structureLevel, int level) {
 			structureLevel.level = level;
-			/*
-			for (int i = 0; i < structureLevel.childrenS; i++) {
-				
-			}
-			*/
 		}
 		#endregion
 		
@@ -242,6 +239,7 @@ namespace Broccoli.Pipe {
 			if (!allAssignedToGroup) {
 				log.Enqueue (LogItem.GetWarnItem ("There are sprout levels not assigned to a group."));
 			}
+			CheckTrunkMode ();
 			this.RaiseValidateEvent ();
 			return true;
 		}
@@ -260,6 +258,20 @@ namespace Broccoli.Pipe {
 					if (!allAssignedToGroup)
 						break;
 				}
+			}
+		}
+		/// <summary>
+		/// Check the trunk mode to use.
+		/// </summary>
+		public void CheckTrunkMode ()
+		{
+			// Check if the current pipeline has an enabled trunk custom mesh element.
+			TrunkCustomMeshElement trunkCustomMeshElement =
+				(TrunkCustomMeshElement) GetDownstreamElement (PipelineElement.ClassType.TrunkCustomMesh);
+			if (trunkCustomMeshElement != null && trunkCustomMeshElement.isActive) {
+				trunkStructureLevel.trunkMode = TrunkStructureLevel.TrunkMode.CustomMesh;
+			} else {
+				trunkStructureLevel.trunkMode = TrunkStructureLevel.TrunkMode.Frequency;
 			}
 		}
 		#endregion
@@ -358,7 +370,7 @@ namespace Broccoli.Pipe {
 					SetRootStructureLevel (newLevel);
 				}
 			} else {
-				newLevel.nodePosition = rootStructureLevel.nodePosition + new Vector2 (50, (isRoot?70:-70));
+				newLevel.nodePosition = trunkStructureLevel.nodePosition + new Vector2 (50, (isRoot?70:-70));
 				// Root structure level at the main trunk.
 				if (isRoot) {
 					SetRootStructureLevel (newLevel, true);
@@ -474,7 +486,7 @@ namespace Broccoli.Pipe {
 			for (int i = 0; i < flatStructureLevels.Count; i++) {
 				if (flatStructureLevels[i].parentId == 0) {
 					structureLevels.Add (flatStructureLevels[i]);
-					flatStructureLevels[i].parentStructureLevel = rootStructureLevel;
+					flatStructureLevels[i].parentStructureLevel = trunkStructureLevel;
 				} else {
 					if (!levelRel.ContainsKey (flatStructureLevels[i].parentId)) {
 						levelRel.Add (flatStructureLevels[i].parentId, new List<StructureGenerator.StructureLevel> ());
@@ -504,8 +516,8 @@ namespace Broccoli.Pipe {
 					return sl1.id.CompareTo (sl2.id);
 				});
 			}
-			rootStructureLevel.structureLevels = structureLevels;
-			rootStructureLevel.structureLevels.Sort ((sl1,sl2) => {
+			trunkStructureLevel.structureLevels = structureLevels;
+			trunkStructureLevel.structureLevels.Sort ((sl1,sl2) => {
 				if (sl2.isSprout && !sl1.isSprout) return -1;
 				if (!sl2.isSprout && sl1.isSprout) return 1;
 				return sl1.id.CompareTo (sl2.id);
@@ -603,7 +615,7 @@ namespace Broccoli.Pipe {
 			StructureGenerator.StructureLevel childStructureLevel = null;
 			bool isFromTrunk = false;
 			if (parentId == 0) {
-				parentStructureLevel = rootStructureLevel;
+				parentStructureLevel = trunkStructureLevel;
 				isFromTrunk = true;
 			} else if (idToStructureLevels.ContainsKey (parentId)) {
 				parentStructureLevel = idToStructureLevels [parentId];
@@ -773,7 +785,7 @@ namespace Broccoli.Pipe {
 		override public PipelineElement Clone (bool isDuplicate = false) {
 			StructureGeneratorElement clone = ScriptableObject.CreateInstance<StructureGeneratorElement> ();
 			SetCloneProperties (clone, isDuplicate);
-			clone.rootStructureLevel = rootStructureLevel.Clone ();
+			clone.trunkStructureLevel = trunkStructureLevel.Clone ();
 			clone.canvasOffset = canvasOffset;
 			clone.inspectStructureEnabled = inspectStructureEnabled;
 			int maxStructureLevelId = 0;

@@ -128,8 +128,8 @@ namespace Broccoli.Component
 		/// </summary>
 		/// <param name="treeFactory">Tree factory.</param>
 		public override void Unprocess (TreeFactory treeFactory) {
-			treeFactory.meshManager.DeregisterMeshByType (MeshManager.MeshData.Type.Sprout);
-			treeFactory.materialManager.DeregisterMaterialByType (MeshManager.MeshData.Type.Sprout);
+			treeFactory.meshManager.DeregisterMeshByType (MeshManager.MeshData.TYPE_SPROUT);
+			treeFactory.materialManager.DeregisterMaterialByType (MeshManager.MeshData.TYPE_SPROUT);
 		}
 		/// <summary>
 		/// Process a special command or subprocess on this component.
@@ -171,15 +171,15 @@ namespace Broccoli.Component
 					// IF material comes from the Branch Collection.
 					if (sproutGroup.branchCollection != null) {
 						Material material;
-						meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.Type.Sprout, groupId);
+						meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.TYPE_SPROUT, groupId);
 						if (treeFactory.meshManager.HasMeshAndNotEmpty (meshId)) {
 							// Use a clone of the original material if specified by the preferences.
-							material = treeFactory.materialManager.GetMaterial (MeshManager.MeshData.Type.Sprout, true, groupId);
+							material = treeFactory.materialManager.GetMaterial (MeshManager.MeshData.TYPE_SPROUT, true, groupId);
 							material.name = "Sprout Material " + groupId;
 							if (material != null) {
 								treeFactory.assetManager.AddMaterialToPrefab (
 									material,
-									treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.Type.Sprout, groupId), 
+									treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.TYPE_SPROUT, groupId), 
 									groupId);
 							}
 						}
@@ -192,34 +192,34 @@ namespace Broccoli.Component
 							SproutMap.SproutMapArea sproutArea;
 							for (int i = 0; i < sproutMappers[groupId].sproutAreas.Count; i++) {
 								sproutArea = sproutMappers[groupId].sproutAreas[i];
-								meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.Type.Sprout, groupId, i);
+								meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.TYPE_SPROUT, groupId, i);
 								if (treeFactory.meshManager.HasMeshAndNotEmpty (meshId)) {
 									// Register as a native material CLONING
 									if (treeFactory.treeFactoryPreferences.prefabCloneCustomMaterialEnabled) {
-										Material material = treeFactory.materialManager.GetMaterial (MeshManager.MeshData.Type.Sprout, true, groupId, i);
+										Material material = treeFactory.materialManager.GetMaterial (MeshManager.MeshData.TYPE_SPROUT, true, groupId, i);
 										treeFactory.assetManager.AddMaterialParams (
 											new AssetManager.MaterialParams (AssetManager.MaterialParams.ShaderType.Native,
 												treeFactory.treeFactoryPreferences.prefabCreateAtlas, true),
-											treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.Type.Sprout, groupId, i));
+											treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.TYPE_SPROUT, groupId, i));
 										// Add the material to the asset manager.
 										if (material != null) {
 											material.name = "Optimized Sprout Material " + groupId + "." + i;
 											treeFactory.assetManager.AddMaterialToPrefab (
 												material,
-												treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.Type.Sprout, groupId, i), 
+												treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.TYPE_SPROUT, groupId, i), 
 												groupId,
 												sproutArea);
 										}
 									} else {
-										Material material = treeFactory.materialManager.GetMaterial (meshId, false);
+										Material material = treeFactory.materialManager.GetMaterialByMeshId (meshId, false);
 										treeFactory.assetManager.AddMaterialParams (
 											new AssetManager.MaterialParams (AssetManager.MaterialParams.ShaderType.Native,
 												treeFactory.treeFactoryPreferences.prefabCreateAtlas, true),
-											treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.Type.Sprout, groupId, i));
+											treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.TYPE_SPROUT, groupId, i));
 										if (material != null) {
 											treeFactory.assetManager.AddMaterialToPrefab (
 												material,
-												treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.Type.Sprout, groupId, i), 
+												treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.TYPE_SPROUT, groupId, i), 
 												groupId,
 												sproutArea);
 										}
@@ -229,7 +229,7 @@ namespace Broccoli.Component
 						} else {
 							// If custom material mode.
 							Material material;
-							meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.Type.Sprout, groupId);
+							meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.TYPE_SPROUT, groupId);
 							if (treeFactory.meshManager.HasMeshAndNotEmpty (meshId)) {
 								if (treeFactory.treeFactoryPreferences.overrideMaterialShaderEnabled) {
 									// Create material based on the custom one.
@@ -238,21 +238,21 @@ namespace Broccoli.Component
 									treeFactory.assetManager.AddMaterialParams (
 										new AssetManager.MaterialParams (AssetManager.MaterialParams.ShaderType.Native,
 											treeFactory.treeFactoryPreferences.prefabCreateAtlas, false),
-										treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.Type.Sprout, groupId));
+										treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.TYPE_SPROUT, groupId));
 									material.name = "Optimized Sprout Material " + groupId;
 								} else {
 									// Use a clone of the original material if specified by the preferences.
 									if (treeFactory.treeFactoryPreferences.prefabCloneCustomMaterialEnabled) {
-										material = treeFactory.materialManager.GetMaterial (MeshManager.MeshData.Type.Sprout, true, groupId);
+										material = treeFactory.materialManager.GetMaterial (MeshManager.MeshData.TYPE_SPROUT, true, groupId);
 										material.name = "Sprout Material " + groupId;
 									} else {
-										material = treeFactory.materialManager.GetMaterial (MeshManager.MeshData.Type.Sprout, false, groupId);
+										material = treeFactory.materialManager.GetMaterial (MeshManager.MeshData.TYPE_SPROUT, false, groupId);
 									}
 								}
 								if (material != null) {
 									treeFactory.assetManager.AddMaterialToPrefab (
 										material,
-										treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.Type.Sprout, groupId), 
+										treeFactory.meshManager.GetMergedMeshIndex (MeshManager.MeshData.TYPE_SPROUT, groupId), 
 										groupId);
 								}
 							}
@@ -326,7 +326,7 @@ namespace Broccoli.Component
 					if (sproutGroup.branchCollection != null) {
 						BranchDescriptorCollection branchDescriptorCollection = 
 							((BranchDescriptorCollectionSO)sproutGroup.branchCollection).branchDescriptorCollection;
-						Material m = treeFactory.materialManager.GetMaterial(MeshManager.MeshData.Type.Sprout, false, groupId, 0);
+						Material m = treeFactory.materialManager.GetMaterial(MeshManager.MeshData.TYPE_SPROUT, false, groupId, 0);
 						// If the material has not been registered, create it.
 						if (m == null) {
 							m = SproutCompositeManager.GenerateMaterial (sproutMap.color, sproutMap.alphaCutoff,
@@ -335,7 +335,7 @@ namespace Broccoli.Component
 								branchDescriptorCollection.atlasExtrasTexture, branchDescriptorCollection.atlasSubsurfaceTexture,
 								true);
 							MaterialManager.SetDiffusionProfile (m, sproutMap.diffusionProfileSettings, sproutMap.alphaCutoff);
-							treeFactory.materialManager.RegisterCustomMaterial (MeshManager.MeshData.Type.Sprout, m, groupId, 0);
+							treeFactory.materialManager.RegisterCustomMaterial (MeshManager.MeshData.TYPE_SPROUT, m, groupId, 0);
 						}
 						// If the material has been created, update its values.
 						else {
@@ -353,15 +353,15 @@ namespace Broccoli.Component
 							SproutMap.SproutMapArea sproutArea;
 							for (int i = 0; i < sproutMappers[groupId].sproutAreas.Count; i++) {
 								sproutArea = sproutMap.sproutAreas [i];
-								int meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.Type.Sprout, groupId, i);
+								int meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.TYPE_SPROUT, groupId, i);
 
 								/// Get an existing material from the material manager or create a new one.
 								Material material;
 								//TODO: why the else? shouldn't the manager take care of returning a new material if none has been created?
 								if (treeFactory.materialManager.HasMaterial (meshId) && 
 									!treeFactory.materialManager.IsCustomMaterial (meshId) &&
-									treeFactory.materialManager.GetMaterial (meshId) != null) {
-									material = treeFactory.materialManager.GetMaterial (meshId);
+									treeFactory.materialManager.GetMaterialByMeshId (meshId) != null) {
+									material = treeFactory.materialManager.GetMaterialByMeshId (meshId);
 								} else {
 									material = treeFactory.materialManager.GetOwnedMaterial (meshId, treeFactory.materialManager.GetLeavesShader ().name);
 								}
@@ -376,7 +376,7 @@ namespace Broccoli.Component
 									SproutMap.SproutMapArea sproutArea;
 									for (int i = 0; i < sproutMappers[groupId].sproutAreas.Count; i++) {
 										sproutArea = sproutMap.sproutAreas [i];
-										int meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.Type.Sprout, groupId, i);
+										int meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.TYPE_SPROUT, groupId, i);
 
 										/// Get a cloned the material.
 										Material material;
@@ -394,18 +394,18 @@ namespace Broccoli.Component
 									SproutMap.SproutMapArea sproutArea;
 									for (int i = 0; i < sproutMappers[groupId].sproutAreas.Count; i++) {
 										sproutArea = sproutMap.sproutAreas [i];
-										int meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.Type.Sprout, groupId, i);
+										int meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.TYPE_SPROUT, groupId, i);
 										treeFactory.materialManager.RegisterCustomMaterial (meshId, sproutMap.customMaterial);
 									}
 								}
 							} else {
 								// Material Mode.
 								Material customMaterial = sproutMap.customMaterial;
-								treeFactory.materialManager.RegisterCustomMaterial (MeshManager.MeshData.Type.Sprout,
+								treeFactory.materialManager.RegisterCustomMaterial (MeshManager.MeshData.TYPE_SPROUT,
 									customMaterial, groupId, 0);
 							}
 						} else {
-							treeFactory.materialManager.DeregisterMaterial (MeshManager.MeshData.Type.Sprout, groupId);
+							treeFactory.materialManager.DeregisterMaterial (MeshManager.MeshData.TYPE_SPROUT, groupId);
 						}
 					}
 
@@ -415,7 +415,8 @@ namespace Broccoli.Component
 				if (updatePreviewTree) {
 					MeshRenderer renderer = tree.obj.GetComponent<MeshRenderer> ();
 					Material[] materials = renderer.sharedMaterials;
-					for (int j = 0; j < treeFactory.meshManager.GetMeshesCount (); j++) {
+					int meshCount = treeFactory.meshManager.GetMeshesCount ();
+					for (int j = 0; j < meshCount; j++) {
 						int meshId = treeFactory.meshManager.GetMergedMeshId (j);
 						if (treeFactory.materialManager.HasMaterial (meshId)) {
 							if (treeFactory.materialManager.IsCustomMaterial (meshId) &&
@@ -423,7 +424,7 @@ namespace Broccoli.Component
 								bool isSprout = treeFactory.meshManager.IsSproutMesh (meshId);
 								materials [j] = treeFactory.materialManager.GetOverridedMaterial (meshId, isSprout);
 							} else {
-								materials [j] = treeFactory.materialManager.GetMaterial (meshId);
+								materials [j] = treeFactory.materialManager.GetMaterialByMeshId (meshId);
 							}
 						} else if (materials [j] != null) {
 							materials [j] = null;
@@ -455,10 +456,10 @@ namespace Broccoli.Component
 						SproutMap.SproutMapArea sproutArea;
 						for (int i = 0; i < sproutMappers[groupId].sproutAreas.Count; i++) {
 							sproutArea = sproutMappers [groupId].sproutAreas [i];
-							int meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.Type.Sprout, groupId, i);
+							int meshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.TYPE_SPROUT, groupId, i);
 							List<Vector4> uvs = new List<Vector4> ();
-							Mesh mesh = treeFactory.meshManager.GetMesh (meshId);
-							mesh = treeFactory.meshManager.GetMesh (meshId);
+							Mesh mesh = treeFactory.meshManager.GetMeshByMeshId (meshId);
+							mesh = treeFactory.meshManager.GetMeshByMeshId (meshId);
 							if (mesh != null) {
 								mesh.GetUVs (0, uvs);
 								SproutMeshMetaBuilder.GetInstance ().GetCropUVs (ref uvs, 
@@ -503,7 +504,7 @@ namespace Broccoli.Component
 		/// <param name="sproutMap"></param>
 		private void AssignColorVariance (TreeFactory treeFactory, SproutMap sproutMap) {
 			Dictionary<int, MeshManager.MeshData> meshDatas = 
-				treeFactory.meshManager.GetMeshesDataOfType (MeshManager.MeshData.Type.Sprout, sproutMap.groupId);
+				treeFactory.meshManager.GetMeshesDataOfType (MeshManager.MeshData.TYPE_SPROUT, sproutMap.groupId);
 			var meshDatasEnumerator = meshDatas.GetEnumerator ();
 			int sproutMeshId;
 			float normalizedShade = 0f;
@@ -512,8 +513,8 @@ namespace Broccoli.Component
 			Color meshColor = Color.green;
 			while (meshDatasEnumerator.MoveNext ()) {
 				sproutMeshId = meshDatasEnumerator.Current.Key;
-				mesh = treeFactory.meshManager.GetMesh (sproutMeshId);
-				if (treeFactory.meshManager.GetMesh (sproutMeshId) != null) {
+				mesh = treeFactory.meshManager.GetMeshByMeshId (sproutMeshId);
+				if (treeFactory.meshManager.GetMeshByMeshId (sproutMeshId) != null) {
 					List<Color> localColors = new List<Color> ();
 					List<Vector4> localUV2s = new List<Vector4> ();
 					List<Vector2> localUV6s = new List<Vector2> ();

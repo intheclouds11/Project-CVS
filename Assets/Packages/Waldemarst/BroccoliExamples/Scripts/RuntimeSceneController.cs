@@ -5,8 +5,6 @@ using UnityEngine;
 using Broccoli.Factory;
 using Broccoli.Pipe;
 
-#if UNITY_EDITOR
-
 namespace Broccoli.Examples 
 {
 	using Pipeline = Broccoli.Pipe.Pipeline;
@@ -186,4 +184,3 @@ namespace Broccoli.Examples
 		#endregion
 	}
 }
-#endif

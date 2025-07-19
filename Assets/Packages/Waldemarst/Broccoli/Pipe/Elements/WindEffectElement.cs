@@ -122,10 +122,6 @@ namespace Broccoli.Pipe {
 		/// Flag to apply wind mapping to roots.
 		/// </summary>
 		public bool applyToRoots = false;
-		/// <summary>
-		/// Option to show some fields as open input instead of using sliders.
-		/// </summary>
-		public bool showOpenFields = false;
 		#endregion
 
 		#region Constructor
@@ -164,7 +160,6 @@ namespace Broccoli.Pipe {
 			clone.windFactorCurve = new AnimationCurve (windFactorCurve.keys);
 			clone.windQuality = windQuality;
 			clone.applyToRoots = applyToRoots;
-			clone.showOpenFields = showOpenFields;
 			return clone;
 		}
 		#endregion

@@ -164,7 +164,8 @@ namespace Broccoli.Factory
 		/// </summary>
 		/// <param name="index">Index for the LOD definition.</param>
 		/// <returns>LOD definition.</returns>
-		public LODDef GetLOD (int index) {
+		public LODDef GetLOD (int index)
+		{
 			if (index >= 0 && index < lods.Count)
 				return lods [index];
 			return LODDef.GetPreset (LODDef.Preset.RegularPoly);
@@ -173,13 +174,108 @@ namespace Broccoli.Factory
 		/// Returns the default preview LOD definition.
 		/// </summary>
 		/// <returns></returns>
-		public LODDef GetPreviewLOD () {
+		public LODDef GetPreviewLOD ()
+		{
 			if (previewLODIndex >= 0 && previewLODIndex < lods.Count) {
 				return lods [previewLODIndex];
 			} else {
 				previewLODIndex = 0;
 			}
 			return LODDef.GetPreset (LODDef.Preset.RegularPoly);
+		}
+		public float GetLODFactor (int index, float minFactor = 0f, float maxFactor = 1f)
+		{
+			float factor = 1f;
+			// 1. Validate inputs
+			if (lods == null || lods.Count == 0 || index < 0 || index >= lods.Count)
+			{
+				return Mathf.Lerp (minFactor, maxFactor, factor); // Invalid input
+			}
+
+			// 2. Find all indices where the value is true.
+			var trueIndices = new List<int>();
+			for (int i = 0; i < lods.Count; i++)
+			{
+				if (lods[i].includeInPrefab)
+				{
+					trueIndices.Add(i);
+				}
+			}
+
+			// 3. Handle edge cases based on the count of 'true' values.
+			int totalTrues = trueIndices.Count;
+
+			// Case A: No true values at all.
+			if (totalTrues == 0)
+			{
+				return Mathf.Lerp (minFactor, maxFactor, 0.5f); // All are false, so everything is in the middle.
+			}
+
+			// Case B: Only one true value exists.
+			if (totalTrues == 1)
+			{
+				if (index < trueIndices[0]) return Mathf.Lerp (minFactor, maxFactor, 0f);;      // Before the single true point.
+				if (index > trueIndices[0]) return Mathf.Lerp (minFactor, maxFactor, 1f);;      // After the single true point.
+				return Mathf.Lerp (minFactor, maxFactor, 0.5f);;                                // Exactly at the single true point.
+			}
+
+			// 4. If the value at the given index is true, calculate its direct normalized position.
+			if (lods[index].includeInPrefab)
+			{
+				int positionInTrueList = trueIndices.IndexOf(index);
+				factor = (float)positionInTrueList / (totalTrues - 1);
+				return Mathf.Lerp (minFactor, maxFactor, factor);
+			}
+			else // 5. If the value is false, interpolate its position.
+			{
+				int prevTrueIndex = -1;
+				int nextTrueIndex = -1;
+
+				// Find the nearest true value before the index.
+				for (int i = index - 1; i >= 0; i--) {
+					if (lods[i].includeInPrefab) {
+						prevTrueIndex = i;
+						break;
+					}
+				}
+
+				// Find the nearest true value after the index.
+				for (int i = index + 1; i < lods.Count; i++) {
+					if (lods[i].includeInPrefab) {
+						nextTrueIndex = i;
+						break;
+					}
+				}
+
+				// Case C: The false value is before all true values.
+				if (prevTrueIndex == -1)
+				{
+					return Mathf.Lerp (minFactor, maxFactor, 0f);;
+				}
+
+				// Case D: The false value is after all true values.
+				if (nextTrueIndex == -1)
+				{
+					return Mathf.Lerp (minFactor, maxFactor, 1f);;
+				}
+				
+				// Case E: The false value is between two true values.
+				// Get the normalized positions of the surrounding true values.
+				int positionOfPrev = trueIndices.IndexOf(prevTrueIndex);
+				int positionOfNext = trueIndices.IndexOf(nextTrueIndex);
+				
+				float normPosPrev = (float)positionOfPrev / (totalTrues - 1);
+				float normPosNext = (float)positionOfNext / (totalTrues - 1);
+
+				// Calculate the interpolation factor based on distance.
+				float totalDistance = nextTrueIndex - prevTrueIndex;
+				float distanceToCurrent = index - prevTrueIndex;
+				float t = distanceToCurrent / totalDistance;
+
+				// Return the linearly interpolated value.
+				factor = Mathf.Lerp(normPosPrev, normPosNext, t);
+				return Mathf.Lerp (minFactor, maxFactor, factor);
+			}
 		}
 		#endregion
 

@@ -84,7 +84,7 @@
                     if (_UseTex == 1) {
                         col = extra;
                     } else {
-                        col = float4(_Smoothness, _Metallic, 1, 1);
+                        col = float4(_Smoothness, _Metallic, i.color.r, 1);
                     }
                     col.a = alpha;
 

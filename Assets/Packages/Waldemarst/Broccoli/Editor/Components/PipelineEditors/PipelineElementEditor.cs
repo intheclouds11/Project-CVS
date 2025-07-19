@@ -63,10 +63,6 @@ namespace Broccoli.TreeNodeEditor
 		/// </summary>
 		public bool showFieldHelp = false;
 		/// <summary>
-		/// Show float/int fields instead of sliders.
-		/// </summary>
-		public bool showOpenFields = false;
-		/// <summary>
 		/// The current undo group to check for undoable actions.
 		/// </summary>
 		public int currentUndoGroup = 0;
@@ -389,6 +385,17 @@ namespace Broccoli.TreeNodeEditor
 			}
 		}
 		/// <summary>
+		/// Draws the seed options.
+		/// </summary>
+		protected virtual void DrawOpenFieldOptions () {
+			bool _showOpenFields = EditorGUILayout.Toggle (showOpenFieldsLabel, pipelineElement.showOpenFields);
+			if (_showOpenFields != pipelineElement.showOpenFields) {
+				pipelineElement.showOpenFields = _showOpenFields;
+				SerializedProperty prop = GetSerializedProperty ("showOpenFields");
+				prop.boolValue = _showOpenFields;
+			}
+		}
+		/// <summary>
 		/// Draws the key name options.
 		/// </summary>
 		protected virtual void DrawKeyNameOptions () {
@@ -396,6 +403,7 @@ namespace Broccoli.TreeNodeEditor
 			if (useKeyName != pipelineElement.useKeyName) {
 				Undo.RecordObject (pipelineElement, "Using key name.");
 				pipelineElement.useKeyName = useKeyName;
+				TreeFactory.GetActiveInstance().onPipelineElementRequiresRedraw?.Invoke (pipelineElement);
 				SetUndoControlCounter ();
 			}
 			if (pipelineElement.useKeyName) {
@@ -404,6 +412,7 @@ namespace Broccoli.TreeNodeEditor
 				if (string.Compare (newKeyName, pipelineElement.keyName) != 0) {
 					Undo.RecordObject (pipelineElement, "New pipeline element key name: " + pipelineElement.keyName + ".");
 					pipelineElement.keyName = newKeyName;
+					TreeFactory.GetActiveInstance().onPipelineElementRequiresRedraw?.Invoke (pipelineElement);
 					SetUndoControlCounter ();
 				}
 			}
@@ -416,12 +425,6 @@ namespace Broccoli.TreeNodeEditor
 			if (_showFieldHelp != showFieldHelp) {
 				showFieldHelp = _showFieldHelp;
 				OnShowFieldHelpChanged ();
-			}
-			if (offersOpenFields) {
-				bool _showOpenFields = EditorGUILayout.Toggle (showOpenFieldsLabel, showOpenFields);
-				if (_showOpenFields != showOpenFields) {
-					showOpenFields = _showOpenFields;
-				}	
 			}
 			#if BROCCOLI_DEVEL
 			DrawDebugInfo ();
@@ -494,6 +497,87 @@ namespace Broccoli.TreeNodeEditor
 				return true;
 			}
 			return false;
+		}
+		/// <summary>
+		/// Displays input fields for float min and max value properties on the same line.
+		/// </summary>
+		/// <param name="propMinValue">Property with the minumum value.</param>
+		/// <param name="propMaxValue">Property with the maximum value.</param>
+		/// <param name="minRangeValue">Minimum possible value in the range.</param>
+		/// <param name="maxRangeValue">Maximum possible value in the range.</param>
+		/// <param name="label">Label to display on the field.</param>
+		/// <returns>True if the range was changed.</returns>
+		protected bool OpenFloatRangePropertyField (SerializedProperty propMinValue, SerializedProperty propMaxValue, string label, int decimals = 2) {
+			return OpenFloatRangePropertyField (propMinValue, propMaxValue, label, null, decimals);
+		}
+		/// <summary>
+		/// Displays input fields for float min and max value properties on the same line.
+		/// </summary>
+		/// <param name="propMinValue">Property with the minumum value.</param>
+		/// <param name="propMaxValue">Property with the maximum value.</param>
+		/// <param name="minRangeValue">Minimum possible value in the range.</param>
+		/// <param name="maxRangeValue">Maximum possible value in the range.</param>
+		/// <param name="label">Label to display on the field.</param>
+		/// <returns>True if the range was changed.</returns>
+		protected bool OpenFloatRangePropertyField (SerializedProperty propMinValue, SerializedProperty propMaxValue, GUIContent label, int decimals = 2) {
+			return OpenFloatRangePropertyField (propMinValue, propMaxValue, string.Empty, label, decimals);
+		}
+		/// <summary>
+		/// Displays input fields for float min and max value properties on the same line.
+		/// </summary>
+		/// <param name="propMinValue">Property with the minimum value.</param>
+		/// <param name="propMaxValue">Property with the maximum value.</param>
+		/// <param name="label">Label to display for the row if contentLabel is null.</param>
+		/// <param name="contentLabel">GUIContent label to display for the row.</param>
+		/// <param name="decimals">Not directly used for FloatField display formatting, but kept for signature consistency.
+		///                  If you need to round the value to a specific number of decimals after input, you'd do it manually before assignment.</param>
+		/// <returns>True if either min or max value was changed by user input and applied to the properties.</returns>
+		private bool OpenFloatRangePropertyField (SerializedProperty propMinValue, SerializedProperty propMaxValue, string label, GUIContent contentLabel, int decimals = 2) {
+			float stableMinValue = propMinValue.floatValue;
+			float stableMaxValue = propMaxValue.floatValue;
+
+			bool valuesChanged = false;
+
+			GUIContent actualLabel = contentLabel ?? new GUIContent(label);
+
+			EditorGUILayout.BeginHorizontal();
+			EditorGUILayout.LabelField(actualLabel);
+
+			// --- Min Value Field ---
+			float userInputMin = EditorGUILayout.FloatField(GUIContent.none, stableMinValue, GUILayout.MinWidth(40), GUILayout.ExpandWidth(true));
+			if (userInputMin != stableMinValue)
+			{
+				if (userInputMin > stableMaxValue) {
+					userInputMin = stableMaxValue;
+				}
+
+				if (Mathf.Abs(userInputMin - stableMinValue) > Mathf.Epsilon) {
+					propMinValue.floatValue = userInputMin;
+					valuesChanged = true;
+					stableMinValue = userInputMin;
+				}
+			}
+
+			EditorGUILayout.LabelField("to", GUILayout.Width(25));
+
+			// --- Max Value Field ---
+			float userInputMax = EditorGUILayout.FloatField(GUIContent.none, stableMaxValue, GUILayout.MinWidth(40), GUILayout.ExpandWidth(true));
+			if (userInputMax != stableMaxValue) // User finished editing the Max field
+			{
+				if (userInputMax < stableMinValue) // Use stableMinValue which reflects any validated change from the min field
+				{
+					userInputMax = stableMinValue;
+				}
+
+				if (Mathf.Abs(userInputMax - stableMaxValue) > Mathf.Epsilon)
+				{
+					propMaxValue.floatValue = userInputMax;
+					valuesChanged = true;
+				}
+			}
+			EditorGUILayout.EndHorizontal();
+
+			return valuesChanged;
 		}
 		/// <summary>
 		/// Range slider for float min and max value properties.

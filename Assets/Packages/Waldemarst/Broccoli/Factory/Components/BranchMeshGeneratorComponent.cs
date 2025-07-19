@@ -119,7 +119,7 @@ namespace Broccoli.Component
 		/// </summary>
 		/// <param name="treeFactory">Tree factory.</param>
 		public override void Unprocess (TreeFactory treeFactory) {
-			treeFactory.meshManager.DeregisterMesh (MeshManager.MeshData.Type.Branch);
+			treeFactory.meshManager.DeregisterMesh (MeshManager.MeshData.TYPE_BRANCH);
 			if (branchMeshGeneratorElement != null) {
 				branchMeshGeneratorElement.verticesCount = 0;
 				branchMeshGeneratorElement.trianglesCount = 0;
@@ -171,7 +171,7 @@ namespace Broccoli.Component
 			
 			branchMesh = meshBuilder.MeshTree (tree); // TODO: CUT
 
-			treeFactory.meshManager.DeregisterMeshByType (MeshManager.MeshData.Type.Branch);
+			treeFactory.meshManager.DeregisterMeshByType (MeshManager.MeshData.TYPE_BRANCH);
 
 			treeFactory.meshManager.RegisterBranchMesh (branchMesh);
 

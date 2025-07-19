@@ -29,7 +29,6 @@ namespace Broccoli.TreeNodeEditor
 		SerializedProperty propPreviewWindAlways;
 		SerializedProperty propPreviewWindMode;
 		SerializedProperty propWindQuality;
-		SerializedProperty propShowOpenFields;
 		bool shouldUpdateController = false;
 		private static GUIContent resetWindBtn = new GUIContent ("Reset Wind", "Set all the Wind parameters for this instance to their default values.");
 		private static GUIContent labelSprout1Sway = new GUIContent ("Sprout 1 Sway", "Sprout sway weight to apply to sprouts with wind pattern 1.");
@@ -60,7 +59,6 @@ namespace Broccoli.TreeNodeEditor
 		protected override void OnEnableSpecific () {
 			windEffectElement = target as WindEffectElement;
 			offersOpenFields = true;
-			showOpenFields = windEffectElement.showOpenFields;
 
 			if (TreeFactory.GetActiveInstance() != null && 
 				TreeFactory.GetActiveInstance ().previewTree != null)
@@ -101,7 +99,6 @@ namespace Broccoli.TreeNodeEditor
 			propPreviewWindAlways = GetSerializedProperty ("previewWindAlways");
 			propPreviewWindMode = GetSerializedProperty ("previewWindMode");
 			propWindQuality = GetSerializedProperty ("windQuality");
-			propShowOpenFields = GetSerializedProperty ("showOpenFields");
 		}
 		/// <summary>
 		/// Raises the disable specific event.
@@ -159,7 +156,7 @@ namespace Broccoli.TreeNodeEditor
 
 			bool changed = false;
 
-			if (showOpenFields) {
+			if (windEffectElement.showOpenFields) {
 				float _trunkBending = EditorGUILayout.FloatField (trunkBendingContent, propTrunkBending.floatValue);
 				if (_trunkBending != propTrunkBending.floatValue) {
 					propTrunkBending.floatValue = _trunkBending;
@@ -189,7 +186,6 @@ namespace Broccoli.TreeNodeEditor
 			}
 
 			if (EditorGUI.EndChangeCheck () || changed) {
-				propShowOpenFields.boolValue = showOpenFields;
 				ApplySerialized ();
 				shouldUpdateController = true;
 				UpdatePipeline (GlobalSettings.processingDelayMedium, true);
@@ -238,6 +234,11 @@ namespace Broccoli.TreeNodeEditor
 				}
 			}
 
+			EditorGUI.BeginChangeCheck ();
+			DrawOpenFieldOptions ();
+			if (EditorGUI.EndChangeCheck ()) {
+				ApplySerialized ();
+			}
 			DrawFieldHelpOptions ();
 		}
 		private string windParamsInfo;

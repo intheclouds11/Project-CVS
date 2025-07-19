@@ -27,17 +27,17 @@ namespace Broccoli.Manager
 			/// </summary>
 			public int id = 0;
 			/// <summary>
-			/// Types of mesh.
+			/// Types of branch mesh.
 			/// </summary>
-			public enum Type {
-				Custom,
-				Branch,
-				Sprout
-			}
+			public const int TYPE_BRANCH = 1;
+			/// <summary>
+			/// Types of sprout mesh.
+			/// </summary>
+			public const int TYPE_SPROUT = 2;
 			/// <summary>
 			/// The type of mesh.
 			/// </summary>
-			public Type type = Type.Custom;
+			public int type = 0;
 			/// <summary>
 			/// The actual mesh.
 			/// </summary>
@@ -51,13 +51,17 @@ namespace Broccoli.Manager
 			/// </summary>
 			public int areaId = -1;
 			/// <summary>
+			/// The mesh could be destroyed when clear is called on the manager.
+			/// </summary>
+			public bool destroyable = true;
+			/// <summary>
 			/// Static constructor to get a mesh data of a specified type.
 			/// </summary>
 			/// <returns>The mesh data.</returns>
 			/// <param name="mesh">Mesh object.</param>
 			/// <param name="type">Type of mesh.</param>
 			/// <param name="groupId">Sprout group identifier.</param>
-			public static MeshData GetMeshData (Mesh mesh, Type type, int groupId = 0, int areaId = 0) {
+			public static MeshData GetMeshData (Mesh mesh, int type, int groupId = 0, int areaId = 0) {
 				MeshData meshData = new MeshData ();
 				meshData.mesh = mesh;
 				meshData.type = type;
@@ -73,8 +77,8 @@ namespace Broccoli.Manager
 			/// <param name="type">Type.</param>
 			/// <param name="groupId">Group identifier.</param>
 			/// <param name="areaId">Area identifier.</param>
-			public static int GetMeshDataId (Type type, int groupId = 0, int areaId = 0) {
-				return (int)type * MESH_TYPE_FACTOR + groupId * MESH_GROUP_FACTOR + areaId;
+			public static int GetMeshDataId (int type, int groupId = 0, int areaId = 0) {
+				return type * MESH_TYPE_FACTOR + groupId * MESH_GROUP_FACTOR + areaId;
 			}
 			/// <summary>
 			/// Static constructor to get a mesh data of custom type.
@@ -82,8 +86,8 @@ namespace Broccoli.Manager
 			/// <returns>The custom mesh data.</returns>
 			/// <param name="mesh">Mesh object.</param>
 			/// <param name="groupId">Sprout group identifier.</param>
-			public static MeshData GetCustom (Mesh mesh, int groupId = 0) {
-				MeshData meshData = GetMeshData (mesh, Type.Custom, groupId);
+			public static MeshData GetCustom (Mesh mesh, int type, int groupId = 0, int lodId = 0) {
+				MeshData meshData = GetMeshData (mesh, type, groupId, lodId);
 				return meshData;
 			}
 			/// <summary>
@@ -92,8 +96,8 @@ namespace Broccoli.Manager
 			/// <returns>The bark mesh data.</returns>
 			/// <param name="mesh">Mesh object.</param>
 			/// <param name="groupId">Sprout group identifier.</param>
-			public static MeshData GetBranch (Mesh mesh, int groupId = 0) {
-				MeshData meshData = GetMeshData (mesh, Type.Branch, groupId);
+			public static MeshData GetBranch (Mesh mesh, int groupId = 0, int lodId = 0) {
+				MeshData meshData = GetMeshData (mesh, TYPE_BRANCH, groupId);
 				return meshData;
 			}
 			/// <summary>
@@ -103,7 +107,7 @@ namespace Broccoli.Manager
 			/// <param name="mesh">Mesh.</param>
 			/// <param name="groupId">Group identifier.</param>
 			public static MeshData GetSprout (Mesh mesh, int groupId = 0, int areaId = 0) {
-				MeshData meshData = GetMeshData (mesh, Type.Sprout, groupId, areaId);
+				MeshData meshData = GetMeshData (mesh, TYPE_SPROUT, groupId, areaId);
 				return meshData;
 			}
 		}
@@ -183,10 +187,10 @@ namespace Broccoli.Manager
 				if (totalTriangles < 0)
 					totalTriangles = 0;
 				if (meshesData [toDeleteMeshes[i]].mesh != null) {
-					UnityEngine.Object.DestroyImmediate (meshesData [toDeleteMeshes[i]].mesh, true);
+					MeshManager.MeshData data = meshesData [toDeleteMeshes[i]];
+					if (data.destroyable)
+						UnityEngine.Object.DestroyImmediate (data.mesh, true);
 				}
-
-
 				meshesData.Remove (toDeleteMeshes[i]);
 			}
 			toDeleteMeshes.Clear ();
@@ -244,16 +248,20 @@ namespace Broccoli.Manager
 		/// <param name="type">Type.</param>
 		/// <param name="groupId">Group identifier.</param>
 		/// <param name="areaId">Area identifier.</param>
-		public int RegisterMesh (Mesh mesh, MeshData.Type type, int groupId = 0, int areaId = 0) {
+		public int RegisterMesh (Mesh mesh, int type, int groupId = 0, int areaId = 0, bool destroyable = true) {
 			int meshId = MeshData.GetMeshDataId (type, groupId, areaId);
 			if (mesh != null && mesh.vertexCount > 0) {
 				if (meshesData.ContainsKey (meshId)) {
-					totalVertices -= meshesData [meshId].mesh.vertices.Length;
-					totalTriangles -= meshesData [meshId].mesh.triangles.Length / 3;
-					Object.DestroyImmediate (meshesData [meshId].mesh);
+					MeshManager.MeshData _data = meshesData [meshId];
+					totalVertices -= _data.mesh.vertices.Length;
+					totalTriangles -= _data.mesh.triangles.Length / 3;
+					if (_data.destroyable)
+						Object.DestroyImmediate (_data.mesh);
 					meshesData.Remove (meshId);
 				}
-				meshesData.Add (meshId, MeshData.GetMeshData (mesh, type, groupId));
+				MeshData data = MeshData.GetMeshData (mesh, type, groupId);
+				data.destroyable = destroyable;
+				meshesData.Add (meshId, data);
 				totalVertices += mesh.vertices.Length;
 				totalTriangles += mesh.triangles.Length / 3;
 				if (!keepAliveMeshes.Contains (meshId)) {
@@ -269,7 +277,7 @@ namespace Broccoli.Manager
 		/// <param name="mesh">Mesh.</param>
 		/// <param name="groupId">Group identifier.</param>
 		public int RegisterBranchMesh (Mesh mesh, int groupId = 0) {
-			return RegisterMesh (mesh, MeshData.Type.Branch, groupId);
+			return RegisterMesh (mesh, MeshData.TYPE_BRANCH, groupId);
 		}
 		/// <summary>
 		/// Registers a sprout mesh.
@@ -279,7 +287,7 @@ namespace Broccoli.Manager
 		/// <param name="groupId">Group identifier.</param>
 		/// <param name="areaId">Area identifier.</param>
 		public int RegisterSproutMesh (Mesh mesh, int groupId = 0, int areaId = 0) {
-			return RegisterMesh (mesh, MeshData.Type.Sprout, groupId, areaId);
+			return RegisterMesh (mesh, MeshData.TYPE_SPROUT, groupId, areaId);
 		}
 		/// <summary>
 		/// Registers a custom mesh.
@@ -287,8 +295,8 @@ namespace Broccoli.Manager
 		/// <returns>The custom mesh.</returns>
 		/// <param name="mesh">Mesh.</param>
 		/// <param name="groupId">Group identifier.</param>
-		public int RegisterCustomMesh (Mesh mesh, int groupId = 0) {
-			return RegisterMesh (mesh, MeshData.Type.Custom, groupId);
+		public int RegisterCustomMesh (Mesh mesh, int type, int groupId = 0, int lodId = 0, bool destroyable = true) {
+			return RegisterMesh (mesh, type, groupId, lodId, destroyable);
 		}
 		/// <summary>
 		/// Deregisters a mesh or meshes based on type, groupId and areaId.
@@ -297,21 +305,23 @@ namespace Broccoli.Manager
 		/// <param name="type">Type.</param>
 		/// <param name="groupId">Group identifier.</param>
 		/// <param name="areaId">Area identifier.</param>
-		public bool DeregisterMesh (MeshData.Type type, int groupId = 0, int areaId = 0) {
+		public bool DeregisterMesh (int type, int groupId = 0, int areaId = 0) {
 			int meshId = MeshData.GetMeshDataId (type, groupId, areaId);
-			return DeregisterMesh (meshId);
+			return DeregisterMeshByMeshId (meshId);
 		}
 		/// <summary>
 		/// Deregisters a mesh based on its id.
 		/// </summary>
 		/// <returns><c>true</c>, if a mesh was deregistered, <c>false</c> otherwise.</returns>
 		/// <param name="meshId">Mesh identifier.</param>
-		public bool DeregisterMesh (int meshId) {
+		public bool DeregisterMeshByMeshId (int meshId) {
 			bool result = false;
 			if (meshesData.ContainsKey (meshId)) {
-				totalVertices -= meshesData [meshId].mesh.vertices.Length;
-				totalTriangles -= meshesData [meshId].mesh.triangles.Length / 3;
-				UnityEngine.Object.DestroyImmediate (meshesData [meshId].mesh, true);
+				MeshManager.MeshData data = meshesData [meshId];
+				totalVertices -= data.mesh.vertices.Length;
+				totalTriangles -= data.mesh.triangles.Length / 3;
+				if (data.destroyable)
+					UnityEngine.Object.DestroyImmediate (data.mesh, true);
 				meshesData.Remove (meshId);
 				result = true;
 			}
@@ -325,9 +335,9 @@ namespace Broccoli.Manager
 		/// </summary>
 		/// <returns><c>true</c>, if mesh by type was deregistered, <c>false</c> otherwise.</returns>
 		/// <param name="type">Type.</param>
-		public bool DeregisterMeshByType (MeshData.Type type) {
+		public bool DeregisterMeshByType (int type) {
 			toDeleteMeshes.Clear ();
-			int typeFactor = (int)type * MeshData.MESH_TYPE_FACTOR;
+			int typeFactor = type * MeshData.MESH_TYPE_FACTOR;
 			var enumerator = meshesData.GetEnumerator ();
 			int meshId;
 			while (enumerator.MoveNext ()) {
@@ -338,7 +348,7 @@ namespace Broccoli.Manager
 			}
 			if (toDeleteMeshes.Count > 0) {
 				for (int i = 0; i < toDeleteMeshes.Count; i++) {
-					DeregisterMesh (toDeleteMeshes[i]);
+					DeregisterMeshByMeshId (toDeleteMeshes[i]);
 				}
 				toDeleteMeshes.Clear ();
 				return true;
@@ -362,7 +372,7 @@ namespace Broccoli.Manager
 			}
 			if (toDeleteMeshes.Count > 0) {
 				for (int i = 0; i < toDeleteMeshes.Count; i++) {
-					DeregisterMesh (toDeleteMeshes[i]);
+					DeregisterMeshByMeshId (toDeleteMeshes[i]);
 				}
 				toDeleteMeshes.Clear ();
 				return true;
@@ -375,7 +385,7 @@ namespace Broccoli.Manager
 		/// </summary>
 		/// <returns><c>true</c> if this instance has a mesh for the specified meshId; otherwise, <c>false</c>.</returns>
 		/// <param name="meshId">Mesh identifier.</param>
-		public bool HasMesh (int meshId) {
+		public bool HasMeshByMeshId (int meshId) {
 			if (meshesData.ContainsKey (meshId)) {
 				return true;
 			}
@@ -399,15 +409,15 @@ namespace Broccoli.Manager
 		/// <param name="type">Type.</param>
 		/// <param name="groupId">Group identifier.</param>
 		/// <param name="areaId">Area identifier.</param>
-		public bool HasMesh (MeshData.Type type, int groupId = 0, int areaId = 0) {
-			return GetMesh (type, groupId, areaId) != null;
+		public bool HasMesh (int type, int groupId = 0, int areaId = 0) {
+			return GetMeshByType (type, groupId, areaId) != null;
 		}
 		/// <summary>
 		/// Gets a mesh for its meshId.
 		/// </summary>
 		/// <returns>The mesh.</returns>
 		/// <param name="meshId">Mesh identifier.</param>
-		public Mesh GetMesh (int meshId) {
+		public Mesh GetMeshByMeshId (int meshId) {
 			if (meshesData.ContainsKey (meshId)) {
 				if (!keepAliveMeshes.Contains (meshId)) {
 					keepAliveMeshes.Add (meshId);
@@ -423,8 +433,8 @@ namespace Broccoli.Manager
 		/// <param name="type">Type of mesh.</param>
 		/// <param name="groupId">Group identifier.</param>
 		/// <param name="areaId">Area identifier.</param>
-		public Mesh GetMesh (MeshData.Type type, int groupId = 0, int areaId = 0) {
-			return GetMesh (MeshData.GetMeshDataId (type, groupId, areaId));
+		public Mesh GetMeshByType (int type, int groupId = 0, int areaId = 0) {
+			return GetMeshByMeshId (MeshData.GetMeshDataId (type, groupId, areaId));
 		}
 		/// <summary>
 		/// Merges all meshes.
@@ -527,7 +537,7 @@ namespace Broccoli.Manager
 		/// <param name="type">Type of mesh.</param>
 		/// <param name="groupId">Group identifier.</param>
 		/// <param name="areaId">Area identifier.</param>
-		public int GetMergedMeshIndex (MeshData.Type type, int groupId = 0, int areaId = 0) {
+		public int GetMergedMeshIndex (int type, int groupId = 0, int areaId = 0) {
 			return GetMergedMeshIndex (MeshData.GetMeshDataId (type, groupId, areaId));
 		}
 		/// <summary>
@@ -565,7 +575,7 @@ namespace Broccoli.Manager
 		/// <param name="type">Type of mesh.</param>
 		/// <param name="groupId">Group identifier.</param>
 		/// <param name="areaId">Area identifier.</param>
-		public int GetMergedMeshVertexOffset (MeshData.Type type, int groupId = 0, int areaId = 0) {
+		public int GetMergedMeshVertexOffset (int type, int groupId = 0, int areaId = 0) {
 			return GetMergedMeshVertexOffset (MeshData.GetMeshDataId (type, groupId, areaId));
 		}
 		/// <summary>
@@ -574,8 +584,10 @@ namespace Broccoli.Manager
 		public void Clear () {
 			var enumerator = meshesData.GetEnumerator ();
 			while (enumerator.MoveNext ()) {
-				if (enumerator.Current.Value.mesh != null) enumerator.Current.Value.mesh.Clear ();
-				UnityEngine.Object.DestroyImmediate (enumerator.Current.Value.mesh, true);
+				if (enumerator.Current.Value.destroyable) {
+					if (enumerator.Current.Value.mesh != null) enumerator.Current.Value.mesh.Clear ();
+					UnityEngine.Object.DestroyImmediate (enumerator.Current.Value.mesh, true);
+				}
 			}
 			totalVertices  = 0;
 			totalTriangles = 0;
@@ -594,7 +606,7 @@ namespace Broccoli.Manager
 		#region MeshData operations
 		public bool IsSproutMesh (int meshId) {
 			if (meshesData.ContainsKey (meshId)) {
-				if (meshesData [meshId].type == MeshData.Type.Sprout) {
+				if (meshesData [meshId].type == MeshData.TYPE_SPROUT) {
 					return true;
 				}
 			}
@@ -605,7 +617,7 @@ namespace Broccoli.Manager
 		/// </summary>
 		/// <returns>The mesh data, null if the data is not found.</returns>
 		/// <param name="meshId">Mesh identifier.</param>
-		public MeshData GetMeshData (int meshId) {
+		public MeshData GetMeshDataByMeshId (int meshId) {
 			if (meshesData.ContainsKey (meshId)) {
 				return meshesData [meshId];
 			}
@@ -618,8 +630,8 @@ namespace Broccoli.Manager
 		/// <param name="type">Type of the mesh.</param>
 		/// <param name="groupId">Group identifier.</param>
 		/// <param name="areaId">Area identifier.</param>
-		public MeshData GetMeshData (MeshData.Type type, int groupId = 0, int areaId = 0) {
-			return GetMeshData (MeshData.GetMeshDataId (type, groupId, areaId));
+		public MeshData GetMeshData (int type, int groupId = 0, int areaId = 0) {
+			return GetMeshDataByMeshId (MeshData.GetMeshDataId (type, groupId, areaId));
 		}
 		/// <summary>
 		/// Gets the meshes data.
@@ -633,7 +645,7 @@ namespace Broccoli.Manager
 		/// </summary>
 		/// <returns>Type of mesh data.</returns>
 		/// <param name="type">Type.</param>
-		public Dictionary<int, MeshData> GetMeshesDataOfType (MeshData.Type type) {
+		public Dictionary<int, MeshData> GetMeshesDataOfType (int type) {
 			Dictionary<int, MeshData> resultMesh = new Dictionary<int, MeshData> ();
 			int typeFactor = (int)type * MeshData.MESH_TYPE_FACTOR;
 			var enumerator = meshesData.GetEnumerator ();
@@ -651,7 +663,7 @@ namespace Broccoli.Manager
 		/// </summary>
 		/// <returns>Type of mesh data.</returns>
 		/// <param name="type">Type.</param>
-		public Dictionary<int, MeshData> GetMeshesDataOfType (MeshData.Type type, int group = 0) {
+		public Dictionary<int, MeshData> GetMeshesDataOfType (int type, int group = 0) {
 			Dictionary<int, MeshData> resultMesh = new Dictionary<int, MeshData> ();
 			int typeFactor = (int)type * MeshData.MESH_TYPE_FACTOR;
 			int groupFactor = group * MeshData.MESH_GROUP_FACTOR;

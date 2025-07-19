@@ -161,22 +161,22 @@ namespace Broccoli.Component
 			}
 
 			// Set wind on branch mesh
-			int branchMeshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.Type.Branch);
-			Mesh mesh = treeFactory.meshManager.GetMesh (branchMeshId);
+			int branchMeshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.TYPE_BRANCH);
+			Mesh mesh = treeFactory.meshManager.GetMeshByMeshId (branchMeshId);
 			stWindMetaBuilder.SetBranchesWindDataJobs (mesh);
 
 			// Set wind on each sprouts mesh
 			Dictionary<int, MeshManager.MeshData> meshDatas = 
-				treeFactory.meshManager.GetMeshesDataOfType (MeshManager.MeshData.Type.Sprout);
+				treeFactory.meshManager.GetMeshesDataOfType (MeshManager.MeshData.TYPE_SPROUT);
 			var meshDatasEnumerator = meshDatas.GetEnumerator ();
 			int sproutMeshId;
 			MeshManager.MeshData sproutMeshData;
 			while (meshDatasEnumerator.MoveNext ()) {
 				sproutMeshId = meshDatasEnumerator.Current.Key;
 				sproutMeshData = meshDatasEnumerator.Current.Value;
-				mesh = treeFactory.meshManager.GetMesh (sproutMeshId);
+				mesh = treeFactory.meshManager.GetMeshByMeshId (sproutMeshId);
 
-				if (sproutMeshData.type == MeshManager.MeshData.Type.Sprout) {
+				if (sproutMeshData.type == MeshManager.MeshData.TYPE_SPROUT) {
 					stWindMetaBuilder.SetAdvancedSproutsWindData (sproutMeshId, mesh);
 				}
 			}

@@ -60,6 +60,7 @@ namespace Broccoli.BroccoEditor
 				case PipelineElement.ClassType.BranchMeshGenerator:
 				case PipelineElement.ClassType.SproutMeshGenerator:
 				case PipelineElement.ClassType.TrunkMeshGenerator:
+				case PipelineElement.ClassType.TrunkCustomMesh:
 					return BroccoEditorGUI.meshGeneratorHeaderColor;
 				case PipelineElement.ClassType.BranchMapper:
 				case PipelineElement.ClassType.SproutMapper:

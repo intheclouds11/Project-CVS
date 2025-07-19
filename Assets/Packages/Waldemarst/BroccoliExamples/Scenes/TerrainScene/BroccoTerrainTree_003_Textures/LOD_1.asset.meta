@@ -10,6 +10,6 @@ AssetOrigin:
   serializedVersion: 1
   productId: 121853
   packageName: Broccoli Tree Creator
-  packageVersion: 1.10.2
-  assetPath: Assets/Waldemarst/BroccoliExamples/Scenes/TerrainScene/BroccoTerrainTree_003_Textures/LOD_1.asset
-  uploadId: 754994
+  packageVersion: 1.10.3
+  assetPath: Assets/Packages/Waldemarst/BroccoliExamples/Scenes/TerrainScene/BroccoTerrainTree_003_Textures/LOD_1.asset
+  uploadId: 767891

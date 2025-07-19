@@ -11,6 +11,7 @@ using Broccoli.Model;
 using Broccoli.Generator;
 using Broccoli.Component;
 using Broccoli.Factory;
+using Broccoli.Builder;
 
 namespace Broccoli.TreeNodeEditor
 {
@@ -90,6 +91,12 @@ namespace Broccoli.TreeNodeEditor
 		/// The property structure levels.
 		/// </summary>
 		SerializedProperty propStructureLevels;
+		/// <summary>
+		/// Opens fields for manual input.
+		/// </summary>
+		SerializedProperty propShowOpenFields;
+
+
 		/// <summary>
 		/// True when the canvas needs reinitialization.
 		/// </summary>
@@ -320,6 +327,7 @@ namespace Broccoli.TreeNodeEditor
 		/// </summary>
 		protected override void OnEnableSpecific () {
 			structureGeneratorElement = target as StructureGeneratorElement;
+			offersOpenFields = true;
 
 			structureGeneratorElement.BuildStructureLevelTree ();
 
@@ -377,7 +385,7 @@ namespace Broccoli.TreeNodeEditor
 			curveEditor.selectedNodeHandleColor = selectedCurveColor;
 			curveEditor.preselectedNodeColor = Color.red;
 
-			propRootStructureLevel = GetSerializedProperty ("rootStructureLevel");
+			propRootStructureLevel = GetSerializedProperty ("trunkStructureLevel");
 			propMinFrequency = propRootStructureLevel.FindPropertyRelative ("minFrequency");
 			propMaxFrequency = propRootStructureLevel.FindPropertyRelative ("maxFrequency");
 			propMinLength = propRootStructureLevel.FindPropertyRelative ("minLengthAtBase");
@@ -389,6 +397,7 @@ namespace Broccoli.TreeNodeEditor
 			propOverrideFrequencyLimit = propRootStructureLevel.FindPropertyRelative ("overrideFrequencyLimit");
 			propOverridedFrequencyLimit = propRootStructureLevel.FindPropertyRelative ("overridedFrequencyLimit");
 			propStructureLevels = GetSerializedProperty ("flatStructureLevels");
+			propShowOpenFields = GetSerializedProperty ("showOpenFields");
 
 			structureGeneratorComponent = (StructureGeneratorComponent)TreeFactory.GetActiveInstance ().componentManager.GetFactoryComponent (structureGeneratorElement);
 
@@ -398,9 +407,9 @@ namespace Broccoli.TreeNodeEditor
 			SetStructureInspectorEnabled (structureGeneratorElement.inspectStructureEnabled);
 
 			if (structureGeneratorElement.selectedLevel != null) {
-				SetSelectedStructureLevel (structureGeneratorElement.selectedLevel.id);
+				SetSelectedStructureLevel (structureGeneratorElement.selectedLevel);
 			} else {
-				SetSelectedStructureLevel (structureGeneratorElement.rootStructureLevel.id);
+				SetSelectedStructureLevel (structureGeneratorElement.trunkStructureLevel);
 			}
 
 			showGizmosBtn = true;
@@ -432,7 +441,7 @@ namespace Broccoli.TreeNodeEditor
 				TreeFactory.GetActiveInstance ().onProcessPipeline -= onProcessPipeline;
 
 				// Clear structure level branches
-				SetSelectedStructureLevel (-1);
+				SetSelectedStructureLevel (null);
 			}
 		}
 		void GetTunedBranches () {
@@ -510,13 +519,14 @@ namespace Broccoli.TreeNodeEditor
 			if (structureGeneratorElement.showGizmosEnabled) {
 				Handles.color = Color.yellow;
 				if (structureGeneratorElement != null && 
-					structureGeneratorElement.selectedLevel == null && 
-					structureGeneratorElement.rootStructureLevel.radius > 0) {
+					structureGeneratorElement.selectedLevel == null &&
+					structureGeneratorElement.trunkStructureLevel.trunkMode == TrunkStructureLevel.TrunkMode.Frequency &&
+					structureGeneratorElement.trunkStructureLevel.radius > 0) {
 					Handles.DrawWireArc (structureGeneratorElement.pipeline.origin,
 						GlobalSettings.againstGravityDirection,
 						Vector3.right,
 						360,
-						structureGeneratorElement.rootStructureLevel.radius);
+						structureGeneratorElement.trunkStructureLevel.radius);
 				} if (structureGeneratorElement.selectedLevel == null) {
 					DrawStructures (structureGeneratorElement.flatStructures, 0,
 						TreeFactoryEditorWindow.editorWindow.treeFactory.GetPreviewTreeWorldOffset (),
@@ -620,73 +630,86 @@ namespace Broccoli.TreeNodeEditor
 				// MAIN LEVEL OPTIONS.
 				EditorGUILayout.LabelField ("Main Level Node", EditorStyles.boldLabel);
 				EditorGUILayout.Space ();
-
-				bool rootChanged = false;
-
-				if (selectedPanel >= aspectsTrunkPanelOptions.Length) selectedPanel = TRUNK_PANEL_STRUCTURE;
-				selectedPanel = GUILayout.Toolbar (selectedPanel, aspectsTrunkPanelOptions);
-
-				// STRUCTURE PANEL.
-				if (selectedPanel == TRUNK_PANEL_STRUCTURE) {
-					// FREQUENCY
-					EditorGUI.BeginChangeCheck ();
-					IntRangePropertyField (propMinFrequency, propMaxFrequency, 0, 30, rootFrequencyLabel);
-					ShowHelpBox (MSG_MAIN_MIN_MAX_FREQUENCY);
-
-					// LENGTH
-					if (pipelineElement.preset == PipelineElement.Preset.Tree) {
-						FloatRangePropertyField (propMinLength, propMaxLength, minRootTreeLengthValue, maxRootTreeLengthValue, rootLengthLabel);
-					} else {
-						FloatRangePropertyField (propMinLength, propMaxLength, minRootShrubLengthValue, maxRootShrubLengthValue, rootLengthLabel);
-					}
-					ShowHelpBox (MSG_MAIN_MIN_MAX_LENGTH);
-					if (EditorGUI.EndChangeCheck ()) {
-						rootChanged = true;
-					}
-						
-					// RADIUS
-					float radius = propRadius.floatValue;
-					EditorGUILayout.Slider (propRadius, 0f, 20f, rootRadiusLabel);
-					ShowHelpBox (MSG_MAIN_RADIUS);
-					if (radius != propRadius.floatValue) {
-						rootChanged = true;
-					}
+				// CUSTOM TRUNK MODE
+				if (structureGeneratorElement.trunkStructureLevel.trunkMode == TrunkStructureLevel.TrunkMode.CustomMesh) {
+					EditorGUILayout.HelpBox ("Trunk Custom Mesh controls the trunk generated in this tree.", MessageType.Info);
 				}
-				// ADVANCED PANEL.
-				else if (selectedPanel == TRUNK_PANEL_ADVANCED) {
-					// OVERRIDE NOISE.
-					bool overrideNoise = propOverrideNoise.boolValue;
-					EditorGUILayout.PropertyField (propOverrideNoise, overrideNoiseLabel);
-					ShowHelpBox (MSG_OVERRIDE_NOISE);
-					if (overrideNoise != propOverrideNoise.boolValue) {
-						rootChanged = true;
-					}
-					if (overrideNoise) {
-						// NOISE.
-						EditorGUI.BeginChangeCheck ();
-						EditorGUILayout.Slider (propNoise, 0f, 1.5f, rootNoiseLabel);
-						ShowHelpBox (MSG_NOISE);
+				// FREQUENCY TRUNK MODE
+				else {
+					bool rootChanged = false;
+					if (selectedPanel >= aspectsTrunkPanelOptions.Length) selectedPanel = TRUNK_PANEL_STRUCTURE;
+					selectedPanel = GUILayout.Toolbar (selectedPanel, aspectsTrunkPanelOptions);
 
-						// NOISE SCALE.
-						EditorGUILayout.Slider (propNoiseScale, 0f, 1.5f, rootNoiseScaleLabel);
-						ShowHelpBox (MSG_NOISE_SCALE);
+					// STRUCTURE PANEL.
+					if (selectedPanel == TRUNK_PANEL_STRUCTURE) {
+						// FREQUENCY
+						EditorGUI.BeginChangeCheck ();
+						IntRangePropertyField (propMinFrequency, propMaxFrequency, 0, 30, rootFrequencyLabel);
+						ShowHelpBox (MSG_MAIN_MIN_MAX_FREQUENCY);
+
+						// LENGTH
+						if (pipelineElement.preset == PipelineElement.Preset.Tree) {
+							if (pipelineElement.showOpenFields) {
+								OpenFloatRangePropertyField (propMinLength, propMaxLength, rootLengthLabel);
+							} else {
+								FloatRangePropertyField (propMinLength, propMaxLength, minRootTreeLengthValue, maxRootTreeLengthValue, rootLengthLabel);
+							}
+						} else {
+							if (pipelineElement.showOpenFields) {
+								OpenFloatRangePropertyField (propMinLength, propMaxLength, rootLengthLabel);	
+							} else {
+								FloatRangePropertyField (propMinLength, propMaxLength, minRootShrubLengthValue, maxRootShrubLengthValue, rootLengthLabel);
+							}
+						}
+						ShowHelpBox (MSG_MAIN_MIN_MAX_LENGTH);
 						if (EditorGUI.EndChangeCheck ()) {
 							rootChanged = true;
 						}
+							
+						// RADIUS
+						float radius = propRadius.floatValue;
+						EditorGUILayout.Slider (propRadius, 0f, 20f, rootRadiusLabel);
+						ShowHelpBox (MSG_MAIN_RADIUS);
+						if (radius != propRadius.floatValue) {
+							rootChanged = true;
+						}
 					}
-				}
-				// DEBUG PANEL
-				else {
-					DrawDebugPanel (structureGeneratorElement.rootStructureLevel, propRootStructureLevel, rootChanged);
-				}
+					// ADVANCED PANEL.
+					else if (selectedPanel == TRUNK_PANEL_ADVANCED) {
+						// OVERRIDE NOISE.
+						bool overrideNoise = propOverrideNoise.boolValue;
+						EditorGUILayout.PropertyField (propOverrideNoise, overrideNoiseLabel);
+						ShowHelpBox (MSG_OVERRIDE_NOISE);
+						if (overrideNoise != propOverrideNoise.boolValue) {
+							rootChanged = true;
+						}
+						if (overrideNoise) {
+							// NOISE.
+							EditorGUI.BeginChangeCheck ();
+							EditorGUILayout.Slider (propNoise, 0f, 1.5f, rootNoiseLabel);
+							ShowHelpBox (MSG_NOISE);
 
-				if (rootChanged &&
-					propMinFrequency.intValue <= propMaxFrequency.intValue &&
-					propMinLength.floatValue <= propMaxLength.floatValue) {
-					rootElementChanged = true;
-				} else if (propMinLength.floatValue > propMaxLength.floatValue) { // FIX
-					propMinLength.floatValue = propMaxLength.floatValue;
-					rootElementChanged = true;
+							// NOISE SCALE.
+							EditorGUILayout.Slider (propNoiseScale, 0f, 1.5f, rootNoiseScaleLabel);
+							ShowHelpBox (MSG_NOISE_SCALE);
+							if (EditorGUI.EndChangeCheck ()) {
+								rootChanged = true;
+							}
+						}
+					}
+					// DEBUG PANEL
+					else {
+						DrawDebugPanel (structureGeneratorElement.trunkStructureLevel, propRootStructureLevel, rootChanged);
+					}
+
+					if (rootChanged &&
+						propMinFrequency.intValue <= propMaxFrequency.intValue &&
+						propMinLength.floatValue <= propMaxLength.floatValue) {
+						rootElementChanged = true;
+					} else if (propMinLength.floatValue > propMaxLength.floatValue) { // FIX
+						propMinLength.floatValue = propMaxLength.floatValue;
+						rootElementChanged = true;
+					}
 				}
 			} else {
 				// BRANCH/ROOT/SPROUT LEVEL OPTIONS.
@@ -784,6 +807,7 @@ namespace Broccoli.TreeNodeEditor
 			}
 
 			//NodeEditorGUI.EndUsingSkin ();
+			DrawOpenFieldOptions ();
 
 			// Field descriptors option.
 			DrawFieldHelpOptions ();
@@ -910,18 +934,34 @@ namespace Broccoli.TreeNodeEditor
 				// LENGTH
 				EditorGUI.BeginChangeCheck ();
 				if (pipelineElement.preset == PipelineElement.Preset.Tree) {
-					FloatRangePropertyField (propStructureLevel.FindPropertyRelative ("minLengthAtTop"), 
-						propStructureLevel.FindPropertyRelative ("maxLengthAtTop"), minTreeLengthValue, maxTreeLengthValue, lengthAtTopLabel);
+					if (pipelineElement.showOpenFields)
+						OpenFloatRangePropertyField (propStructureLevel.FindPropertyRelative ("minLengthAtTop"), 
+							propStructureLevel.FindPropertyRelative ("maxLengthAtTop"), lengthAtTopLabel);
+					else
+						FloatRangePropertyField (propStructureLevel.FindPropertyRelative ("minLengthAtTop"), 
+							propStructureLevel.FindPropertyRelative ("maxLengthAtTop"), minTreeLengthValue, maxTreeLengthValue, lengthAtTopLabel);
 					ShowHelpBox (MSG_LENGTH_AT_TOP);
-					FloatRangePropertyField (propStructureLevel.FindPropertyRelative ("minLengthAtBase"), 
-						propStructureLevel.FindPropertyRelative ("maxLengthAtBase"), minTreeLengthValue, maxTreeLengthValue, lengthAtBaseLabel);
+					if (pipelineElement.showOpenFields)
+						OpenFloatRangePropertyField (propStructureLevel.FindPropertyRelative ("minLengthAtBase"), 
+							propStructureLevel.FindPropertyRelative ("maxLengthAtBase"), lengthAtBaseLabel);
+					else
+						FloatRangePropertyField (propStructureLevel.FindPropertyRelative ("minLengthAtBase"), 
+							propStructureLevel.FindPropertyRelative ("maxLengthAtBase"), minTreeLengthValue, maxTreeLengthValue, lengthAtBaseLabel);
 					ShowHelpBox (MSG_LENGTH_AT_BASE);
 				} else {
-					FloatRangePropertyField (propStructureLevel.FindPropertyRelative ("minLengthAtTop"), 
-						propStructureLevel.FindPropertyRelative ("maxLengthAtTop"), minShrubLengthValue, maxShrubLengthValue, lengthAtTopLabel);
+					if (pipelineElement.showOpenFields)
+						OpenFloatRangePropertyField (propStructureLevel.FindPropertyRelative ("minLengthAtTop"), 
+							propStructureLevel.FindPropertyRelative ("maxLengthAtTop"), lengthAtTopLabel);
+					else
+						FloatRangePropertyField (propStructureLevel.FindPropertyRelative ("minLengthAtTop"), 
+							propStructureLevel.FindPropertyRelative ("maxLengthAtTop"), minShrubLengthValue, maxShrubLengthValue, lengthAtTopLabel);
 					ShowHelpBox (MSG_LENGTH_AT_TOP);
-					FloatRangePropertyField (propStructureLevel.FindPropertyRelative ("minLengthAtBase"), 
-						propStructureLevel.FindPropertyRelative ("maxLengthAtBase"), minShrubLengthValue, maxShrubLengthValue, lengthAtBaseLabel);
+					if (pipelineElement.showOpenFields)
+						OpenFloatRangePropertyField (propStructureLevel.FindPropertyRelative ("minLengthAtBase"), 
+							propStructureLevel.FindPropertyRelative ("maxLengthAtBase"), lengthAtBaseLabel);
+					else
+						FloatRangePropertyField (propStructureLevel.FindPropertyRelative ("minLengthAtBase"), 
+							propStructureLevel.FindPropertyRelative ("maxLengthAtBase"), minShrubLengthValue, maxShrubLengthValue, lengthAtBaseLabel);
 					ShowHelpBox (MSG_LENGTH_AT_BASE);
 				}
 
@@ -1111,9 +1151,9 @@ namespace Broccoli.TreeNodeEditor
 			structureGraph.ClearElements ();
 
 			// Create trunk node.
-			Vector2 rootNodePosition = structureGeneratorElement.rootStructureLevel.nodePosition;
+			Vector2 rootNodePosition = structureGeneratorElement.trunkStructureLevel.nodePosition;
 			structureGraph.AddNode (StructureNode.NodeType.Trunk,
-				structureGeneratorElement.rootStructureLevel.id, rootNodePosition, true);
+				structureGeneratorElement.trunkStructureLevel.id, rootNodePosition, true);
 
 			// Traverse structures and create nodes.
 			StructureNode.NodeType nodeType;
@@ -1129,7 +1169,7 @@ namespace Broccoli.TreeNodeEditor
 			}
 
 			// Create connections.
-			structureLevel = structureGeneratorElement.rootStructureLevel;
+			structureLevel = structureGeneratorElement.trunkStructureLevel;
 			for (int j = 0; j < structureLevel.structureLevels.Count; j++) {
 				structureGraph.AddConnection (structureLevel.id, structureLevel.structureLevels [j].id);
 			}
@@ -1215,17 +1255,9 @@ namespace Broccoli.TreeNodeEditor
 			if (listenGraphEvents) {
 				curveEditor.ClearSelection ();
 				if (structureGeneratorElement.idToStructureLevels.ContainsKey (node.id)) {
-					structureGeneratorElement.selectedLevel = structureGeneratorElement.idToStructureLevels [node.id];
-					if (node.id == structureGeneratorElement.rootStructureLevel.id) {
-						structureGeneratorElement.selectedLevel = null;
-						SetSelectedStructureLevel (structureGeneratorElement.rootStructureLevel.id);
-					} else {
-						structureGeneratorElement.selectedLevel = structureGeneratorElement.idToStructureLevels [node.id];
-						SetSelectedStructureLevel (node.id);
-					}
+					SetSelectedStructureLevel (structureGeneratorElement.idToStructureLevels [node.id]);
 				} else {
-					structureGeneratorElement.selectedLevel = null;
-					SetSelectedStructureLevel (structureGeneratorElement.rootStructureLevel.id);
+					SetSelectedStructureLevel (null);
 				}
 			}
 		}
@@ -1262,7 +1294,7 @@ namespace Broccoli.TreeNodeEditor
 				StructureGenerator.StructureLevel newLevel = 
 					structureGeneratorElement.AddStructureLevel (node.id, isSprout, isRoot);
 				newLevel.nodePosition = nodePosition;
-				structureGeneratorElement.selectedLevel = newLevel;
+				SetSelectedStructureLevel (newLevel);
 				curveEditor.ClearSelection ();
 				ApplySerialized ();
 				SetUndoControlCounter ();
@@ -1276,7 +1308,7 @@ namespace Broccoli.TreeNodeEditor
 				structureLevel.parentId = -1;
 				structureGeneratorElement.AddStructureLevel (structureLevel);
 				structureLevel.nodePosition = nodePosition;
-				structureGeneratorElement.selectedLevel = structureLevel;
+				SetSelectedStructureLevel (structureLevel);
 				structureGraph.SetNodeMark (structureLevel.id, structureLevel.sproutGroupColor);
 				curveEditor.ClearSelection ();
 				ApplySerialized ();
@@ -1295,7 +1327,7 @@ namespace Broccoli.TreeNodeEditor
 					ids.Add (nodesRemoved [i].id);
 				}
 				structureGeneratorElement.RemoveStructureLevels (ids);
-				structureGeneratorElement.selectedLevel = null;
+				SetSelectedStructureLevel (null);
 				curveEditor.ClearSelection ();
 				ApplySerialized ();
 				UpdatePipeline (GlobalSettings.processingDelayMedium, true);
@@ -1558,7 +1590,21 @@ namespace Broccoli.TreeNodeEditor
 		#endregion
 
 		#region Canvas Editor
-		void SetSelectedStructureLevel (int selectedLevelId) {
+		void SetSelectedStructureLevel (StructureGenerator.StructureLevel structureLevel) {
+			// Set StructureGeneratorElement selected structure level.
+			int selectedLevelId = 0;
+			if (structureLevel == null || structureLevel == structureGeneratorElement.trunkStructureLevel) {
+				structureGeneratorElement.selectedLevel = null;
+				selectedLevelId = structureGeneratorElement.trunkStructureLevel.id;
+			} else {
+				structureGeneratorElement.selectedLevel = structureLevel;
+				selectedLevelId = structureLevel.id;
+			}
+			// If the selected level is the trunk, check for trunk mode.
+			if (structureGeneratorElement.selectedLevel == null) {
+				structureGeneratorElement.CheckTrunkMode ();
+			}
+			// Update material to highligth the selected level.
 			MeshRenderer meshRenderer = TreeFactory.GetActiveInstance ().previewTree.obj.GetComponent<MeshRenderer> ();
 			MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock ();
 			if (meshRenderer != null) {

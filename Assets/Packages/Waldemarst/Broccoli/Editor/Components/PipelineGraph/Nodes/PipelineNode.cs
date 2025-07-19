@@ -19,7 +19,10 @@ namespace Broccoli.TreeNodeEditor
         public PipelineElement pipelineElement { get; private set; }
         public Port srcPort = null;
         public Port sinkPort = null;
-        public new class UxmlFactory : UxmlElementAttribute {}
+        public new class UxmlFactory : UxmlFactory<PipelineNode, VisualElement.UxmlTraits> {}
+        protected Label titleLabel = null;
+        protected Label keyLabel = null;
+        protected VisualElement nodeDescriptor = null;
         #endregion
 
         #region Delegates
@@ -85,6 +88,11 @@ namespace Broccoli.TreeNodeEditor
             VisualElement titleElement = this.Q<VisualElement>("title");
             VisualElement inputHeader = this.Q<VisualElement>("input");
             Toggle nodeToggle = this.Q<Toggle>("node-toggle");
+
+            titleLabel = this.Q<Label>("title-label");
+            keyLabel = this.Q<Label>("key-label");
+            nodeDescriptor = this.Q<VisualElement>("description");
+
             if (nodeToggle != null) {
                 nodeToggle.value = pipelineElement.isActive;
                 nodeToggle.RegisterCallback<ChangeEvent<bool>>(x => OnEnableNode (x.newValue));
@@ -93,27 +101,30 @@ namespace Broccoli.TreeNodeEditor
             // Title
             title = pipelineElement.elementName;
             inputHeader.style.backgroundColor = BroccoEditorGUI.GetElementColor (pipelineElement);
-
-            /*
-            Button contentsButton = new Button(() => { 
-                Debug.Log("Clicked!");
-                UnityEditor.Selection.activeObject = pipelineElement;
-            });
-            contentsButton.text = contentsButton.name = "Test Button";
-            contentsElement.Add(contentsButton);
-            */
         
             SetPosition(new Rect(
                 pipelineElement.nodePosition.x, 
                 pipelineElement.nodePosition.y, 
                 0, 0));
 
+            RefreshNode ();
+        }
+        public void RefreshNode ()
+        {
+            RefreshNodeKeyName ();
             RefreshNodeStatus ();
             RefreshNodeGroups ();
-        
             MarkDirtyRepaint();
         }
-
+        public void RefreshNodeKeyName ()
+        {
+            if (pipelineElement.hasKeyName && !string.IsNullOrWhiteSpace(pipelineElement.keyName)) {
+                keyLabel.style.display = DisplayStyle.Flex;
+                keyLabel.text = pipelineElement.keyName;
+            } else {
+                keyLabel.style.display = DisplayStyle.None;
+            }
+        }
         public void RefreshNodeStatus () {
             // Node status icon.
             VisualElement nodeStatus = this.Q<VisualElement>("node-status");
@@ -140,7 +151,7 @@ namespace Broccoli.TreeNodeEditor
             if (pipelineElement is ISproutGroupConsumer) {
                 ISproutGroupConsumer consumerElement = pipelineElement as ISproutGroupConsumer;
                 Color[] groupColors = consumerElement.GetGroupColors ();
-                VisualElement nodeDescriptor = this.Q<VisualElement>("description");
+                
                 if (nodeDescriptor != null) {
                     nodeDescriptor.Clear ();
                     for (int i = groupColors.Length - 1; i >= 0; i--) {

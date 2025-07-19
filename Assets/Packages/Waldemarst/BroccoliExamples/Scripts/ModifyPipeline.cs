@@ -37,6 +37,22 @@ namespace Broccoli.Examples
             get { return _factoryScale; }
         }
         /// <summary>
+        /// Key names for SproutMesh elements withing the target pipeline.
+        /// </summary>
+        /// <value>Key name value.</value>
+        public static string[] sproutMeshKeyNames = new string[]{"Grid", "Cross"};
+        /// <summary>
+        /// Index value for the SproutMesh key name selected.
+        /// </summary>
+        private int _sproutMeshSelected = 0;
+        /// <summary>
+        /// Index value for the SproutMesh key name selected.
+        /// </summary>
+        /// <value>Key name for the SproutMesh.</value>
+        public int sproutMeshSelected {
+            get { return _sproutMeshSelected; }
+        }
+        /// <summary>
         /// Key names for SproutMapper elements withing the target pipeline.
         /// </summary>
         /// <value>Key name value.</value>
@@ -107,15 +123,33 @@ namespace Broccoli.Examples
             }
         }
         /// <summary>
+        /// Switches between the available SproutMesh elements found on the pipeline.
+        /// </summary>
+        public void SwitchSproutMesh () {
+            if (_pipeline != null && _pipeline.IsValid ()) {
+                if (_sproutMeshSelected == 0) {
+                    _pipeline.ReplaceElements (PipelineElement.ClassType.SproutMeshGenerator, sproutMeshKeyNames[0], sproutMeshKeyNames[1]);
+                    _sproutMeshSelected = 1;
+                } else {
+                    _pipeline.ReplaceElements (PipelineElement.ClassType.SproutMeshGenerator, sproutMeshKeyNames[1], sproutMeshKeyNames[0]);
+                    _sproutMeshSelected = 0;
+                }
+                // Calling with cache parameter true to get the same tree seed.
+                _treeFactory.ProcessPipelinePreview (null, true);
+            } else {
+                Debug.LogWarning ("The TreeFactory component has no valid pipeline.");
+            }
+        }
+        /// <summary>
         /// Switches between the available SproutMappers elements found on the pipeline.
         /// </summary>
         public void SwitchSproutMappers () {
             if (_pipeline != null && _pipeline.IsValid ()) {
                 if (_sproutMapperSelected == 0) {
-                    _pipeline.ReplaceElements (sproutMapperKeyNames[0], sproutMapperKeyNames[1]);
+                    _pipeline.ReplaceElements (PipelineElement.ClassType.SproutMapper, sproutMapperKeyNames[0], sproutMapperKeyNames[1]);
                     _sproutMapperSelected = 1;
                 } else {
-                    _pipeline.ReplaceElements (sproutMapperKeyNames[1], sproutMapperKeyNames[0]);
+                    _pipeline.ReplaceElements (PipelineElement.ClassType.SproutMapper, sproutMapperKeyNames[1], sproutMapperKeyNames[0]);
                     _sproutMapperSelected = 0;
                 }
                 // Calling with cache parameter true to get the same tree seed.

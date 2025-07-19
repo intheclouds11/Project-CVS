@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Broccoli.Pipe {
 	/// <summary>
@@ -71,7 +72,8 @@ namespace Broccoli.Pipe {
 			StructureGenerator,
 			TrunkMeshGenerator,
 			ProceduralBranchMapper,
-			Baker
+			Baker,
+			TrunkCustomMesh,
 		};
 		/// <summary>
 		/// Presets mark an elements as being used to generate a particular type of vegetation,
@@ -99,6 +101,10 @@ namespace Broccoli.Pipe {
 		/// then it has the same value as fixedSeed.
 		/// </summary>
 		public int seed = 0;
+		/// <summary>
+		/// Option to show some fields as open input instead of using sliders.
+		/// </summary>
+		public bool showOpenFields = false;
 		/// <summary>
 		/// If true the <see cref="Broccoli.Pipe.PipelineElement"/> takes part in the processing, otherwise it does not.
 		/// </summary>
@@ -387,7 +393,6 @@ namespace Broccoli.Pipe {
 		/// Raises the update event.
 		/// </summary>
 		public virtual void OnUpdate () {
-			Debug.Log ("UPDATE PIPELINE ELEMENT.");
 		}
 		#endregion
 
@@ -409,6 +414,7 @@ namespace Broccoli.Pipe {
 			clone.isSeedFixed = isSeedFixed;
 			clone.fixedSeed = fixedSeed;
 			clone.seed = seed;
+			clone.showOpenFields = showOpenFields;
 			clone.preset = preset;
 			clone.isActive = isActive;
 			clone.index = index;

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 49fcb84dd6d525fb4ba841a7793c4887
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121853
+  packageName: Broccoli Tree Creator
+  packageVersion: 1.10.3
+  assetPath: Assets/Packages/Waldemarst/Broccoli/Editor/Utils/CylinderHandle.cs
+  uploadId: 767891

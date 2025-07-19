@@ -100,6 +100,14 @@ namespace Broccoli.Pipe {
 		/// </summary>
 		public float lodTransitionWidth = 0.4f;
 		/// <summary>
+		/// Option to include a TreeController on the Billboard asset.
+		/// </summary>
+		public bool billboardIncludeController = false;
+		/// <summary>
+		/// Additional tint to apply to sprouts when rendering the billboard textures.
+		/// </summary>
+		public Color billboardSproutTint = Color.white;
+		/// <summary>
 		/// Flag to unwrap the mesh to the UV channel 1 at runtie.
 		/// </summary>
 		public bool unwrapUV1sAtRuntime = false;
@@ -244,6 +252,8 @@ namespace Broccoli.Pipe {
 			clone.lodFade = lodFade;
 			clone.lodFadeAnimate = lodFadeAnimate;
 			clone.lodTransitionWidth = lodTransitionWidth;
+			clone.billboardIncludeController = billboardIncludeController;
+			clone.billboardSproutTint = billboardSproutTint;
 			clone.unwrapUV1sAtRuntime = unwrapUV1sAtRuntime;
 			clone.unwrapUV1sAtPrefab = unwrapUV1sAtPrefab;
 			clone.splitSubmeshes = splitSubmeshes;

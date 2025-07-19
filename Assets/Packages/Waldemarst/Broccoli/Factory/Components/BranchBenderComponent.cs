@@ -64,8 +64,8 @@ namespace Broccoli.Component
 				(StructureGeneratorElement)pipelineElement.GetUpstreamElement (PipelineElement.ClassType.StructureGenerator);
 			if (structureGeneratorElement != null) {
 				// Add root generator?
-				if (structureGeneratorElement.rootStructureLevel.overrideNoise) {
-					overrideNoiseLevels.Add (structureGeneratorElement.rootStructureLevel.id, structureGeneratorElement.rootStructureLevel);
+				if (structureGeneratorElement.trunkStructureLevel.overrideNoise) {
+					overrideNoiseLevels.Add (structureGeneratorElement.trunkStructureLevel.id, structureGeneratorElement.trunkStructureLevel);
 				}
 				// Add children generators?
 				for (int i = 0; i < structureGeneratorElement.flatStructureLevels.Count; i++) {

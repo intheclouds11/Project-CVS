@@ -79,12 +79,12 @@ namespace Broccoli.Factory
 					#endif
 				}
 			} else if (structureGeneratorElement != null) {
-				if (structureGeneratorElement.rootStructureLevel.radius > 0) {
+				if (structureGeneratorElement.trunkStructureLevel.radius > 0) {
 					Handles.DrawWireArc (treeFactory.transform.position,
 						GlobalSettings.againstGravityDirection,
 						Vector3.right,
 						360,
-						structureGeneratorElement.rootStructureLevel.radius);
+						structureGeneratorElement.trunkStructureLevel.radius);
 				}
 			}
 			Handles.color = Color.yellow;

@@ -55,6 +55,7 @@ Shader "Hidden/Broccoli/SproutLabComposite"
             #pragma shader_feature_local EFFECT_EXTRA_TEX
 
             #define ENABLE_WIND
+            #define SPEEDTREE_8_WIND 1 
             #define EFFECT_BACKSIDE_NORMALS
             #include "SpeedTree8Common.cginc"
 

@@ -191,6 +191,8 @@ namespace Broccoli.Model
 		}
 		public SimplifyBias simplifyBias = SimplifyBias.Angle;
 		public float distanceStep = 0.05f;
+		public float valueA = 0f;
+		public float valueB = 0f;
 		#endregion
 
 		#region Delegates

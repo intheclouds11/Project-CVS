@@ -157,7 +157,7 @@ namespace Broccoli.Component
 		/// </summary>
 		/// <param name="treeFactory">Tree factory.</param>
 		public override void Unprocess (TreeFactory treeFactory) {
-			treeFactory.meshManager.DeregisterMeshByType (MeshManager.MeshData.Type.Sprout);
+			treeFactory.meshManager.DeregisterMeshByType (MeshManager.MeshData.TYPE_SPROUT);
 			if (sproutMeshGeneratorElement != null) {
 				sproutMeshGeneratorElement.verticesCount = 0;
 				sproutMeshGeneratorElement.trianglesCount = 0;
@@ -306,7 +306,7 @@ namespace Broccoli.Component
 							*/
 						} else {
 							// Deregister a Mesh if its subgroup is disabled.
-							treeFactory.meshManager.DeregisterMesh (MeshManager.MeshData.Type.Sprout, groupId, i);
+							treeFactory.meshManager.DeregisterMesh (MeshManager.MeshData.TYPE_SPROUT, groupId, i);
 						}
 					}
 				} else {

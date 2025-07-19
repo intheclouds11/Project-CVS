@@ -19,6 +19,14 @@ namespace Broccoli.Builder
 	public class BillboardBuilder {
 		#region Vars
 		/// <summary>
+		/// Option to include a TreeController on the Billboard asset.
+		/// </summary>
+		public bool includeController = false;
+		/// <summary>
+		/// Additional tint to apply to sprouts when rendering the billboard albedo texture.
+		/// </summary>
+		public Color albedoSproutTint = Color.white;
+		/// <summary>
 		/// Layer to move the object when rendering with the camera.
 		/// </summary>
 		private const int PREVIEW_LAYER = 22;
@@ -187,7 +195,7 @@ namespace Broccoli.Builder
 
 			// Render
 			MeshRenderer renderer= target.GetComponent<MeshRenderer> ();
-			Material[] unlitMaterials = MaterialManager.GetUnlitMaterials (renderer.sharedMaterials);
+			Material[] unlitMaterials = MaterialManager.GetUnlitMaterials (renderer.sharedMaterials, albedoSproutTint);
 			Material[] normalMaterials = GetNormalMaterials (renderer.sharedMaterials);
 			Material[] subsurfaceMaterials = GetSubsurfaceMaterials (renderer.sharedMaterials);
 			Material[] extraMaterials = GetExtraMaterials (renderer.sharedMaterials);

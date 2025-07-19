@@ -225,6 +225,8 @@ namespace Broccoli.TreeNodeEditor
 
 			// Field descriptors option.
 			DrawFieldHelpOptions ();
+			// Draw key name options.
+			DrawKeyNameOptions ();
 		}
 		/// <summary>
 		/// Raises the on disable event.

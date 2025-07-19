@@ -232,6 +232,14 @@ namespace Broccoli.Manager
 		/// </summary>
 		public float lodTransitionWidth = 0.3f;
 		/// <summary>
+		/// Option to include a TreeController on the Billboard asset.
+		/// </summary>
+		public bool billboardIncludeController = false;
+		/// <summary>
+		/// Additional tint to apply to sprouts when rendering the billboard textures.
+		/// </summary>
+		public Color billboardSproutTint = Color.white;
+		/// <summary>
 		/// Splits the Prefab submeshes into meshes.
 		/// </summary>
 		public bool splitSubmeshesIntoGOs = true;
@@ -678,7 +686,7 @@ namespace Broccoli.Manager
 							// Add the mesh to the asset.
 							AddMeshAsAsset (submeshMeshes[submeshI], prefab);
 							// Add tree controller.
-							if (GlobalSettings.prefabAddController) AddBroccoTreeController (submeshGO);
+							if (GlobalSettings.prefabAddController) AddBroccoTreeControllerV2 (submeshGO);
 							// Add appendable controllers.
 							AddAppendableControllers (submeshGO);
 							if (submeshI == 0) {
@@ -700,7 +708,7 @@ namespace Broccoli.Manager
 						// Add the mesh to the asset.
 						AddMeshAsAsset (lodMesh, prefab);
 						// Add tree controller.
-						if (GlobalSettings.prefabAddController) AddBroccoTreeController (prefabGameObject);
+						if (GlobalSettings.prefabAddController) AddBroccoTreeControllerV2 (prefabGameObject);
 						// Add appendable controllers.
 						AddAppendableControllers (prefabGameObject);
 						// Add collision objects.
@@ -755,7 +763,7 @@ namespace Broccoli.Manager
 								// Add the mesh to the asset.
 								AddMeshAsAsset (submeshMeshes [submeshI], prefab);
 								// Add Tree Controller.
-								if (GlobalSettings.prefabAddController) AddBroccoTreeController (lodGameObject);
+								if (GlobalSettings.prefabAddController) AddBroccoTreeControllerV2 (lodGameObject);
 								// Add appendable components.
 								AddAppendableControllers (lodGameObject);
 								// Register the renderers for the LOD.
@@ -781,7 +789,7 @@ namespace Broccoli.Manager
 							// Add the mesh to the asset.
 							AddMeshAsAsset (lodMesh, prefab);
 							// Add Tree Controller.
-							if (GlobalSettings.prefabAddController) AddBroccoTreeController (lodGameObject);
+							if (GlobalSettings.prefabAddController) AddBroccoTreeControllerV2 (lodGameObject);
 							// Add appendable components.
 							AddAppendableControllers (lodGameObject);
 							// Register the renderers for the LOD.
@@ -797,6 +805,8 @@ namespace Broccoli.Manager
 
 					// Create billboard.
 					BillboardBuilder billboardBuilder = BillboardBuilder.GetInstance ();
+					billboardBuilder.includeController = billboardIncludeController;
+					billboardBuilder.albedoSproutTint = billboardSproutTint;
 					if (generateBillboard) {
 						// Create and save billboard texture.
 						int textureSize = TreeFactory.GetAtlasSize (TreeFactory.GetActiveInstance ().treeFactoryPreferences.billboardTextureSize);
@@ -835,6 +845,12 @@ namespace Broccoli.Manager
 							billboardGameObject.GetComponent<BillboardRenderer> ().billboard = billboardAsset;
 						}
 						billboardGameObject.transform.position = new Vector3(0, billboardBuilder.meshTargetYOffset, 0);
+						// Add Tree Controller.
+						if (GlobalSettings.prefabAddController && billboardIncludeController) {
+							Broccoli.Controller.BroccoTreeController2 treeController = AddBroccoTreeControllerV2 (billboardGameObject);
+							treeController.localWindQuality = Controller.BroccoTreeController2.WindQuality.Fastest;
+							treeController.globalWindQuality = Controller.BroccoTreeController2.WindQuality.Fastest;
+						}
 						// Call OnLODReady
 						if (onLODReady != null) onLODReady.Invoke (billboardGameObject);
 
@@ -975,30 +991,31 @@ namespace Broccoli.Manager
 			}
 			#endif
 		}
-		void AddBroccoTreeController (GameObject gameObject) {
-			if (GlobalSettings.broccoTreeControllerVersion == GlobalSettings.BROCCO_TREE_CONTROLLER_V1) {
-				Broccoli.Controller.BroccoTreeController treeController = gameObject.AddComponent<Broccoli.Controller.BroccoTreeController> ();
-				treeController.shaderType = (Broccoli.Controller.BroccoTreeController.ShaderType)MaterialManager.leavesShaderType;
-				treeController.version = Broccoli.Base.BroccoliExtensionInfo.GetVersion ();
-				// Set Wind
-				WindEffectElement windEffectElement= (WindEffectElement)TreeFactory.GetActiveInstance ().localPipeline.GetElement (PipelineElement.ClassType.WindEffect, true);
-				if (windEffectElement) {
-					treeController.localWindAmplitude = windEffectElement.windAmplitude;
-					treeController.sproutTurbulance = windEffectElement.sproutTurbulence;
-					treeController.sproutSway = windEffectElement.minSprout1Sway;
-				}
-			} else {
-				Broccoli.Controller.BroccoTreeController2 treeController = gameObject.AddComponent<Broccoli.Controller.BroccoTreeController2> ();
-				treeController.localShaderType = (Broccoli.Controller.BroccoTreeController2.ShaderType)MaterialManager.leavesShaderType;
-				treeController.version = Broccoli.Base.BroccoliExtensionInfo.GetVersion ();
-				treeController.windInstance = Controller.BroccoTreeController2.WindInstance.Global;
-				treeController.globalWindSource = Controller.BroccoTreeController2.WindSource.WindZone;
-				// Set Wind
-				WindEffectElement windEffectElement= (WindEffectElement)TreeFactory.GetActiveInstance ().localPipeline.GetElement (PipelineElement.ClassType.WindEffect, true);
-				if (windEffectElement) {
-					treeController.trunkBending= windEffectElement.trunkBending;
-				}
+		Broccoli.Controller.BroccoTreeController AddBroccoTreeControllerV1 (GameObject gameObject) {
+			Broccoli.Controller.BroccoTreeController treeController = gameObject.AddComponent<Broccoli.Controller.BroccoTreeController> ();
+			treeController.shaderType = (Broccoli.Controller.BroccoTreeController.ShaderType)MaterialManager.leavesShaderType;
+			treeController.version = Broccoli.Base.BroccoliExtensionInfo.GetVersion ();
+			// Set Wind
+			WindEffectElement windEffectElement= (WindEffectElement)TreeFactory.GetActiveInstance ().localPipeline.GetElement (PipelineElement.ClassType.WindEffect, true);
+			if (windEffectElement) {
+				treeController.localWindAmplitude = windEffectElement.windAmplitude;
+				treeController.sproutTurbulance = windEffectElement.sproutTurbulence;
+				treeController.sproutSway = windEffectElement.minSprout1Sway;
 			}
+			return treeController;
+		}
+		Broccoli.Controller.BroccoTreeController2 AddBroccoTreeControllerV2 (GameObject gameObject) {
+			Broccoli.Controller.BroccoTreeController2 treeController = gameObject.AddComponent<Broccoli.Controller.BroccoTreeController2> ();
+			treeController.localShaderType = (Broccoli.Controller.BroccoTreeController2.ShaderType)MaterialManager.leavesShaderType;
+			treeController.version = Broccoli.Base.BroccoliExtensionInfo.GetVersion ();
+			treeController.windInstance = Controller.BroccoTreeController2.WindInstance.Global;
+			treeController.globalWindSource = Controller.BroccoTreeController2.WindSource.WindZone;
+			// Set Wind
+			WindEffectElement windEffectElement= (WindEffectElement)TreeFactory.GetActiveInstance ().localPipeline.GetElement (PipelineElement.ClassType.WindEffect, true);
+			if (windEffectElement) {
+				treeController.trunkBending= windEffectElement.trunkBending;
+			}
+			return treeController;
 		}
 		void AddAppendableControllers (GameObject gameObject) {
 			List<ComponentReference> components = 

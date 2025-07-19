@@ -1504,6 +1504,19 @@ namespace Broccoli.Builder {
 		public Mesh MeshTree (BroccoTree tree) { // TODO: cut
 			Clear ();
 			
+			for (int i = 0; i < tree.branches.Count; i++) {
+				BroccoTree.Branch trunk = tree.branches [i];
+				Vector3 trunkOffset = Vector3.zero;
+				if (trunk.branches.Count > 0) {
+					CurvePoint curvePointCore = trunk.curve.GetPointAt (1f, true);
+					CurvePoint curvePoint = trunk.curve.GetPointAt (1f);
+					//trunkOffset = curvePointCore.position - curvePoint.position;
+					trunkOffset = curvePoint.position - curvePointCore.position;
+				}
+				trunk.originOffset = -trunkOffset;
+				//trunk.girthScale = 2f;
+			}
+			
 			tree.RecalculateNormals ();
 			tree.UpdateGirth ();
 			tree.UpdatePosition ();
@@ -1863,6 +1876,7 @@ namespace Broccoli.Builder {
 		/// <param name="branch">Branch.</param>
 		/// <param name="branchSkin">Branch skin.</param>
 		protected virtual float SkinBranchBase (BroccoTree.Branch branch, BranchSkin branchSkin) {
+			if (!branch.meshingEnabled) return 0f;
 			bool upperLimitReached;
 			IBranchMeshBuilder branchMeshBuilder = GetBuilderAtPosition (branchSkin, 0, out upperLimitReached);
 			float girth = branch.GetGirthAtPosition (0f);
@@ -1991,25 +2005,26 @@ namespace Broccoli.Builder {
 						segmentType = BranchSkin.SEGMENT_TYPE_MIDDLE;
 					}
 					// Add the segment.
-					branchSkin.AddSegment (
-						branch.id, 
-						branch.helperStructureLevelId, 
-						branch.GetPointAtPosition (curvePoints[i].relativePosition), 
-						avgDirection,
-						curvePoints [i].normal, 
-						curvePoints [i].bitangent,
-						numberOfSegments, 
-						segmentType, 
-						girth, 
-						curvePoints[i].relativePosition, 
-						curvePointPosition, 
-						branch.GetLengthAtPos (curvePoints[i].relativePosition, true),
-						MeshUtils.Vector3ToFloat (branch.phaseDir),
-						branch.GetPhasePosition (curvePoints[i].relativePosition),
-						branch.isRoot,
-						branch.isTuned,
-						branch.hasShaper,
-						branchMeshBuilder.GetBuilderType ());
+					if (branch.meshingEnabled)
+						branchSkin.AddSegment (
+							branch.id, 
+							branch.helperStructureLevelId, 
+							branch.GetPointAtPosition (curvePoints[i].relativePosition), 
+							avgDirection,
+							curvePoints [i].normal, 
+							curvePoints [i].bitangent,
+							numberOfSegments, 
+							segmentType, 
+							girth, 
+							curvePoints[i].relativePosition, 
+							curvePointPosition, 
+							branch.GetLengthAtPos (curvePoints[i].relativePosition, true),
+							MeshUtils.Vector3ToFloat (branch.phaseDir),
+							branch.GetPhasePosition (curvePoints[i].relativePosition),
+							branch.isRoot,
+							branch.isTuned,
+							branch.hasShaper,
+							branchMeshBuilder.GetBuilderType ());
 					// If the segment has a shaper, add their vertices.
 					if (branch.hasShaper) {
 						AddSegmentShapeVertices (branch, curvePoints[i].relativePosition, numberOfSegments, branchSkin);

@@ -115,6 +115,11 @@
     margin: 6px;
 }
 
+#key-label {
+    margin-top: -6px;
+    -unity-text-align: upper-center;
+}
+
 #description {
     font-size: 10px;
     white-space: normal;

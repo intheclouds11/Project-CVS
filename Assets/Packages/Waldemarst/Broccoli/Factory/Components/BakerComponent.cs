@@ -96,6 +96,8 @@ namespace Broccoli.Component
 			}
 			treeFactory.assetManager.lodFadeAnimate = bakerElement.lodFadeAnimate;
 			treeFactory.assetManager.lodTransitionWidth = bakerElement.lodTransitionWidth;
+			treeFactory.assetManager.billboardIncludeController = bakerElement.billboardIncludeController;
+			treeFactory.assetManager.billboardSproutTint = bakerElement.billboardSproutTint;
 			treeFactory.assetManager.enableUnwrappedUV1 = bakerElement.unwrapUV1sAtPrefab;
 			treeFactory.assetManager.keepUV5Data = bakerElement.keepUV5Data;
 			treeFactory.assetManager.splitSubmeshesIntoGOs = bakerElement.splitSubmeshes;
@@ -204,8 +206,8 @@ namespace Broccoli.Component
 					/// y: branch length position. (used for UV mapping)
 					/// z: girth.
 					/// w: branch skin length position. (used for UV unwrapping)
-					int branchMeshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.Type.Branch);
-					Mesh mesh = treeFactory.meshManager.GetMesh (branchMeshId);
+					int branchMeshId = MeshManager.MeshData.GetMeshDataId (MeshManager.MeshData.TYPE_BRANCH);
+					Mesh mesh = treeFactory.meshManager.GetMeshByMeshId (branchMeshId);
 					if (mesh != null) {
 						List<Vector4> uv1s = new List<Vector4> ();
 						List<Vector4> uv4s = new List<Vector4> ();
