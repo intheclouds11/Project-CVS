@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Impact Trail
+  m_Name: DasherProjectile Impact Trail
   m_Shader: {fileID: -6465566751694194690, guid: 713d96115512ab64fb01037def5d71a4, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -65,7 +65,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Ramp:
-        m_Texture: {fileID: 2800000, guid: 2f126060a46d4a018caad99e69d3cc69, type: 3}
+        m_Texture: {fileID: 2800000, guid: b52053da5a6848c886816aae0e2c7032, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SecondaryMask:

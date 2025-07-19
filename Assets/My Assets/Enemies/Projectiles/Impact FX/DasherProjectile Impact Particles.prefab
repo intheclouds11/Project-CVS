@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2194716166270581093}
   - component: {fileID: 3222202372567312168}
   m_Layer: 0
-  m_Name: Projectile Impact Particles
+  m_Name: DasherProjectile Impact Particles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
