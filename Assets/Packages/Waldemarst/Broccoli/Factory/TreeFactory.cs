@@ -465,7 +465,9 @@ namespace Broccoli.Factory
 				Debug.LogWarning ("Could not load pipeline, path to pipeline asset is empty or null.");
 			} else {
 				if (pathToResource.StartsWith ("Assets/")) {
+					#if UNITY_EDITOR
 					loadedPipeline = AssetDatabase.LoadAssetAtPath<Pipeline>(pathToResource);
+					#endif
 				} else {
 					loadedPipeline = Resources.Load<Pipeline> (pathToResource);
 				}
