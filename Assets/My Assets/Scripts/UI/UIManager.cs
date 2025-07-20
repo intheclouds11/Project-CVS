@@ -70,9 +70,9 @@ public class UIManager : MonoBehaviour
                SceneManager.GetActiveScene().name == "MainMenu";
     }
 
-    public void ShowRespawnScreen()
+    public void ToggleRespawnScreen(bool toggle)
     {
-        _respawnScreen.SetActive(true);
+        _respawnScreen.SetActive(toggle);
     }
 
     public void Button_ResumeGame()
@@ -86,7 +86,7 @@ public class UIManager : MonoBehaviour
 
         if (_pauseMenu.gameObject.activeSelf)
         {
-            _pauseMenu.gameObject.SetActive(false);
+            _pauseMenu.OnReturnToMainMenu();
         }
 
         SceneManager.LoadScene("MainMenu");

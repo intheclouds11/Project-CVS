@@ -130,7 +130,7 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (!_inputManager.InputsAllowed)
+        if (!_inputManager.InputsAllowed || !CharacterController.enabled)
         {
             xzVelocity = Vector3.zero;
             _playerAnimator.SetSpeed(0f);

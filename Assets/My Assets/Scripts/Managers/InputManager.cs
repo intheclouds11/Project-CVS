@@ -66,6 +66,7 @@ public class InputManager : MonoBehaviour
 
     private void OnPlayerSpawned(PlayerController obj)
     {
+        WaitingToGivePlayerControl = true;
         DelayGivePlayerControl();
     }
 
@@ -88,7 +89,7 @@ public class InputManager : MonoBehaviour
 
     public void ToggleInputsAllowed(bool toggle)
     {
-        if (WaitingToGivePlayerControl) return;
+        if (toggle && WaitingToGivePlayerControl) return;
         InputsAllowed = toggle;
     }
 

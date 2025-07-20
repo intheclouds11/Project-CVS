@@ -50,7 +50,7 @@ public class GameManager : MonoBehaviour
                 EnemyAIToggled?.Invoke(EnemyAIEnabled);
                 Debug.Log($"[GameManager] EnemyAIEnabled: {EnemyAIEnabled}");
             }
-            
+
             if (InputManager.Instance.ToggleChargeHUDWasPressed)
                 Player1.PlayerAttack.ToggleChargeHUD();
         }
@@ -115,19 +115,29 @@ public class GameManager : MonoBehaviour
     private void OnPlayerDied(GameObject deadObj)
     {
         CurrentState = GameState.GameOver;
-        UIManager.Instance.ShowRespawnScreen();
+        UIManager.Instance.ToggleRespawnScreen(true);
+        InputManager.Instance.ToggleInputsAllowed(false);
     }
 
     public void OnReturnToMainMenu()
     {
-        Destroy(Player1.gameObject);
-        Player1 = null;
+        UIManager.Instance.ToggleRespawnScreen(false);
+
         StopAllCoroutines();
         HUD.Instance.GetLoseUI.SetActive(false);
         HUD.Instance.GetWinUI.SetActive(false);
         HUD.Instance.GetWaveCompleteUI.SetActive(false);
 
         EnemyManager.Instance.DeregisterAllEnemies();
+    }
+
+    public void OnMainMenuStart()
+    {
+        if (Player1)
+        {
+            Destroy(Player1.gameObject);
+            Player1 = null;
+        }
     }
 
     public void OnRespawn()

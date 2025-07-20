@@ -64,6 +64,7 @@ public class MainMenu : MonoBehaviour
 
     private void Start()
     {
+        GameManager.Instance.OnMainMenuStart();
         AudioManager.Instance.MusicAudioSource.volume = _menuMusicVolume;
         AudioManager.Instance.MusicAudioSource.clip = _menuMusic;
         AudioManager.Instance.MusicAudioSource.Play();

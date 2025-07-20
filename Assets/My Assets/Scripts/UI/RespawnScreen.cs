@@ -50,7 +50,7 @@ public class RespawnScreen : MonoBehaviour
 
     private void Update()
     {
-        if (_lastTimeShown + _delayRespawnInputTime < +Time.time && InputManager.Instance.RespawnWasPressed)
+        if (_lastTimeShown + _delayRespawnInputTime < +Time.time && InputManager.Instance.RespawnWasPressed && !PauseMenu.IsPaused)
         {
             StartCoroutine(RespawnCoroutine());
         }
