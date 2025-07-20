@@ -50,12 +50,7 @@ public class ProjectilePattern : ScriptableObject
 
     private int _currentFireCount;
     private Transform _lastUsedSpawnPoint;
-
-
-    private void OnEnable()
-    {
-        _currentFireCount = 0;
-    }
+    
 
     public GameObject Spawn(MultiProjectilePool pool, List<Transform> spawnPoints)
     {

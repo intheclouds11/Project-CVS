@@ -89,9 +89,11 @@ public class Projectile : MonoBehaviour
     public void ReturnToPool(GameObject hitObj = null, bool deflected = false)
     {
         AudioManager.Instance.PlaySound(transform, _impactSFX, true, false, 1f, 1f);
+        
         var particleDirection = (FindAnyObjectByType<FirstBossEncounter>().transform.position - transform.position).normalized;
         particleDirection = deflected ? -particleDirection : particleDirection;
-        Instantiate(_impactVFX, _impactVFXSpawnPoint.position, Quaternion.LookRotation(particleDirection));
+        var particleRotation = particleDirection == Vector3.zero ? Quaternion.identity : Quaternion.LookRotation(particleDirection);
+        Instantiate(_impactVFX, _impactVFXSpawnPoint.position, particleRotation);
         
         tag = "EnemyProjectile";
         Rb.linearVelocity = Vector3.zero;

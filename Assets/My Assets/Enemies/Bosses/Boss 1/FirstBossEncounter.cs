@@ -97,6 +97,14 @@ public class FirstBossEncounter : MonoBehaviour
         enabled = false;
     }
 
+    private void OnDisable()
+    {
+        foreach (var phase1ProjectilePattern in _phase1ProjectilePatterns)
+        {
+            phase1ProjectilePattern.OnPatternEnd();
+        }
+    }
+
     public void EnteredBossZone()
     {
         StartCoroutine(ProjectilesCoroutine(_phase1ProjectilePatterns[0]));
