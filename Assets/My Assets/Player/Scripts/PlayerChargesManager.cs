@@ -46,6 +46,11 @@ public class PlayerChargesManager : MonoBehaviour
         _remainingCharges = _maxCharges;
     }
 
+    private void Start()
+    {
+        GetComponent<PlayerHealth>().Died += OnDied;
+    }
+
     private void OnEnable()
     {
         SawBlade.HitEnemy += SawBladeOnEnemyHit;
@@ -153,12 +158,13 @@ public class PlayerChargesManager : MonoBehaviour
         mr.material.color = endColor;
     }
 
-    public void OnDied()
+    public void OnDied(GameObject obj)
     {
         enabled = false;
-        foreach (var chargeGameObject in _chargeGameObjects)
+        foreach (var charge in _charges)
         {
-            chargeGameObject.SetActive(false);
+            charge.ChargeGameObject.SetActive(false);
+            charge.RechargeTimer = 0f;
         }
     }
 

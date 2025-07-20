@@ -354,13 +354,11 @@ public class PlayerController : MonoBehaviour
 
     private void OnDied(GameObject deadObj)
     {
-        _inputManager.ToggleInputsAllowed(false);
         _dashBufferTimer = 0f;
         CharacterController.enabled = false;
         PlayerAttack.OnDied();
         _playerAnimator.SetSpeed(0f);
         _playerAnimator.SetDiedTrigger();
-        PlayerCharges.OnDied();
         StartCoroutine(DiedCoroutine());
     }
 
