@@ -10,20 +10,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ac84f57ed65b3a74ab9f294d06a53c14, type: 3}
-  m_Name: Projectile Pattern 1
+  m_Name: Pulser Pattern hard
   m_EditorClassIdentifier: 
   PatternName: Dasher Pattern 1
-  ProjectilePrefab: {fileID: 1454579934101814444, guid: 618435c5d8e06a7479521b386784eb49, type: 3}
+  FollowupPattern: {fileID: 0}
+  ProjectilePrefab: {fileID: 109227493381812246, guid: 4578e780d89409a4cb70adfbb805b3eb, type: 3}
   AimAtPlayer: 1
-  StartDelay: 3
+  StartDelay: 0.754717
   EndDelay: 3
-  FireRate: 0.3773585
-  Speed: 10
-  FireCount: 10
-  abilityUsage: 0
+  TimeBetweenShots: 0.18867925
+  Speed: 8
+  FireCount: 4
+  SpawnPointSelection: 2
+  abilityUsage: 3
   ChargeSFX: {fileID: 8300000, guid: 651b1dfebc610c44e956b9c74fb8811d, type: 3}
   ChargeVolume: 1
-  SpawnSFX: {fileID: 8300000, guid: bcb891387ed904ad2890076972ded27d, type: 3}
+  ChargePitch: 2
+  SpawnSFX: {fileID: 8300000, guid: f397e705778544f01afc8ce3216f6df8, type: 3}
   SpawnVolume: 1
   CooldownSFX: {fileID: 8300000, guid: 4ff2440fcfa2b9a4a815ad44f64224d1, type: 3}
   CooldownVolume: 1

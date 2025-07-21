@@ -18,7 +18,7 @@ public class Projectile : MonoBehaviour
     protected float _hitByDeflectedSpeed = 15f;
     [SerializeField]
     protected Knockback _knockback;
-    
+
     [Header("Base FX")]
     [SerializeField]
     protected AudioClip _deflectedSFX;
@@ -34,11 +34,13 @@ public class Projectile : MonoBehaviour
     protected GameObject _impactVFX;
 
     public Rigidbody Rb { get; private set; }
-    
+
     protected bool _abilityEnabled;
     protected string _poolKey;
     protected float _distToPlayer;
     protected bool _isCritDeflected;
+    protected bool _isDeflected;
+    protected AudioSource _abilityAudio;
     protected MultiProjectilePool _pool;
     protected PlayerController _player;
     protected Animator _animator;
@@ -71,7 +73,7 @@ public class Projectile : MonoBehaviour
     {
         if (Vector3.Distance(transform.position, _player.transform.position) > 30)
         {
-            ReturnToPool(null);
+            ReturnToPool();
         }
     }
 
@@ -82,22 +84,23 @@ public class Projectile : MonoBehaviour
         _abilityEnabled = enableAbility;
         if (_abilityEnabled)
         {
-            Debug.Log($"Ability enabled!", gameObject);
+            // Debug.Log($"Ability enabled!", gameObject);
         }
     }
 
-    public void ReturnToPool(GameObject hitObj = null, bool deflected = false)
+    public void ReturnToPool(bool deflected = false)
     {
         AudioManager.Instance.PlaySound(transform, _impactSFX, true, false, 1f, 1f);
-        
+
         var particleDirection = (FindAnyObjectByType<FirstBossEncounter>().transform.position - transform.position).normalized;
         particleDirection = deflected ? -particleDirection : particleDirection;
         var particleRotation = particleDirection == Vector3.zero ? Quaternion.identity : Quaternion.LookRotation(particleDirection);
         Instantiate(_impactVFX, _impactVFXSpawnPoint.position, particleRotation);
-        
+
         tag = "EnemyProjectile";
         Rb.linearVelocity = Vector3.zero;
         _isCritDeflected = false;
+        _isDeflected = false;
         gameObject.SetActive(false);
         transform.localPosition = Vector3.zero;
         _pool.Return(_poolKey, gameObject);
@@ -106,7 +109,7 @@ public class Projectile : MonoBehaviour
 
     protected virtual void OnReturnToPool()
     {
-        
+        if (_abilityAudio) _abilityAudio = null;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -114,6 +117,7 @@ public class Projectile : MonoBehaviour
         if (CompareTag("EnemyProjectile") && other.CompareTag("PlayerWeapon"))
         {
             tag = "Deflected";
+            _isDeflected = true;
             var sawblade = other.GetComponentInParent<SawBlade>();
             _isCritDeflected = sawblade.IsCritAttack;
 
@@ -136,9 +140,11 @@ public class Projectile : MonoBehaviour
             var playerHit = other.GetComponent<PlayerController>();
             if (playerHit)
             {
-                var knockBackDir = (playerHit.transform.position - transform.position).normalized;
-                playerHit.Health.TakeDamage(_baseDamage, knockBackDir, _knockback);
-                ReturnToPool(other.gameObject);
+                DamagePlayer(playerHit, false);
+            }
+            else if (other.gameObject.layer != LayerMask.NameToLayer("Enemy"))
+            {
+                ReturnToPool();
             }
             else if (CompareTag("Deflected"))
             {
@@ -150,7 +156,7 @@ public class Projectile : MonoBehaviour
                 if (enemyHit)
                 {
                     enemyHit.Health.TakeDamage(deflectedDamage, Vector3.zero, null);
-                    ReturnToPool(other.gameObject, true);
+                    ReturnToPool(true);
                 }
                 else if (projHit)
                 {
@@ -165,14 +171,17 @@ public class Projectile : MonoBehaviour
                 else if (bossHit)
                 {
                     bossHit.Health.TakeDamage(deflectedDamage, Vector3.zero, null);
-                    ReturnToPool(other.gameObject, true);
+                    ReturnToPool(true);
                 }
             }
-            else if (other.gameObject.layer != LayerMask.NameToLayer("Enemy"))
-            {
-                ReturnToPool(other.gameObject);
-            }
         }
+    }
+
+    protected virtual void DamagePlayer(PlayerController playerHit, bool usingAbility)
+    {
+        var knockBackDir = (playerHit.transform.position - transform.position).normalized;
+        playerHit.Health.TakeDamage(usingAbility ? 2 : _baseDamage, knockBackDir, _knockback);
+        ReturnToPool();
     }
 
     protected virtual void OnPlayerSpawned(PlayerController player)

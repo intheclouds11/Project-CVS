@@ -1,78 +1,93 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
+using Utils;
 
 public class PulserProjectile : Projectile
 {
+    [Header("Pulser Settings")]
     [SerializeField]
-    private float _pulseTriggerDistance = 2.5f;
+    private LayerMask _layersToHit;
+    [SerializeField]
+    private int _deflectedPulseDamage = 200;
     [SerializeField]
     private float _pulseDamageRadius = 2.5f;
     [SerializeField]
-    private float _pulseDuration = 0.3f;
+    private float _pulseStartDelay = 0.3f;
+
+    [Header("Pulser FX")]
+    [SerializeField]
+    private AudioClip _pulseSFX;
+    [SerializeField]
+    private AudioClip _pulseHitSFX;
+    [SerializeField]
+    private Animator _lightAnimator;
     [SerializeField]
     private GameObject _pulseVFX;
 
     private bool _isPulsing;
+    private readonly Collider[] _overlapColliders = new Collider[1];
 
 
-    // private void Update()
-    // {
-    //     _distToPlayer = Vector3.Distance(transform.position, _player.transform.position);
-    //
-    //     if (_isPulsing) return;
-    //
-    //     if (_distToPlayer <= _pulseTriggerDistance)
-    //     {
-    //         StartCoroutine(PulseCoroutine());
-    //     }
-    // }
-    
+    protected override void Update()
+    {
+        base.Update();
+        if (_isPulsing || !_abilityEnabled) return;
+
+        StartCoroutine(PulseCoroutine());
+    }
+
+    private IEnumerator PulseCoroutine()
+    {
+        _isPulsing = true;
+        yield return new WaitForSeconds(_pulseStartDelay);
+
+        _pulseVFX.SetActive(false);
+        _pulseVFX.SetActive(true);
+        _lightAnimator.SetTrigger("Pulse");
+        _animator.SetTrigger("Alerted");
+        _abilityAudio = AudioManager.Instance.PlaySound(transform, _pulseSFX, true, false, 0.7f);
+
+        while (true)
+        {
+            var overlapCount = Physics.OverlapSphereNonAlloc(transform.position, _pulseDamageRadius, _overlapColliders, _layersToHit);
+            if (overlapCount > 0 && (_overlapColliders[0].CompareTag("Player") || _overlapColliders[0].CompareTag("Boss")))
+            {
+                var playerHit = _overlapColliders[0].GetComponentInParent<PlayerController>();
+                var bossHit = _overlapColliders[0].GetComponentInParent<FirstBossEncounter>();
+
+                if (playerHit && !playerHit.Health.IsInvincible() && !playerHit.IsDashing)
+                {
+                    var knockBackDir = (playerHit.transform.position - transform.position).normalized;
+                    playerHit.Health.TakeDamage(2, knockBackDir, _knockback);
+                    AudioManager.Instance.PlaySound(playerHit.transform, _pulseHitSFX, true, false, 0.9f);
+                }
+                else if (_isDeflected && bossHit)
+                {
+                    bossHit.Health.TakeDamage(_deflectedPulseDamage, Vector3.zero, null);
+                }
+
+                _abilityEnabled = false;
+                yield break;
+            }
+
+            yield return null;
+        }
+    }
+
+
     protected override void OnReturnToPool()
     {
         base.OnReturnToPool();
+        _isPulsing = false;
+        _pulseVFX.SetActive(false);
     }
-    //
-    // private IEnumerator PulseCoroutine()
-    // {
-    //     _isPulsing = true;
-    //     _pulseVFX.SetActive(false);
-    //     _pulseVFX.SetActive(true);
-    //     _animator.SetTrigger("Alerted");
-    //
-    //     _agroAudio.Stop();
-    //     _agroAudio = null;
-    //     _abilityStartAudio = AudioManager.Instance.PlaySound(transform, _abilityStartSFX, true, false, 0.7f);
-    //
-    //     yield return new WaitForSeconds(_pulseDelayDuration);
-    //     
-    //     var startTime = Time.time;
-    //
-    //     while (startTime + _pulseDuration >= Time.time)
-    //     {
-    //         if (_isInterruptable && _isGettingKnockedBack)
-    //         {
-    //             _pulseVFX.SetActive(false);
-    //             _abilityStartAudio.Stop();
-    //             _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
-    //             _isPulsing = false;
-    //             _lastPulseCompleteTime = Time.time;
-    //             yield break;
-    //         }
-    //         
-    //         if (!_player.IsDashing && _distToPlayer <= _pulseDamageRadius)
-    //         {
-    //             var knockBackDir = (_player.transform.position - transform.position).normalized;
-    //             _player.Health.TakeDamage(_pulseDamage, knockBackDir, _knockback);
-    //             StartCoroutine(DamagedPlayerCoroutine());
-    //         }
-    //
-    //         yield return null;
-    //     }
-    //
-    //     _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
-    //
-    //     _aiFollower.canMove = true;
-    //     _isPulsing = false;
-    //     _lastPulseCompleteTime = Time.time;
-    // }
+
+    private void OnDrawGizmosSelected()
+    {
+        var gizmosColor = Gizmos.color;
+        Gizmos.color = Color.red;
+        GizmosExtensions.DrawWireCircle(transform.position, _pulseDamageRadius);
+        Gizmos.color = gizmosColor;
+    }
 }

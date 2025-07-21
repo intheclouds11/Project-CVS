@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ac84f57ed65b3a74ab9f294d06a53c14, type: 3}
-  m_Name: Projectile Pattern continuous
+  m_Name: Dasher Pattern easy
   m_EditorClassIdentifier: 
   PatternName: Dasher Pattern 1
-  ProjectilePrefab: {fileID: 1454579934101814444, guid: 618435c5d8e06a7479521b386784eb49, type: 3}
+  ProjectilePrefab: {fileID: 1454579934101814444, guid: 8744852507999354487d0b741d21861d, type: 3}
   AimAtPlayer: 1
   StartDelay: 3
   EndDelay: 3
   TimeBetweenShots: 0.3773585
   Speed: 10
-  FireCount: 10
-  SpawnPointSelection: 0
-  abilityUsage: 0
+  FireCount: 4
+  SpawnPointSelection: 3
+  abilityUsage: 2
   ChargeSFX: {fileID: 8300000, guid: 651b1dfebc610c44e956b9c74fb8811d, type: 3}
   ChargeVolume: 1
   SpawnSFX: {fileID: 8300000, guid: a46cdb78bb95a43e883584dfddb99dbe, type: 3}

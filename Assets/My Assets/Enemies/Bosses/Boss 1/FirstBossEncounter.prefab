@@ -1,5 +1,39 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &861498732030841815
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1131606720352924418}
+  m_Layer: 11
+  m_Name: ProjectileSpawnPoints
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1131606720352924418
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 861498732030841815}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 6305355025210879136}
+  - {fileID: 909818968511048893}
+  - {fileID: 8384232282251193041}
+  m_Father: {fileID: 8083067915439252313}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2344441286326572744
 GameObject:
   m_ObjectHideFlags: 0
@@ -14,7 +48,7 @@ GameObject:
   - component: {fileID: 4636590205535577141}
   m_Layer: 11
   m_Name: Sphere
-  m_TagString: Untagged
+  m_TagString: Boss
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -393,11 +427,11 @@ Transform:
   m_GameObject: {fileID: 4485727396215973559}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.9563946, z: -0, w: 0.29207766}
-  m_LocalPosition: {x: -5.8, y: 0.6, z: -0.77}
+  m_LocalPosition: {x: -5.800003, y: 0.6, z: -0.77000046}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8083067915439252313}
+  m_Father: {fileID: 1131606720352924418}
   m_LocalEulerAnglesHint: {x: 0, y: -146.035, z: 0}
 --- !u!1 &5051799085434231722
 GameObject:
@@ -424,11 +458,11 @@ Transform:
   m_GameObject: {fileID: 5051799085434231722}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.9563946, z: -0, w: 0.29207766}
-  m_LocalPosition: {x: 2.41, y: 0.6, z: -6.3}
+  m_LocalPosition: {x: 2.4100037, y: 0.6, z: -6.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8083067915439252313}
+  m_Father: {fileID: 1131606720352924418}
   m_LocalEulerAnglesHint: {x: 0, y: -146.035, z: 0}
 --- !u!1 &5759000758429366882
 GameObject:
@@ -455,11 +489,11 @@ Transform:
   m_GameObject: {fileID: 5759000758429366882}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.9563946, z: -0, w: 0.29207766}
-  m_LocalPosition: {x: -2.18, y: 0.6, z: -3.21}
+  m_LocalPosition: {x: -2.1800003, y: 0.6, z: -3.21}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8083067915439252313}
+  m_Father: {fileID: 1131606720352924418}
   m_LocalEulerAnglesHint: {x: 0, y: -146.035, z: 0}
 --- !u!1 &7317875588965405024
 GameObject:
@@ -636,9 +670,7 @@ Transform:
   - {fileID: 6578308145650816380}
   - {fileID: 4418431052800808484}
   - {fileID: 1157600898172181072}
-  - {fileID: 6305355025210879136}
-  - {fileID: 909818968511048893}
-  - {fileID: 8384232282251193041}
+  - {fileID: 1131606720352924418}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6249937188197870172
@@ -654,6 +686,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _phase1ProjectilePatterns:
+  - {fileID: 11400000, guid: ceadd8c04cd9c3744b5aa400fc4d802e, type: 2}
   - {fileID: 11400000, guid: 060dab990a6cbf041bbd62c6fdf2a5cc, type: 2}
   _projectileSpawnPoints:
   - {fileID: 6305355025210879136}
@@ -837,7 +870,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 995300729845106293, guid: 187ee1349087ce747a871117c8eeff00, type: 3}
       propertyPath: m_Name
-      value: PulseAttack
+      value: PulseAOE
       objectReference: {fileID: 0}
     - target: {fileID: 995300729845106293, guid: 187ee1349087ce747a871117c8eeff00, type: 3}
       propertyPath: m_Layer

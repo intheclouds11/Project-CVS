@@ -2,6 +2,7 @@ using System.Collections;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Utils;
 
 public class DasherProjectile : Projectile
 {
@@ -10,12 +11,10 @@ public class DasherProjectile : Projectile
     private bool useAbilityAfterDistanceTraveled;
     [field: SerializeField, ShowIf(nameof(useAbilityAfterDistanceTraveled))]
     private float _distanceToTravel = 2.5f;
-    [field: SerializeField, HideIf(nameof(useAbilityAfterDistanceTraveled))]
+    [SerializeField]
     private float _dashTriggerDistance = 4f;
     [SerializeField]
     private float _dashSpeed = 6f;
-    [SerializeField]
-    private float _alertStartDelay = 0.5f;
     [SerializeField]
     private float _dashStartDelay = 0.5f;
 
@@ -26,7 +25,6 @@ public class DasherProjectile : Projectile
     private AudioClip _dashSFX;
 
     private bool _isDashing;
-    private AudioSource _dashingAudio;
     private AudioSource _dashAlertAudio;
     private float _distTraveled;
     private Vector3 _lastPos;
@@ -40,6 +38,7 @@ public class DasherProjectile : Projectile
 
     protected override void Update()
     {
+        base.Update();
         if (_isDashing || !_abilityEnabled) return;
 
         if (useAbilityAfterDistanceTraveled)
@@ -48,17 +47,16 @@ public class DasherProjectile : Projectile
             if (_distTraveled >= _distanceToTravel)
             {
                 StartCoroutine(DashCoroutine());
+                return;
             }
 
             _lastPos = transform.position;
         }
-        else
+
+        _distToPlayer = GameManager.Instance.GetDistanceFromPlayer(transform);
+        if (_distToPlayer <= _dashTriggerDistance)
         {
-            _distToPlayer = GameManager.Instance.GetDistanceFromPlayer(transform);
-            if (_distToPlayer <= _dashTriggerDistance)
-            {
-                StartCoroutine(DashCoroutine());
-            }
+            StartCoroutine(DashCoroutine());
         }
     }
 
@@ -67,21 +65,21 @@ public class DasherProjectile : Projectile
     {
         _isDashing = true;
 
-        if (!useAbilityAfterDistanceTraveled)
-        {
-            yield return new WaitForSeconds(_alertStartDelay);
-        }
-
         Rb.linearVelocity = Vector3.zero;
         _animator.SetTrigger("Alerted");
         _dashAlertAudio = AudioManager.Instance.PlaySound(transform, _dashAlertSFX, true, false, 1f, 1.2f);
 
         yield return new WaitForSeconds(_dashStartDelay);
 
-        _dashingAudio = AudioManager.Instance.PlaySound(transform, _dashSFX, true, false, 1f, 1.1f);
+        _abilityAudio = AudioManager.Instance.PlaySound(transform, _dashSFX, true, false, 1f, 1.1f);
 
         var dir = (_player.transform.position - transform.position).normalized;
         Rb.linearVelocity = dir * _dashSpeed;
+    }
+
+    protected override void DamagePlayer(PlayerController playerHit, bool usingAbility)
+    {
+        base.DamagePlayer(playerHit, _isDashing);
     }
 
     protected override void OnReturnToPool()
@@ -89,6 +87,13 @@ public class DasherProjectile : Projectile
         base.OnReturnToPool();
         _isDashing = false;
         if (_dashAlertAudio) _dashAlertAudio = null;
-        if (_dashingAudio) _dashingAudio = null;
+    }
+    
+    private void OnDrawGizmosSelected()
+    {
+        var gizmosColor = Gizmos.color;
+        Gizmos.color = Color.red;
+        GizmosExtensions.DrawWireCircle(transform.position, _dashTriggerDistance);
+        Gizmos.color = gizmosColor;
     }
 }

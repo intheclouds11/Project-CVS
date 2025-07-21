@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
@@ -25,17 +26,21 @@ public enum BossSpawnPointSelection
 [CreateAssetMenu(fileName = "NewProjectilePattern", menuName = "Boss/Projectile Pattern")]
 public class ProjectilePattern : ScriptableObject
 {
-    public string PatternName;
+    public ProjectilePattern FollowupPattern;
 
     [Header("Projectile Settings")]
     public GameObject ProjectilePrefab;
-    public bool AimAtPlayer;
     public float StartDelay = 3f;
     public float EndDelay = 3f;
-    public float FireRate = 0.5f;
+    public float TimeBetweenShots = 0.5f;
     public float Speed = 10f;
     public int FireCount = 10;
     public BossSpawnPointSelection SpawnPointSelection;
+    public bool AimAtPlayer;
+    [field: HideIf(nameof(AimAtPlayer)), Header("Spread")]
+    public float StartAngle = 0f;
+    [HideIf(nameof(AimAtPlayer))]
+    public float EndAngle = 90f;
 
     [Header("Special")]
     public PatternAbilityUsage abilityUsage;
@@ -43,14 +48,29 @@ public class ProjectilePattern : ScriptableObject
     [Header("FX")]
     public AudioClip ChargeSFX;
     public float ChargeVolume = 1f;
+    public float ChargePitch = 1f;
     public AudioClip SpawnSFX;
     public float SpawnVolume = 1f;
     public AudioClip CooldownSFX;
     public float CooldownVolume = 1f;
 
     private int _currentFireCount;
+    private float _spreadAngleOffset;
+    private float _currentSpreadAngleOffset;
     private Transform _lastUsedSpawnPoint;
     
+
+    private void Awake()
+    {
+        Init();
+    }
+
+    public void Init()
+    {
+        _currentFireCount = 0;
+        _currentSpreadAngleOffset = StartAngle;
+        _spreadAngleOffset = (EndAngle - StartAngle) / FireCount;
+    }
 
     public GameObject Spawn(MultiProjectilePool pool, List<Transform> spawnPoints)
     {
@@ -75,8 +95,19 @@ public class ProjectilePattern : ScriptableObject
         proj.Init(pool, ProjectilePrefab.name, enableAbility);
         projObj.SetActive(true);
 
-        var dirToPlayer = (GameManager.Instance.Player1.transform.position - spawnPoint.position).normalized;
-        var direction = AimAtPlayer ? dirToPlayer : spawnPoint.forward;
+        Vector3 direction;
+        if (AimAtPlayer)
+        {
+            direction = (GameManager.Instance.Player1.transform.position - spawnPoint.position).normalized;
+        }
+        else
+        {
+            var rotation = Quaternion.Euler(0f, _currentSpreadAngleOffset, 0f);
+            direction = rotation * spawnPoint.forward;
+            _currentSpreadAngleOffset += _spreadAngleOffset;
+        }
+        
+        
         proj.Rb.linearVelocity = direction * Speed;
 
         var pitch = Random.Range(0.9f, 1.1f);
@@ -131,10 +162,5 @@ public class ProjectilePattern : ScriptableObject
         _lastUsedSpawnPoint = spawnPoint;
 
         return spawnPoint;
-    }
-
-    public void OnPatternEnd()
-    {
-        _currentFireCount = 0;
     }
 }

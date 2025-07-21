@@ -250,7 +250,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 8638747706446257286}
+  - {fileID: 4792881903720496103}
   m_Father: {fileID: 8989784334462728688}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &8588829975824437934
@@ -328,7 +328,7 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: 1b177b769507b5447be2d6a5615f87fc, type: 2}
---- !u!1 &1196327433769647133
+--- !u!1 &1320326834807423879
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -336,46 +336,46 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8638747706446257286}
-  - component: {fileID: 1946596462566350914}
-  - component: {fileID: 3473521954649100412}
+  - component: {fileID: 4792881903720496103}
+  - component: {fileID: 2166062365217492611}
+  - component: {fileID: 8005379343368190814}
   m_Layer: 0
-  m_Name: FocusedExplosion_03_PointLight
+  m_Name: PointLight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &8638747706446257286
+--- !u!4 &4792881903720496103
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1196327433769647133}
+  m_GameObject: {fileID: 1320326834807423879}
   serializedVersion: 2
   m_LocalRotation: {x: 0.50240684, y: 0.4975816, z: -0.4975816, w: 0.50240684}
-  m_LocalPosition: {x: 0, y: 3.6200008, z: 0}
-  m_LocalScale: {x: 1.1, y: 1.1, z: 1.1}
+  m_LocalPosition: {x: 0, y: 3.6200004, z: 0}
+  m_LocalScale: {x: 1.1000001, y: 1.1000001, z: 1.1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1886800929289647102}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
---- !u!108 &1946596462566350914
+--- !u!108 &2166062365217492611
 Light:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1196327433769647133}
+  m_GameObject: {fileID: 1320326834807423879}
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
   m_Color: {r: 1, g: 0.039215688, b: 0, a: 1}
   m_Intensity: 15
-  m_Range: 3.48
-  m_SpotAngle: 69.83859
-  m_InnerSpotAngle: 19.053959
+  m_Range: 4.54
+  m_SpotAngle: 106.60365
+  m_InnerSpotAngle: 55.81904
   m_CookieSize: 10
   m_Shadows:
     m_Type: 1
@@ -426,13 +426,13 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
---- !u!114 &3473521954649100412
+--- !u!114 &8005379343368190814
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1196327433769647133}
+  m_GameObject: {fileID: 1320326834807423879}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
@@ -514,11 +514,10 @@ MonoBehaviour:
   _impactSFX: {fileID: 8300000, guid: b2e331145911e7c4f87d6a9d46769373, type: 3}
   _impactVFXSpawnPoint: {fileID: 3198422194492923817}
   _impactVFX: {fileID: 9049631545069152736, guid: 2c5bca4e2f5c8e04f8b78dd27e341d68, type: 3}
-  useAbilityAfterDistanceTraveled: 0
-  _distanceToTravel: 3.5
-  _dashTriggerDistance: 2.5
-  _dashSpeed: 15
-  _alertStartDelay: 0.5
+  useAbilityAfterDistanceTraveled: 1
+  _distanceToTravel: 12
+  _dashTriggerDistance: 3.5
+  _dashSpeed: 20
   _dashStartDelay: 0.5
   _dashAlertSFX: {fileID: 8300000, guid: baa42a3793a623b42bc15d843bdbfd13, type: 3}
   _dashSFX: {fileID: 8300000, guid: b6d3f0aac49764654879e55ed401c6f2, type: 3}
@@ -591,7 +590,7 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.4
-  m_Height: 2
+  m_Height: 3
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
 --- !u!1 &5495581471653901793

@@ -73,7 +73,7 @@ public class FirstBossEncounter : MonoBehaviour
     private float _distToPlayer;
     private bool _isPerformingAOE;
     private float _lastImpulseTime;
-    private ProjectilePattern _currentProjectilePattern;
+    private ProjectilePattern _currentPattern;
     private MultiProjectilePool _multiProjectilePool;
     private PlayerController _player;
     private Animator _animator;
@@ -101,8 +101,13 @@ public class FirstBossEncounter : MonoBehaviour
     {
         foreach (var phase1ProjectilePattern in _phase1ProjectilePatterns)
         {
-            phase1ProjectilePattern.OnPatternEnd();
+            phase1ProjectilePattern.Init();
         }
+
+        if (_AOEAttackAudio) _AOEAttackAudio.Stop();
+        if (_AOEChargeAudio) _AOEChargeAudio.Stop();
+        if (_projectileCooldownAudio) _projectileCooldownAudio.Stop();
+        if (_projectileChargeAudio) _projectileChargeAudio.Stop();
     }
 
     public void EnteredBossZone()
@@ -115,7 +120,7 @@ public class FirstBossEncounter : MonoBehaviour
     {
         _distToPlayer = GameManager.Instance.GetDistanceFromPlayer(transform);
 
-        if (!_currentProjectilePattern)
+        if (!_currentPattern)
         {
             if (!_isPerformingAOE && _distToPlayer <= _AOEAgroRadius)
             {
@@ -146,32 +151,41 @@ public class FirstBossEncounter : MonoBehaviour
 
     private IEnumerator ProjectilesCoroutine(ProjectilePattern pattern)
     {
-        // Debug.Log($"Start Projectile Charge", _projectileChargeAudio);
-        _currentProjectilePattern = pattern;
-        _projectileChargeAudio = AudioManager.Instance.PlaySound(transform, pattern.ChargeSFX, true, false, pattern.ChargeVolume);
+        _currentPattern = pattern;
 
-        yield return new WaitForSeconds(pattern.StartDelay);
-
-        _projectileChargeAudio.Stop();
-        _projectileChargeAudio = null;
-
-        int count = 0;
-        while (count < pattern.FireCount)
+        while (_currentPattern)
         {
-            pattern.Spawn(_multiProjectilePool, _projectileSpawnPoints);
-            count++;
-            yield return new WaitForSeconds(pattern.FireRate);
-        }
-        
-        pattern.OnPatternEnd();
+            _projectileChargeAudio = AudioManager.Instance.PlaySound(transform, _currentPattern.ChargeSFX, true, false,
+                _currentPattern.ChargeVolume, _currentPattern.ChargePitch);
 
-        // Debug.Log($"Start Projectile cooldown", _projectileCooldownAudio);
-        _projectileCooldownAudio =
-            AudioManager.Instance.PlaySound(transform, pattern.CooldownSFX, true, false, pattern.CooldownVolume);
-        yield return new WaitForSeconds(pattern.EndDelay);
+            yield return new WaitForSeconds(_currentPattern.StartDelay);
+
+            _projectileChargeAudio.Stop();
+            _projectileChargeAudio = null;
+
+            int count = 0;
+            while (count < _currentPattern.FireCount)
+            {
+                _currentPattern.Spawn(_multiProjectilePool, _projectileSpawnPoints);
+                count++;
+                yield return new WaitForSeconds(_currentPattern.TimeBetweenShots);
+            }
+
+            _currentPattern.Init();
+
+            if (!_currentPattern.FollowupPattern)
+            {
+                _projectileCooldownAudio = AudioManager.Instance.PlaySound(transform, _currentPattern.CooldownSFX, true, false,
+                    _currentPattern.CooldownVolume);
+            }
+
+            yield return new WaitForSeconds(_currentPattern.EndDelay);
+
+            _currentPattern = _currentPattern.FollowupPattern;
+        }
 
         _projectileCooldownAudio = null;
-        _currentProjectilePattern = null;
+        _currentPattern = null;
     }
 
     private IEnumerator AOECoroutine()
