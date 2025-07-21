@@ -19,29 +19,18 @@ public class TimeManager : MonoBehaviour
 
     private void Update()
     {
-        if (InputManager.Instance.TimeScaleUpWasPressed && Keyboard.current.shiftKey.isPressed)
+        if (InputManager.Instance.TimeScaleUpWasPressed)
         {
             _currentTimeScale += 0.3f;
             Time.timeScale = _currentTimeScale;
             Debug.Log($"Timescale large increase to {_currentTimeScale}");
         }
-        else if (InputManager.Instance.TimeScaleUpWasPressed)
-        {
-            _currentTimeScale += 0.1f;
-            Time.timeScale = _currentTimeScale;
-            Debug.Log($"Timescale small increase to {_currentTimeScale}");
-        }
-        else if (InputManager.Instance.TimeScaleDownWasPressed && Keyboard.current.shiftKey.isPressed)
+        
+        else if (InputManager.Instance.TimeScaleDownWasPressed)
         {
             _currentTimeScale -= 0.3f;
             Time.timeScale = _currentTimeScale;
             Debug.Log($"Timescale large decrease to {_currentTimeScale}");
-        }
-        else if (InputManager.Instance.TimeScaleDownWasPressed)
-        {
-            _currentTimeScale -= 0.1f;
-            Time.timeScale = _currentTimeScale;
-            Debug.Log($"Timescale small decrease to {_currentTimeScale}");
         }
         else if (InputManager.Instance.TimeScaleResetWasPressed)
         {

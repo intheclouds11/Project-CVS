@@ -5,6 +5,7 @@ using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour
@@ -38,6 +39,23 @@ public class AudioManager : MonoBehaviour
     private void Start()
     {
         LoadAudioPreferences();
+    }
+
+    private void Update()
+    {
+        if (InputManager.Instance.ToggleMusicWasPressed)
+        {
+            if (GetMusicGroupGain() <= -70f)
+            {
+                SetMusicGroupGain(0f);
+                PlayerPrefs.SetFloat("MusicVolume", 0f);
+            }
+            else
+            {
+                SetMusicGroupGain(-80f);
+                PlayerPrefs.SetFloat("MusicVolume", -80f);
+            }
+        }
     }
 
     private void LoadAudioPreferences()

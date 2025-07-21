@@ -234,6 +234,42 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Increase TimeScale"",
+                    ""type"": ""Button"",
+                    ""id"": ""9e48d78d-2931-476b-a3d6-4cd0479bf151"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Decrease TimeScale"",
+                    ""type"": ""Button"",
+                    ""id"": ""1d90f059-b5ef-40fa-9c2d-9642ae36314f"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Reset TimeScale"",
+                    ""type"": ""Button"",
+                    ""id"": ""a61b4cd2-4ddf-47c9-bd7a-90d854046ede"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Toggle Music"",
+                    ""type"": ""Button"",
+                    ""id"": ""d7a9c8d1-a6b0-4cce-8a00-4c75a5e2a4fe"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -610,6 +646,83 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
                     ""action"": ""Toggle Enemy AI"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8429d612-713b-43a0-b6b5-431e14d4a341"",
+                    ""path"": ""<Keyboard>/equals"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Increase TimeScale"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""13d85ca0-a7a5-456c-ab27-eee586b80db7"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Increase TimeScale"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""38a6568f-edb5-489d-9b21-12256759e318"",
+                    ""path"": ""<Keyboard>/minus"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Decrease TimeScale"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""30e9f863-855e-47e7-bf5a-7b6fe96b9dff"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Decrease TimeScale"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""92fda31f-8196-49e4-b88e-9793cda11f9b"",
+                    ""path"": ""<Keyboard>/0"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Reset TimeScale"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8b879e41-a854-480a-9057-e5b2cb00a54a"",
+                    ""path"": ""<Gamepad>/select"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Reset TimeScale"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3a04f028-c343-4129-85e1-b9262e6f044d"",
+                    ""path"": ""<Keyboard>/m"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Toggle Music"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -690,6 +803,10 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
         m_Player_ToggleChargeHUD = m_Player.FindAction("Toggle Charge HUD", throwIfNotFound: true);
         m_Player_ToggleGodMode = m_Player.FindAction("Toggle God Mode", throwIfNotFound: true);
         m_Player_ToggleEnemyAI = m_Player.FindAction("Toggle Enemy AI", throwIfNotFound: true);
+        m_Player_IncreaseTimeScale = m_Player.FindAction("Increase TimeScale", throwIfNotFound: true);
+        m_Player_DecreaseTimeScale = m_Player.FindAction("Decrease TimeScale", throwIfNotFound: true);
+        m_Player_ResetTimeScale = m_Player.FindAction("Reset TimeScale", throwIfNotFound: true);
+        m_Player_ToggleMusic = m_Player.FindAction("Toggle Music", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Back = m_UI.FindAction("Back", throwIfNotFound: true);
@@ -790,6 +907,10 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_ToggleChargeHUD;
     private readonly InputAction m_Player_ToggleGodMode;
     private readonly InputAction m_Player_ToggleEnemyAI;
+    private readonly InputAction m_Player_IncreaseTimeScale;
+    private readonly InputAction m_Player_DecreaseTimeScale;
+    private readonly InputAction m_Player_ResetTimeScale;
+    private readonly InputAction m_Player_ToggleMusic;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -866,6 +987,22 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @ToggleEnemyAI => m_Wrapper.m_Player_ToggleEnemyAI;
         /// <summary>
+        /// Provides access to the underlying input action "Player/IncreaseTimeScale".
+        /// </summary>
+        public InputAction @IncreaseTimeScale => m_Wrapper.m_Player_IncreaseTimeScale;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/DecreaseTimeScale".
+        /// </summary>
+        public InputAction @DecreaseTimeScale => m_Wrapper.m_Player_DecreaseTimeScale;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/ResetTimeScale".
+        /// </summary>
+        public InputAction @ResetTimeScale => m_Wrapper.m_Player_ResetTimeScale;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/ToggleMusic".
+        /// </summary>
+        public InputAction @ToggleMusic => m_Wrapper.m_Player_ToggleMusic;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Player; }
@@ -939,6 +1076,18 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
             @ToggleEnemyAI.started += instance.OnToggleEnemyAI;
             @ToggleEnemyAI.performed += instance.OnToggleEnemyAI;
             @ToggleEnemyAI.canceled += instance.OnToggleEnemyAI;
+            @IncreaseTimeScale.started += instance.OnIncreaseTimeScale;
+            @IncreaseTimeScale.performed += instance.OnIncreaseTimeScale;
+            @IncreaseTimeScale.canceled += instance.OnIncreaseTimeScale;
+            @DecreaseTimeScale.started += instance.OnDecreaseTimeScale;
+            @DecreaseTimeScale.performed += instance.OnDecreaseTimeScale;
+            @DecreaseTimeScale.canceled += instance.OnDecreaseTimeScale;
+            @ResetTimeScale.started += instance.OnResetTimeScale;
+            @ResetTimeScale.performed += instance.OnResetTimeScale;
+            @ResetTimeScale.canceled += instance.OnResetTimeScale;
+            @ToggleMusic.started += instance.OnToggleMusic;
+            @ToggleMusic.performed += instance.OnToggleMusic;
+            @ToggleMusic.canceled += instance.OnToggleMusic;
         }
 
         /// <summary>
@@ -998,6 +1147,18 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
             @ToggleEnemyAI.started -= instance.OnToggleEnemyAI;
             @ToggleEnemyAI.performed -= instance.OnToggleEnemyAI;
             @ToggleEnemyAI.canceled -= instance.OnToggleEnemyAI;
+            @IncreaseTimeScale.started -= instance.OnIncreaseTimeScale;
+            @IncreaseTimeScale.performed -= instance.OnIncreaseTimeScale;
+            @IncreaseTimeScale.canceled -= instance.OnIncreaseTimeScale;
+            @DecreaseTimeScale.started -= instance.OnDecreaseTimeScale;
+            @DecreaseTimeScale.performed -= instance.OnDecreaseTimeScale;
+            @DecreaseTimeScale.canceled -= instance.OnDecreaseTimeScale;
+            @ResetTimeScale.started -= instance.OnResetTimeScale;
+            @ResetTimeScale.performed -= instance.OnResetTimeScale;
+            @ResetTimeScale.canceled -= instance.OnResetTimeScale;
+            @ToggleMusic.started -= instance.OnToggleMusic;
+            @ToggleMusic.performed -= instance.OnToggleMusic;
+            @ToggleMusic.canceled -= instance.OnToggleMusic;
         }
 
         /// <summary>
@@ -1272,6 +1433,34 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnToggleEnemyAI(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Increase TimeScale" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnIncreaseTimeScale(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Decrease TimeScale" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnDecreaseTimeScale(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Reset TimeScale" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnResetTimeScale(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Toggle Music" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnToggleMusic(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.
