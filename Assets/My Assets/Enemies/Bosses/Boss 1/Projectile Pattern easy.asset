@@ -19,10 +19,10 @@ MonoBehaviour:
   TimeBetweenShots: 0.3773585
   Speed: 10
   FireCount: 8
-  SpawnPointSelection: 1
-  AimAtPlayer: 0
-  StartAngle: 0
-  EndAngle: 90
+  SpawnPointSelection: 3
+  AimAtPlayer: 1
+  StartAngle: -45
+  EndAngle: 45
   abilityUsage: 0
   ChargeSFX: {fileID: 8300000, guid: 651b1dfebc610c44e956b9c74fb8811d, type: 3}
   ChargeVolume: 1

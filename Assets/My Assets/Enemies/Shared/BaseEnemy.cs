@@ -266,7 +266,7 @@ public abstract class BaseEnemy : MonoBehaviour
         _aiFollower.canMove = GameManager.Instance.EnemyAIEnabled;
     }
 
-    protected void OnDamageTaken(Vector3 knockbackDir, Knockback knockback)
+    protected virtual void OnDamageTaken(Vector3 knockbackDir, Knockback knockback)
     {
         IsAggroed = true;
 

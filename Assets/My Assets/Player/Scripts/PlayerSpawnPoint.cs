@@ -11,10 +11,13 @@ public class PlayerSpawnPoint : MonoBehaviour
 {
     [SerializeField]
     private AudioClip _enabledSFX;
+    [SerializeField]
+    private GameObject _vfx;
 
     public void Activate(bool reachedCheckpoint)
     {
         enabled = true;
+        _vfx.SetActive(true);
 
         if (reachedCheckpoint)
         {
@@ -26,6 +29,8 @@ public class PlayerSpawnPoint : MonoBehaviour
     public void Deactivate(bool reachedCheckpoint)
     {
         enabled = false;
+        _vfx.SetActive(false);
+        
         if (reachedCheckpoint)
         {
             // VFX?
@@ -63,7 +68,6 @@ public class PlayerSpawnPointEditor : Editor
         {
             ES3.Save("SpawnPointName", _playerSpawnPoint.name);
             Debug.Log($"Saved SpawnPointName: {_playerSpawnPoint.name}");
-            _playerSpawnPoint.enabled = true;
         }
 
         if (_wasDisabled && _playerSpawnPoint.enabled)

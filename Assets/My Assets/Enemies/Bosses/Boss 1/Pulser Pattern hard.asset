@@ -12,16 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac84f57ed65b3a74ab9f294d06a53c14, type: 3}
   m_Name: Pulser Pattern hard
   m_EditorClassIdentifier: 
-  PatternName: Dasher Pattern 1
   FollowupPattern: {fileID: 0}
   ProjectilePrefab: {fileID: 109227493381812246, guid: 4578e780d89409a4cb70adfbb805b3eb, type: 3}
-  AimAtPlayer: 1
   StartDelay: 0.754717
   EndDelay: 3
   TimeBetweenShots: 0.18867925
   Speed: 8
   FireCount: 4
-  SpawnPointSelection: 2
+  SpawnPointSelection: 4
+  AimAtPlayer: 1
+  StartAngle: -45
+  EndAngle: 45
   abilityUsage: 3
   ChargeSFX: {fileID: 8300000, guid: 651b1dfebc610c44e956b9c74fb8811d, type: 3}
   ChargeVolume: 1

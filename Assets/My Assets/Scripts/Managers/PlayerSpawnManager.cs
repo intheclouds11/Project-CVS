@@ -12,6 +12,8 @@ using UnityEngine.SceneManagement;
 public class PlayerSpawnManager : MonoBehaviour
 {
     public static PlayerSpawnManager Instance;
+    [SerializeField]
+    private GameObject _playerPrefab;
     public PlayerSpawnPoint ActiveSpawnPoint { get; private set; }
     public static event Action<PlayerController> PlayerSpawned;
 
@@ -40,6 +42,11 @@ public class PlayerSpawnManager : MonoBehaviour
             {
                 Debug.LogError($"No ActiveSpawnPoint found!");
                 return;
+            }
+
+            foreach (var spawnPoint in _spawnPoints.Where(sp => !sp.enabled))
+            {
+                spawnPoint.Deactivate(false);
             }
         }
 
@@ -79,8 +86,7 @@ public class PlayerSpawnManager : MonoBehaviour
 
     private PlayerController Spawn(PlayerSpawnPoint spawnPoint)
     {
-        var loadedPlayer = Resources.Load<GameObject>("Player");
-        var player = Instantiate(loadedPlayer, spawnPoint.transform.position, Quaternion.identity).GetComponent<PlayerController>();
+        var player = Instantiate(_playerPrefab, spawnPoint.transform.position, Quaternion.identity).GetComponent<PlayerController>();
         player.RotationTransform.rotation = spawnPoint.transform.rotation;
         DontDestroyOnLoad(player);
         return player;

@@ -48,6 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _enabledSFX: {fileID: 8300000, guid: d6237c7fb51689844b0e2a5f616d54d6, type: 3}
+  _vfx: {fileID: 5238770969473812121}
 --- !u!1 &3038104762418570078
 GameObject:
   m_ObjectHideFlags: 0
@@ -323,6 +324,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ad0160090d7fadb45815f7a26844be8b, type: 3}
+--- !u!1 &5238770969473812121 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7025050157031047033, guid: ad0160090d7fadb45815f7a26844be8b, type: 3}
+  m_PrefabInstance: {fileID: 3012388721732270560}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &7850139062433484688 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4989826173358487152, guid: ad0160090d7fadb45815f7a26844be8b, type: 3}

@@ -30,13 +30,14 @@ public class Pulser : BaseEnemy
     private AudioClip _pulseHitSFX;
 
     private float _lastPulseCompleteTime;
+    private bool _isPulsing;
 
 
     protected override void Update()
     {
         base.Update();
         _distToPlayer = GameManager.Instance.GetDistanceFromPlayer(transform);
-        
+
         if (!_aiFollower.canMove || !_player.Health.IsAlive()) return;
 
         if (!IsAggroed && _distToPlayer <= _agroRange)
@@ -62,6 +63,7 @@ public class Pulser : BaseEnemy
     private IEnumerator PulseCoroutine()
     {
         _aiFollower.canMove = false;
+        _isPulsing = true;
         _pulseVFX.SetActive(false);
         _pulseVFX.SetActive(true);
         _lightAnimator.SetTrigger("Pulse");
@@ -71,20 +73,21 @@ public class Pulser : BaseEnemy
         _abilityStartAudio = AudioManager.Instance.PlaySound(transform, _abilityStartSFX, true, false, 0.7f);
 
         yield return new WaitForSeconds(_pulseDelayDuration);
-        
+
         var startTime = Time.time;
 
         while (startTime + _pulseDuration >= Time.time)
         {
             if (_isInterruptable && IsGettingKnockedBack)
             {
+                _isPulsing = false;
                 _lastPulseCompleteTime = Time.time;
                 _pulseVFX.SetActive(false);
                 _abilityStartAudio.Stop();
                 _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
                 yield break;
             }
-            
+
             if (!_player.Health.IsInvincible() && !_player.IsDashing && _distToPlayer <= _pulseDamageRadius)
             {
                 var knockBackDir = (_player.transform.position - transform.position).normalized;
@@ -96,6 +99,7 @@ public class Pulser : BaseEnemy
             yield return null;
         }
 
+        _isPulsing = false;
         _lastPulseCompleteTime = Time.time;
         _aiFollower.canMove = true;
         _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
@@ -113,6 +117,15 @@ public class Pulser : BaseEnemy
                 playerHit.Health.TakeDamage(_baseDamage, knockBackDir, _damagePlayerKnockback);
                 OnDamagedPlayer();
             }
+        }
+    }
+
+    protected override void OnDamageTaken(Vector3 knockbackDir, Knockback knockback)
+    {
+        base.OnDamageTaken(knockbackDir, knockback);
+        if (!_isPulsing)
+        {
+            StartCoroutine(PulseCoroutine());
         }
     }
 

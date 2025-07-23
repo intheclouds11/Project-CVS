@@ -42,6 +42,10 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField]
     private Canvas _chargeMeterCanvas;
     [SerializeField]
+    private float _chargeMeterStartFadeDelay = 0.2f;
+    [SerializeField]
+    private float _chargeMeterFinishFadeDelay = 2f;
+    [SerializeField]
     private Transform _chargeIndicator;
     [SerializeField]
     private float _chargeIndicatorDelay = 0.2f;
@@ -83,6 +87,7 @@ public class PlayerAttack : MonoBehaviour
     private Vector3 _bufferedRotateDir;
     private Color _originalIndicatorColor;
     private Coroutine _chargeIndicatorCoroutine;
+    private Coroutine _fadeChargeMeterCoroutine;
 
     private CanvasGroup _chargeMeterCanvasGroup;
     private AudioSource _chargingAudio;
@@ -114,22 +119,24 @@ public class PlayerAttack : MonoBehaviour
 
         HandleCharging();
         HandleAttacking();
-
-        if (!IsCharging && _chargeMeterCanvasGroup.alpha != 0f)
-        {
-            var newAlpha = _chargeMeterCanvasGroup.alpha - 0.5f * Time.deltaTime;
-            _chargeMeterCanvasGroup.alpha = Mathf.Clamp(newAlpha, 0f, 1);
-            _chargeMeter.value = 0f;
-        }
     }
 
     private void HandleCharging()
     {
+        if (_inputManager.AttackWasPressed)
+        {
+            _chargeMeter.value = 0f;
+        }
+
         if (_inputManager.AttackHeld && !IsAttacking && !_sawBlade.isActiveAndEnabled)
         {
             if (!IsCharging)
             {
+                // Debug.Log($"StartCharge");
+
                 State = AttackState.Charging;
+
+                if (_fadeChargeMeterCoroutine != null) StopCoroutine(_fadeChargeMeterCoroutine);
                 if (_chargeIndicatorCoroutine != null) StopCoroutine(_chargeIndicatorCoroutine);
                 _chargeIndicatorCoroutine = StartCoroutine(ChargeIndicatorCoroutine());
 
@@ -137,7 +144,6 @@ public class PlayerAttack : MonoBehaviour
 
                 if (_player.IsDashing) _playerAnimator.SetIsDashing(false);
                 _playerAnimator.SetReadyAttackTrigger();
-                // Debug.Log($"StartCharge");
             }
             else
             {
@@ -145,11 +151,7 @@ public class PlayerAttack : MonoBehaviour
 
                 if (_exceededCritThreshold)
                 {
-                    _attackHeldTime -= Time.deltaTime;
-                    if (_chargeMeter.value > _critChargeTime)
-                    {
-                        _chargeMeter.value -= Time.deltaTime;
-                    }
+                    if (_chargeMeter.value > _critChargeTime) _chargeMeter.value -= Time.deltaTime;
                 }
                 else
                 {
@@ -171,7 +173,7 @@ public class PlayerAttack : MonoBehaviour
             }
         }
     }
-    
+
     private void HandleAttacking()
     {
         if (_inputManager.AttackWasReleased)
@@ -227,8 +229,10 @@ public class PlayerAttack : MonoBehaviour
             // Debug.Log($"SetAttackRotateDirection: {_bufferedRotateDir}");
         }
 
-        _attackBufferTimer = 0f;
         State = AttackState.Attacking;
+        _attackBufferTimer = 0f;
+        if (_fadeChargeMeterCoroutine != null) StopCoroutine(_fadeChargeMeterCoroutine);
+        _fadeChargeMeterCoroutine = StartCoroutine(FadeChargeMeter());
 
         indicatorMR.material.color = _originalIndicatorColor;
         if (_chargingAudio) _chargingAudio.Stop();
@@ -282,6 +286,30 @@ public class PlayerAttack : MonoBehaviour
     public void ToggleChargeHUD()
     {
         _chargeMeterCanvas.enabled = !_chargeMeterCanvas.enabled;
+    }
+
+    private IEnumerator FadeChargeMeter()
+    {
+        _chargeMeterCanvasGroup.alpha = 1f;
+        
+        yield return new WaitForSeconds(_chargeMeterStartFadeDelay);
+
+        while (_chargeMeterCanvasGroup.alpha >= 0.1f)
+        {
+            _chargeMeterCanvasGroup.alpha -= 1f * Time.deltaTime;
+            yield return null;
+        }
+
+        yield return new WaitForSeconds(_chargeMeterFinishFadeDelay);
+
+        while (_chargeMeterCanvasGroup.alpha >= 0f)
+        {
+            _chargeMeterCanvasGroup.alpha -= 0.1f * Time.deltaTime;
+
+            yield return null;
+        }
+
+        _fadeChargeMeterCoroutine = null;
     }
 
     public void OnDied()

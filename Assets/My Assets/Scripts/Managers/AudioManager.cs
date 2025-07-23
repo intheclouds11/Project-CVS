@@ -48,12 +48,12 @@ public class AudioManager : MonoBehaviour
             if (GetMusicGroupGain() <= -70f)
             {
                 SetMusicGroupGain(0f);
-                PlayerPrefs.SetFloat("MusicVolume", 0f);
+                PlayerPrefs.SetFloat("MusicVolume", 1f);
             }
             else
             {
                 SetMusicGroupGain(-80f);
-                PlayerPrefs.SetFloat("MusicVolume", -80f);
+                PlayerPrefs.SetFloat("MusicVolume", 0f);
             }
         }
     }
