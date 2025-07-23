@@ -10,7 +10,7 @@ using UnityEngine.Serialization;
 public class InputManager : MonoBehaviour
 {
     public static InputManager Instance;
-    
+
     [SerializeField]
     private float _inputsEnabledDelay = 1f;
     public bool WaitingToGivePlayerControl { get; private set; } = true;
@@ -35,7 +35,7 @@ public class InputManager : MonoBehaviour
 
     public bool InteractWasPressed { get; private set; }
     public bool GamepadEastButtonWasPressed { get; private set; }
-    
+
     public bool PauseWasPressed { get; private set; }
     public bool RespawnWasPressed { get; private set; }
     public bool OpenInventoryWasPressed { get; private set; }
@@ -77,7 +77,7 @@ public class InputManager : MonoBehaviour
     {
         StartCoroutine(GiveControlCoroutine());
     }
-    
+
     private IEnumerator GiveControlCoroutine()
     {
         yield return new WaitForSeconds(_inputsEnabledDelay);
@@ -100,7 +100,8 @@ public class InputManager : MonoBehaviour
     {
         if (IsGamepadInUse())
             UsingGamepad = true;
-        else if (Keyboard.current.wasUpdatedThisFrame || Mouse.current.leftButton.wasPressedThisFrame)
+        else if (Keyboard.current.wasUpdatedThisFrame || Mouse.current.leftButton.wasPressedThisFrame ||
+                 Mouse.current.delta.magnitude > 0.1f)
             UsingGamepad = false;
 
         if (!_gamepadWasUsed && UsingGamepad)
