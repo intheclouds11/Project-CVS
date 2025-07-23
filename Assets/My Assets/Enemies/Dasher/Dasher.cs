@@ -29,7 +29,7 @@ public class Dasher : BaseEnemy
     [SerializeField]
     private AudioClip _interruptedSFX;
 
-    private float _lastDashCompleteTime;
+    private float _lastDashTime;
     private bool _isDashing;
 
     private AudioSource _dashingAudio;
@@ -45,7 +45,7 @@ public class Dasher : BaseEnemy
         if (!IsAggroed && _distToPlayer <= _agroRange)
         {
             IsAggroed = true;
-            _lastDashCompleteTime = Time.time;
+            _lastDashTime = Time.time;
             _destinationSetter.target = _player.transform;
             _destinationSetter.enabled = true;
             _aiFollower.maxSpeed = _agroSpeed;
@@ -56,7 +56,7 @@ public class Dasher : BaseEnemy
             _patrolAudio = null;
             _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
         }
-        else if (_distToPlayer <= _dashTriggerDistance && Time.time >= _lastDashCompleteTime + _dashCooldownDuration)
+        else if (_distToPlayer <= _dashTriggerDistance && Time.time >= _lastDashTime + _dashCooldownDuration)
         {
             if (CanDashReachPlayer(out var hitObj))
             {
@@ -90,6 +90,7 @@ public class Dasher : BaseEnemy
     private IEnumerator DashCoroutine()
     {
         _isDashing = true;
+        _lastDashTime = Time.time;
         if (_aiFollower) _aiFollower.canMove = false;
         float pitch = Random.Range(1.1f, 1.3f);
         if (_agroAudio) _agroAudio.Stop();
@@ -112,7 +113,7 @@ public class Dasher : BaseEnemy
                 if (_isInterruptable && IsGettingKnockedBack)
                 {
                     _isDashing = false;
-                    _lastDashCompleteTime = Time.time;
+                    _lastDashTime = Time.time;
                     _dashingAudio.Stop();
                     _abilityStartAudio.Stop();
                     pitch = Random.Range(0.9f, 1.1f);
@@ -136,7 +137,6 @@ public class Dasher : BaseEnemy
         _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
         _aiFollower.canMove = true;
         _isDashing = false;
-        _lastDashCompleteTime = Time.time;
     }
 
     protected override void OnTriggerEnter(Collider other)
