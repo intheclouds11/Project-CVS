@@ -16,6 +16,8 @@ public class SettingsMenu : MonoBehaviour
     [SerializeField]
     private Toggle _fullscreenToggle;
 
+    private bool _wasFullscreen;
+
 
     private void OnEnable()
     {
@@ -39,6 +41,22 @@ public class SettingsMenu : MonoBehaviour
         {
             Screen.fullScreen = PlayerPrefs.GetInt("Fullscreen") == 1;
         }
+
+        _wasFullscreen = Screen.fullScreen;
+    }
+
+    private void Update()
+    {
+        if (_wasFullscreen && !Screen.fullScreen)
+        {
+            _wasFullscreen = false;
+            PlayerPrefs.SetInt("Fullscreen", 0); // save fullscreen off
+        }
+        else if (!_wasFullscreen && Screen.fullScreen)
+        {
+            _wasFullscreen = true;
+            PlayerPrefs.SetInt("Fullscreen", 1); // save fullscreen on
+        }
     }
 
     public void Button_Return()
@@ -52,7 +70,6 @@ public class SettingsMenu : MonoBehaviour
         PlayerPrefs.SetFloat("MusicVolume", _musicVolumeSlider.value);
         PlayerPrefs.SetFloat("AmbienceVolume", _ambienceVolumeSlider.value);
         PlayerPrefs.SetFloat("SFXVolume", _sfxVolumeSlider.value);
-        PlayerPrefs.SetInt("Fullscreen", _fullscreenToggle.isOn ? 1 : 0);
     }
 
     private void FullscreenToggled(bool toggle)
