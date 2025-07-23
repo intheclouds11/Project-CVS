@@ -43,7 +43,7 @@ public class Pulser : BaseEnemy
         if (!IsAggroed && _distToPlayer <= _agroRange)
         {
             IsAggroed = true;
-            _lastPulseCompleteTime = Time.time;
+            // _lastPulseCompleteTime = Time.time;
             _destinationSetter.target = _player.transform;
             _destinationSetter.enabled = true;
             _aiFollower.maxSpeed = _agroSpeed;

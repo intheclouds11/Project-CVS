@@ -6,31 +6,40 @@ using NaughtyAttributes;
 using UnityEditor;
 #endif
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class PlayerSpawnPoint : MonoBehaviour
 {
     [SerializeField]
-    private AudioClip _enabledSFX;
+    private AudioClip _unlockCheckpointSFX;
     [SerializeField]
-    private GameObject _vfx;
+    private Animator _animator;
+
+    private AudioSource _spawnAudio;
+
+
+    public void PlaySpawnAudio()
+    {
+        _spawnAudio.Play();
+    }
 
     public void Activate(bool reachedCheckpoint)
     {
         enabled = true;
-        _vfx.SetActive(true);
+        _animator.gameObject.SetActive(true);
 
         if (reachedCheckpoint)
         {
-            // TODO: VFX and sound
-            AudioManager.Instance.PlaySound(transform, _enabledSFX, true, false, 0.5f, 1.2f);
+            _animator.SetTrigger("Checkpoint");
+            AudioManager.Instance.PlaySound(transform, _unlockCheckpointSFX, true, false, 0.5f, 1.2f);
         }
     }
 
     public void Deactivate(bool reachedCheckpoint)
     {
         enabled = false;
-        _vfx.SetActive(false);
-        
+        _animator.gameObject.SetActive(false);
+
         if (reachedCheckpoint)
         {
             // VFX?
