@@ -108,7 +108,7 @@ public class PlayerAttack : MonoBehaviour
         _critRange.maxValue = _chargeMeter.maxValue;
         _critRange.value = _critGraceTime;
         _chargeMeterCanvasGroup = _chargeMeterCanvas.GetComponent<CanvasGroup>();
-        _chargeMeterCanvasGroup.alpha = 0.25f;
+        StartCoroutine(FadeChargeMeter());
         indicatorMR = _chargeIndicator.GetComponent<SkinnedMeshRenderer>();
         _originalIndicatorColor = indicatorMR.material.color;
     }
@@ -163,7 +163,8 @@ public class PlayerAttack : MonoBehaviour
 
                 if (!_enteredCritThreshold && WithinCritThreshold())
                 {
-                    OnEnteredCritThreshold();
+                    _enteredCritThreshold = true;
+                    EnteredCritThreshold?.Invoke();
                 }
                 else if (!_exceededCritThreshold && ExceededCritThreshold())
                 {
@@ -213,12 +214,6 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
-    private void OnEnteredCritThreshold()
-    {
-        _enteredCritThreshold = true;
-        EnteredCritThreshold?.Invoke();
-    }
-
     private IEnumerator Attack()
     {
         // Debug.Log($"StartATTACK");
@@ -233,7 +228,6 @@ public class PlayerAttack : MonoBehaviour
         _attackBufferTimer = 0f;
         if (_fadeChargeMeterCoroutine != null) StopCoroutine(_fadeChargeMeterCoroutine);
         _fadeChargeMeterCoroutine = StartCoroutine(FadeChargeMeter());
-
         indicatorMR.material.color = _originalIndicatorColor;
         if (_chargingAudio) _chargingAudio.Stop();
         if (_player.IsDashing) _playerAnimator.SetIsDashing(false);
@@ -291,10 +285,10 @@ public class PlayerAttack : MonoBehaviour
     private IEnumerator FadeChargeMeter()
     {
         _chargeMeterCanvasGroup.alpha = 1f;
-        
+
         yield return new WaitForSeconds(_chargeMeterStartFadeDelay);
 
-        while (_chargeMeterCanvasGroup.alpha >= 0.1f)
+        while (_chargeMeterCanvasGroup.alpha >= 0.3f)
         {
             _chargeMeterCanvasGroup.alpha -= 1f * Time.deltaTime;
             yield return null;
