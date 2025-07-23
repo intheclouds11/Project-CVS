@@ -70,7 +70,7 @@ public class AudioManager : MonoBehaviour
 
     public void OnPlayerRespawned()
     {
-        AdjustMasterLowPass(22000f, 2f);
+        AdjustMasterLowPass(22000f, 1f);
     }
 
     /// <summary>
@@ -193,10 +193,17 @@ public class AudioManager : MonoBehaviour
         _audioMixer.SetFloat("SFXGain", GetSFXGroupGain() - offset);
     }
 
-    public void AdjustMasterLowPass(float cutoffFreq, float duration)
+    public void AdjustMasterLowPass(float cutoffFreq, float duration = 0f)
     {
-        if (_masterLowPassCoroutine != null) StopCoroutine(_masterLowPassCoroutine);
-        _masterLowPassCoroutine = StartCoroutine(AdjustMasterLowPassCoroutine(cutoffFreq, duration));
+        if (duration > 0)
+        {
+            if (_masterLowPassCoroutine != null) StopCoroutine(_masterLowPassCoroutine);
+            _masterLowPassCoroutine = StartCoroutine(AdjustMasterLowPassCoroutine(cutoffFreq, duration));
+        }
+        else
+        {
+            _audioMixer.SetFloat("MasterLowpassCutoffFreq", 22000f);
+        }
     }
 
     private IEnumerator AdjustMasterLowPassCoroutine(float desiredFreq, float duration)

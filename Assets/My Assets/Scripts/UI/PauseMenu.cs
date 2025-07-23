@@ -28,6 +28,7 @@ public class PauseMenu : MonoBehaviour
         IsPaused = true;
         EventSystem.current.SetSelectedGameObject(_defaultButton);
         gameObject.SetActive(true);
+        AudioManager.Instance.AdjustMasterLowPass(3000f, 0.5f);
         InputManager.Instance.ToggleInputsAllowed(false);
     }
 
@@ -36,11 +37,13 @@ public class PauseMenu : MonoBehaviour
         IsPaused = false;
         gameObject.SetActive(false);
         InputManager.Instance.ToggleInputsAllowed(true);
+        AudioManager.Instance.AdjustMasterLowPass(22000f, 0.5f);
     }
 
     public void OnReturnToMainMenu()
     {
         IsPaused = false;
         gameObject.SetActive(false);
+        AudioManager.Instance.AdjustMasterLowPass(22000f, 0f);
     }
 }

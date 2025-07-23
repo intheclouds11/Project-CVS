@@ -13,6 +13,7 @@ public class Health : MonoBehaviour
     protected int _currentHealth;
     [SerializeField]
     protected int _maxHealth;
+    public int GetMaxHealth => _maxHealth;
     
     [Header("FX")]
     [SerializeField]
@@ -85,7 +86,10 @@ public class Health : MonoBehaviour
     protected virtual void OnDied()
     {
         AudioManager.Instance.PlaySound(transform, _diedSFX, true, false, _diedSFXVolume, _diedSFXPitch);
-        Instantiate(_diedVFX, transform.position, transform.rotation);
+        if (_diedVFX)
+        {
+            Instantiate(_diedVFX, transform.position, transform.rotation);
+        }
 
         Died?.Invoke(gameObject);
     }

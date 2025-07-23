@@ -5857,7 +5857,7 @@ MonoBehaviour:
   _invincibilityDuration: 0.75
   _invincibilityFlashRate: 20
   _damagedVignetteIntensity: 0.45
-  _damagedLowPassFreq: 5000
+  _damagedLowPassFreq: 3000
   _damagedLowPassAdjustDuration: 2
   _damagedSaturation: -40
 --- !u!114 &4469519121344481290
