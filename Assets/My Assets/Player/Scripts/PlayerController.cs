@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
 using Unity.Cinemachine;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -58,7 +59,7 @@ public class PlayerController : MonoBehaviour
     private ParticleSystem _dashParticleSystem;
     [SerializeField]
     private AudioClip _dashSFX;
-    
+
     public CharacterController CharacterController { get; private set; }
     public PlayerHealth Health { get; protected set; }
     public PlayerAttack PlayerAttack { get; private set; }
@@ -147,7 +148,7 @@ public class PlayerController : MonoBehaviour
     private void CheckInputs()
     {
         _movementVector = new Vector3(_inputManager.Translation.x, 0f, _inputManager.Translation.y);
-        
+
         if (_inputManager.DashWasPressed && PlayerCharges.IsChargeAvailable())
         {
             _dashBufferTimer = _dashBufferTime;
@@ -237,7 +238,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
     }
-    
+
     public void SetAttackRotateDirection(Vector3 direction)
     {
         if (_inputManager.UsingGamepad)
@@ -284,7 +285,11 @@ public class PlayerController : MonoBehaviour
         CharacterController.excludeLayers = LayerMask.GetMask("Enemy");
         if (!PlayerAttack.IsCharging) _playerAnimator.SetIsDashing(true);
 
-        ToggleMeshRenderers(false, 0.2f);
+        if (!Health.IsInvincible())
+        {
+            FadeMeshRenderers(false, 0.2f, 0.05f);
+        }
+
         _dashParticleSystem.Play();
         float pitch = Random.Range(0.9f, 1.1f);
         AudioManager.Instance.PlaySound(transform, _dashSFX, true, false, 0.85f, pitch);
@@ -303,7 +308,11 @@ public class PlayerController : MonoBehaviour
         }
 
         // Reset state
-        ToggleMeshRenderers(true, 0.2f);
+        if (!Health.IsInvincible())
+        {
+            FadeMeshRenderers(true, 0.2f);
+        }
+
         GetComponent<CapsuleCollider>().excludeLayers -= LayerMask.GetMask("Enemy");
         CharacterController.excludeLayers -= LayerMask.GetMask("Enemy");
         _playerAnimator.SetIsDashing(false);
@@ -325,7 +334,7 @@ public class PlayerController : MonoBehaviour
     {
         // Debug.Log($"Start Knockback. Amount: {knockbackAmount}, Dir: {dir}, Duration: {knockbackDuration}");
         _applyingKnockback = true;
-    
+
         while (_knockbackTimeElapsed < knockback.KnockbackDuration && Health.IsAlive())
         {
             var t = _knockbackTimeElapsed / knockback.KnockbackDuration;
@@ -335,7 +344,7 @@ public class PlayerController : MonoBehaviour
             _knockbackTimeElapsed += Time.deltaTime;
             yield return null;
         }
-    
+
         _knockbackTimeElapsed = 0f;
         _applyingKnockback = false;
         _knockbackCoroutine = null;
@@ -343,10 +352,10 @@ public class PlayerController : MonoBehaviour
 
     private void OnDamageTaken(Vector3 knockbackDir, Knockback damagedKnockback)
     {
-        if (damagedKnockback == null || knockbackDir == Vector3.zero || damagedKnockback.KnockbackAmount <= 0) return;
-
         _playerAnimator.SetSpeed(0f);
         //todo: damage knockback animation
+
+        if (damagedKnockback == null || knockbackDir == Vector3.zero || damagedKnockback.KnockbackAmount <= 0) return;
 
         if (_knockbackCoroutine != null) StopCoroutine(_knockbackCoroutine);
         _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(knockbackDir, damagedKnockback));
@@ -365,14 +374,14 @@ public class PlayerController : MonoBehaviour
     private IEnumerator DiedCoroutine()
     {
         yield return new WaitForSeconds(_deathDelay);
-        ToggleMeshRenderers(false, 0.25f);
+        FadeMeshRenderers(false, 0.25f);
     }
 
     public void Respawn(PlayerSpawnPoint spawnPoint)
     {
         transform.position = spawnPoint.transform.position;
         RotationTransform.rotation = spawnPoint.transform.rotation;
-        ToggleMeshRenderers(true, 1f);
+        FadeMeshRenderers(true, 0.5f);
         Health.OnRespawn();
         PlayerAttack.OnRespawn();
         PlayerCharges.OnRespawn();
@@ -402,15 +411,15 @@ public class PlayerController : MonoBehaviour
         _distanceSinceLastFootstep = 0f;
     }
 
-    private Coroutine _toggleMRsCoroutine;
+    private Coroutine _fadeMRsCoroutine;
 
-    private void ToggleMeshRenderers(bool show, float fadeTime)
+    public void FadeMeshRenderers(bool show, float fadeDuration, float alphaTarget = 0f)
     {
-        if (_toggleMRsCoroutine != null) StopCoroutine(_toggleMRsCoroutine);
-        _toggleMRsCoroutine = StartCoroutine(MeshRenderersVisibilityCoroutine(show, fadeTime));
+        if (_fadeMRsCoroutine != null) StopCoroutine(_fadeMRsCoroutine);
+        _fadeMRsCoroutine = StartCoroutine(FadeMeshRenderersCoroutine(show, fadeDuration, alphaTarget));
     }
 
-    private IEnumerator MeshRenderersVisibilityCoroutine(bool show, float fadeTime)
+    private IEnumerator FadeMeshRenderersCoroutine(bool show, float fadeDuration, float alphaTarget = 0f)
     {
         if (!show)
         {
@@ -423,15 +432,15 @@ public class PlayerController : MonoBehaviour
         var newAlpha = show ? 0f : 1f;
         var startTime = Time.time;
 
-        while (Time.time < fadeTime + startTime)
+        while (Time.time < fadeDuration + startTime)
         {
             if (show)
             {
-                newAlpha += Time.deltaTime / fadeTime;
+                newAlpha += Time.deltaTime / fadeDuration;
             }
-            else
+            else if (newAlpha > alphaTarget)
             {
-                newAlpha -= Time.deltaTime / fadeTime;
+                newAlpha -= Time.deltaTime / fadeDuration;
             }
 
             foreach (var skinnedMeshRenderer in _skinnedMeshRenderers)
@@ -446,7 +455,7 @@ public class PlayerController : MonoBehaviour
         foreach (var skinnedMeshRenderer in _skinnedMeshRenderers)
         {
             var color = skinnedMeshRenderer.material.color;
-            skinnedMeshRenderer.material.color = new Color(color.r, color.g, color.b, show ? 1f : 0f);
+            skinnedMeshRenderer.material.color = new Color(color.r, color.g, color.b, show ? 1f : alphaTarget);
         }
 
         if (show)
@@ -457,6 +466,60 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        _toggleMRsCoroutine = null;
+        _fadeMRsCoroutine = null;
+    }
+
+    public void FlashMeshRenderers(float flashDuration, float flashRate)
+    {
+        if (_fadeMRsCoroutine != null) StopCoroutine(_fadeMRsCoroutine);
+        _fadeMRsCoroutine = StartCoroutine(FlashMeshRenderersCoroutine(flashDuration, flashRate));
+    }
+
+    private IEnumerator FlashMeshRenderersCoroutine(float flashDuration, float flashRate)
+    {
+        for (int i = 0; i < _skinnedMeshRenderers.Count; i++)
+        {
+            _skinnedMeshRenderers[i].material = _transparentMaterials[i];
+        }
+
+        float lowTarget = 0.25f;
+        float highTarget = 0.95f;
+        var newAlpha = highTarget;
+        var startTime = Time.time;
+        bool reachedLowTarget = false;
+
+        while (Time.time < flashDuration + startTime)
+        {
+            if (!reachedLowTarget && newAlpha > lowTarget)
+            {
+                newAlpha -= flashRate * Time.deltaTime;
+            }
+            else
+            {
+                reachedLowTarget = true;
+                newAlpha += flashRate * Time.deltaTime;
+
+                if (newAlpha >= highTarget)
+                {
+                    reachedLowTarget = false;
+                    // Debug.Log("Return to low target");
+                }
+            }
+
+            foreach (var skinnedMeshRenderer in _skinnedMeshRenderers)
+            {
+                var color = skinnedMeshRenderer.material.color;
+                skinnedMeshRenderer.material.color = new Color(color.r, color.g, color.b, newAlpha);
+            }
+
+            yield return null;
+        }
+
+        for (int i = 0; i < _skinnedMeshRenderers.Count; i++)
+        {
+            _skinnedMeshRenderers[i].material = _originalMaterials[i];
+        }
+
+        _fadeMRsCoroutine = null;
     }
 }

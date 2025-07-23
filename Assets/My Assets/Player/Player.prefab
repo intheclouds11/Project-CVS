@@ -5822,6 +5822,8 @@ MonoBehaviour:
   _chargeMeter: {fileID: 5014963689756114707}
   _critRange: {fileID: 6769001076037924196}
   _chargeMeterCanvas: {fileID: 7306149936519701611}
+  _chargeMeterStartFadeDelay: 0.2
+  _chargeMeterFinishFadeDelay: 2
   _chargeIndicator: {fileID: 6135158070405161474}
   _chargeIndicatorDelay: 0.3
   _chargedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -5851,10 +5853,11 @@ MonoBehaviour:
   _diedSFXVolume: 0.65
   _diedSFXPitch: 1
   _diedVFX: {fileID: 9049631545069152736, guid: e2d4687b86076744fbdd2aa6777e932f, type: 3}
-  _damageInvincibilityDuration: 0.5
+  _invincibilityDuration: 0.75
+  _invincibilityFlashRate: 20
   _damagedVignetteIntensity: 0.45
   _damagedLowPassFreq: 5000
-  _damagedLowPassAdjustSpeed: 2
+  _damagedLowPassAdjustDuration: 2
   _damagedSaturation: -40
 --- !u!114 &4469519121344481290
 MonoBehaviour:
