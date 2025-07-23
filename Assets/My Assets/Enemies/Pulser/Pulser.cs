@@ -88,7 +88,8 @@ public class Pulser : BaseEnemy
                 yield break;
             }
 
-            if (!_player.Health.IsInvincible() && !_player.IsDashing && _distToPlayer <= _pulseDamageRadius)
+            if (_player.Health.IsAlive() && !_player.Health.IsInvincible() && !_player.IsDashing &&
+                _distToPlayer <= _pulseDamageRadius)
             {
                 var knockBackDir = (_player.transform.position - transform.position).normalized;
                 _player.Health.TakeDamage(_pulseDamage, knockBackDir, _damagePlayerKnockback);
