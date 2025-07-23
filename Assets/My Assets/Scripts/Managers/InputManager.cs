@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Broccoli.Pipe;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Users;
@@ -53,6 +54,7 @@ public class InputManager : MonoBehaviour
     public bool TimeScaleResetWasPressed { get; private set; }
 
     public bool UsingGamepad { get; private set; }
+    private bool _gamepadWasUsed;
     private MyInputs _inputs;
     private Coroutine _vibrateCoroutine;
 
@@ -100,6 +102,17 @@ public class InputManager : MonoBehaviour
             UsingGamepad = true;
         else if (Keyboard.current.wasUpdatedThisFrame || Mouse.current.leftButton.wasPressedThisFrame)
             UsingGamepad = false;
+
+        if (!_gamepadWasUsed && UsingGamepad)
+        {
+            _gamepadWasUsed = true;
+            Cursor.visible = false;
+        }
+        else if (_gamepadWasUsed && !UsingGamepad)
+        {
+            _gamepadWasUsed = false;
+            Cursor.visible = true;
+        }
 
         // Shared actions
         Translation = _inputs.Player.Translation.ReadValue<Vector2>();
