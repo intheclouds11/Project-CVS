@@ -24,10 +24,22 @@ public class PulserProjectile : Projectile
     private Animator _lightAnimator;
     [SerializeField]
     private GameObject _pulseVFX;
+    [SerializeField]
+    private MeshRenderer _telegraphIndicatorMesh;
+    [SerializeField]
+    private float _telegraphAlphaTarget = 1f;
 
     private bool _isPulsing;
     private readonly Collider[] _overlapColliders = new Collider[1];
+    private Vector3 _scaleTarget;
 
+
+    protected override void Awake()
+    {
+        base.Awake();
+        _scaleTarget = Vector3.one * _pulseDamageRadius * 2;
+        _telegraphIndicatorMesh.transform.localScale = Vector3.zero;
+    }
 
     protected override void Update()
     {
@@ -40,6 +52,7 @@ public class PulserProjectile : Projectile
     private IEnumerator PulseCoroutine()
     {
         _isPulsing = true;
+        StartCoroutine(TelegraphIndicatorCoroutine());
         yield return new WaitForSeconds(_pulseStartDelay);
 
         _pulseVFX.SetActive(false);
@@ -62,9 +75,10 @@ public class PulserProjectile : Projectile
                     playerHit.Health.TakeDamage(2, knockBackDir, _knockback);
                     AudioManager.Instance.PlaySound(playerHit.transform, _pulseHitSFX, true, false, 0.9f);
                 }
-                else if (_isDeflected && bossHit)
+                else if (CompareTag("Deflected") && bossHit)
                 {
                     bossHit.Health.TakeDamage(_deflectedPulseDamage, Vector3.zero, null);
+                    ReturnToPool(true);
                 }
 
                 _abilityEnabled = false;
@@ -76,11 +90,26 @@ public class PulserProjectile : Projectile
     }
 
 
+    private IEnumerator TelegraphIndicatorCoroutine()
+    {
+        _telegraphIndicatorMesh.gameObject.SetActive(true);
+
+        var startTime = Time.time;
+        while (Time.time < startTime + _pulseStartDelay)
+        {
+            _telegraphIndicatorMesh.transform.localScale = Vector3.MoveTowards(_telegraphIndicatorMesh.transform.localScale,
+                _scaleTarget, _scaleTarget.magnitude * Time.deltaTime / _pulseStartDelay);
+            yield return null;
+        }
+    }
+
     protected override void OnReturnToPool()
     {
         base.OnReturnToPool();
         _isPulsing = false;
         _pulseVFX.SetActive(false);
+        _telegraphIndicatorMesh.transform.localScale = Vector3.zero;
+        _telegraphIndicatorMesh.gameObject.SetActive(false);
     }
 
     private void OnDrawGizmosSelected()

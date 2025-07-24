@@ -39,7 +39,6 @@ public class Projectile : MonoBehaviour
     protected string _poolKey;
     protected float _distToPlayer;
     protected bool _isCritDeflected;
-    protected bool _isDeflected;
     protected AudioSource _abilityAudio;
     protected MultiProjectilePool _pool;
     protected PlayerController _player;
@@ -100,7 +99,6 @@ public class Projectile : MonoBehaviour
         tag = "EnemyProjectile";
         Rb.linearVelocity = Vector3.zero;
         _isCritDeflected = false;
-        _isDeflected = false;
         gameObject.SetActive(false);
         transform.localPosition = Vector3.zero;
         _pool.Return(_poolKey, gameObject);
@@ -117,7 +115,6 @@ public class Projectile : MonoBehaviour
         if (CompareTag("EnemyProjectile") && other.CompareTag("PlayerWeapon"))
         {
             tag = "Deflected";
-            _isDeflected = true;
             var sawblade = other.GetComponentInParent<SawBlade>();
             _isCritDeflected = sawblade.IsCritAttack;
 
@@ -131,9 +128,10 @@ public class Projectile : MonoBehaviour
                 AudioManager.Instance.PlaySound(transform, _deflectedSFX, true, false, 0.5f, pitch);
             }
 
-            transform.rotation = Quaternion.LookRotation(_player.RotationTransform.forward);
+            var newForward = sawblade.DeflectDirection;
+            transform.rotation = Quaternion.LookRotation(newForward);
             var deflectSpeed = _baseDeflectSpeed * sawblade.DamageEnemyKnockback.KnockbackAmount * (_isCritDeflected ? 2f : 1f);
-            Rb.linearVelocity = _player.RotationTransform.forward * deflectSpeed;
+            Rb.linearVelocity = newForward * deflectSpeed;
         }
         else
         {

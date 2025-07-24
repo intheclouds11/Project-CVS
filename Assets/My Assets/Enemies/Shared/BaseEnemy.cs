@@ -48,6 +48,8 @@ public abstract class BaseEnemy : MonoBehaviour
     protected AudioClip _agroSFX;
     [SerializeField]
     protected AudioClip _abilityStartSFX;
+    [SerializeField]
+    protected AudioClip _hitByKnockbackSFX;
 
     public Health Health { get; protected set; }
     public bool IsAggroed { get; protected set; }
@@ -55,6 +57,7 @@ public abstract class BaseEnemy : MonoBehaviour
     protected Vector3 _startingPos;
     public bool IsGettingKnockedBack { get; private set; }
     protected float _distToPlayer;
+    protected bool _usingAbility;
     protected float _agroPitch;
     protected Coroutine _knockbackCoroutine;
     protected Coroutine _damagedPlayerCoroutine;
@@ -231,7 +234,7 @@ public abstract class BaseEnemy : MonoBehaviour
 
         yield return new WaitForSeconds(knockback.StunDuration);
 
-        _aiFollower.canMove = GameManager.Instance.EnemyAIEnabled;
+        _aiFollower.canMove = GameManager.Instance.EnemyAIEnabled && !_usingAbility;
         IsGettingKnockedBack = false;
         _knockbackCoroutine = null;
         _animator.speed = prevAnimatorSpeed;
@@ -244,6 +247,7 @@ public abstract class BaseEnemy : MonoBehaviour
             if (enemyHit && !enemyHit.IsGettingKnockedBack)
             {
                 _knockbackTween?.Kill();
+                AudioManager.Instance.PlaySound(enemyHit.transform, _hitByKnockbackSFX);
                 var knockBackDir = (enemyHit.transform.position - transform.position).normalized;
                 enemyHit.Health.TakeDamage(_baseDamage, knockBackDir, _damageEnemyKnockback);
                 OnDamagedPlayer();
@@ -253,6 +257,7 @@ public abstract class BaseEnemy : MonoBehaviour
 
     protected void OnDamagedPlayer()
     {
+        if (!Health.IsAlive()) return;
         if (_damagedPlayerCoroutine != null) StopCoroutine(_damagedPlayerCoroutine);
         _damagedPlayerCoroutine = StartCoroutine(DamagedPlayerCoroutine());
     }

@@ -1,14 +1,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using NaughtyAttributes;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEngine.UI;
 using Utils;
 using Random = UnityEngine.Random;
 
 public class FirstBossEncounter : MonoBehaviour
 {
+    [SerializeField]
+    private float _phase2HealthRatio = 0.5f;
     [Header("Projectiles Settings")]
     [SerializeField]
     private List<ProjectilePattern> _phase1ProjectilePatterns;
@@ -67,9 +71,23 @@ public class FirstBossEncounter : MonoBehaviour
     [SerializeField]
     private int _playHurtSFXHealthInterval = 400;
     private int _prevHurtSFXHealth;
+    [SerializeField]
+    private Color _phase2Color;
+    [SerializeField]
+    private float _phase2ColorTransitionDuration = 1.5f;
+    [SerializeField]
+    private MeshRenderer _bodyMesh;
+    
+    [Header("Debug")]
+    [SerializeField]
+    private Slider _phase1HealthBar;
+    [SerializeField]
+    private Slider _phase2HealthBar;
 
     public Health Health { get; private set; }
 
+    private int _phase1RemainingHealth;
+    private bool _hasEnteredPhase2;
     private float _distToPlayer;
     private bool _isPerformingAOE;
     private float _lastImpulseTime;
@@ -82,6 +100,9 @@ public class FirstBossEncounter : MonoBehaviour
     private AudioSource _projectileCooldownAudio;
     private AudioSource _AOEChargeAudio;
     private AudioSource _AOEAttackAudio;
+    private AudioSource _hurtAudio;
+    private Coroutine _AOECoroutine;
+    private Coroutine _projectileCoroutine;
 
 
     private void Start()
@@ -112,8 +133,21 @@ public class FirstBossEncounter : MonoBehaviour
 
     public void EnteredBossZone()
     {
-        StartCoroutine(ProjectilesCoroutine(_phase1ProjectilePatterns[0]));
         enabled = true;
+        if (Application.isEditor)
+        {
+            _phase1HealthBar.transform.parent.gameObject.SetActive(true);
+            _phase1HealthBar.maxValue = Health.GetMaxHealth - Health.GetMaxHealth * _phase2HealthRatio;
+            _phase1HealthBar.value = _phase1HealthBar.maxValue;
+            _phase2HealthBar.maxValue = Health.GetMaxHealth * _phase2HealthRatio;
+            _phase2HealthBar.value = _phase2HealthBar.maxValue;
+        }
+        else
+        {
+            _phase1HealthBar.transform.parent.gameObject.SetActive(false);
+        }
+
+        _projectileCoroutine = StartCoroutine(ProjectilesCoroutine(_phase1ProjectilePatterns[0]));
     }
 
     private void Update()
@@ -124,11 +158,11 @@ public class FirstBossEncounter : MonoBehaviour
         {
             if (!_isPerformingAOE && _distToPlayer <= _AOEAgroRadius)
             {
-                StartCoroutine(AOECoroutine());
+                _AOECoroutine = StartCoroutine(AOECoroutine());
                 return;
             }
 
-            StartCoroutine(ProjectilesCoroutine(SelectRandomPattern(1)));
+            _projectileCoroutine = StartCoroutine(ProjectilesCoroutine(SelectRandomPattern(1)));
         }
     }
 
@@ -158,6 +192,8 @@ public class FirstBossEncounter : MonoBehaviour
             _projectileChargeAudio = AudioManager.Instance.PlaySound(transform, _currentPattern.ChargeSFX, true, false,
                 _currentPattern.ChargeVolume, _currentPattern.ChargePitch);
 
+            _currentPattern.StartChargeVFX(_projectileSpawnPoints);
+
             yield return new WaitForSeconds(_currentPattern.StartDelay);
 
             _projectileChargeAudio.Stop();
@@ -166,8 +202,8 @@ public class FirstBossEncounter : MonoBehaviour
             int count = 0;
             while (count < _currentPattern.FireCount)
             {
-                _currentPattern.Spawn(_multiProjectilePool, _projectileSpawnPoints);
                 count++;
+                _currentPattern.Spawn(_multiProjectilePool, _projectileSpawnPoints);
                 yield return new WaitForSeconds(_currentPattern.TimeBetweenShots);
             }
 
@@ -186,6 +222,7 @@ public class FirstBossEncounter : MonoBehaviour
 
         _projectileCooldownAudio = null;
         _currentPattern = null;
+        _projectileCoroutine = null;
     }
 
     private IEnumerator AOECoroutine()
@@ -233,6 +270,7 @@ public class FirstBossEncounter : MonoBehaviour
         yield return new WaitForSeconds(_postAOEDelay);
 
         _isPerformingAOE = false;
+        _AOECoroutine = null;
     }
 
     private void OnDamageTaken(Vector3 arg1, Knockback arg2)
@@ -242,21 +280,54 @@ public class FirstBossEncounter : MonoBehaviour
 
         if (_prevHurtSFXHealth - Health.CurrentHealth >= _playHurtSFXHealthInterval)
         {
-            AudioManager.Instance.PlaySound(transform, _hurtSFX, true, false, 1f, 1f);
+            if (!_hurtAudio || !_hurtAudio.isPlaying)
+                _hurtAudio = AudioManager.Instance.PlaySound(transform, _hurtSFX, true, false, 1f, 1f);
             _impulseSource.ImpulseDefinition.ImpulseDuration = _hurtImpulseDuration;
             _impulseSource.GenerateImpulseWithVelocity(new Vector3(0f, _hurtImpulseVelocity, 0f));
 
             _prevHurtSFXHealth = Health.CurrentHealth;
         }
+
+        _phase1RemainingHealth = (int) (Health.CurrentHealth - Health.GetMaxHealth * _phase2HealthRatio);
+        if (_phase1RemainingHealth > 0)
+        {
+            _phase1HealthBar.value = _phase1RemainingHealth;
+        }
+        else
+        {
+            _phase1HealthBar.value = 0f;
+            _phase2HealthBar.value = Health.CurrentHealth;
+
+            if (!_hasEnteredPhase2)
+            {
+                _hasEnteredPhase2 = true;
+                StartCoroutine(MeshTransition());
+            }
+        }
     }
 
     private void OnDied(GameObject obj)
     {
-        gameObject.SetActive(false);
+        if (_projectileCoroutine != null) StopCoroutine(_projectileCoroutine);
+        if (_AOECoroutine != null) StopCoroutine(_AOECoroutine);
         _AOEChargeAudio?.Stop();
         _AOEAttackAudio?.Stop();
         _projectileChargeAudio?.Stop();
         _projectileCooldownAudio?.Stop();
+        _phase1HealthBar.transform.parent.gameObject.SetActive(false);
+    }
+
+    private IEnumerator MeshTransition()
+    {
+        var startTime = Time.time;
+        while (Time.time < startTime + _phase2ColorTransitionDuration)
+        {
+            _bodyMesh.material.color =
+                Color.Lerp(_bodyMesh.material.color, _phase2Color, Time.deltaTime / _phase2ColorTransitionDuration);
+            yield return null;
+        }
+
+        _bodyMesh.material.color = _phase2Color;
     }
 
     private void OnDrawGizmosSelected()

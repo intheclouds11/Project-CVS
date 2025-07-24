@@ -46,9 +46,11 @@ public class ProjectilePattern : ScriptableObject
     public PatternAbilityUsage abilityUsage;
 
     [Header("FX")]
+    public GameObject SpawnPointChargeVFX;
     public AudioClip ChargeSFX;
     public float ChargeVolume = 1f;
     public float ChargePitch = 1f;
+    public GameObject SpawnPointFireVFX;
     public AudioClip SpawnSFX;
     public float SpawnVolume = 1f;
     public AudioClip CooldownSFX;
@@ -58,6 +60,7 @@ public class ProjectilePattern : ScriptableObject
     private float _spreadAngleOffset;
     private float _currentSpreadAngleOffset;
     private Transform _lastUsedSpawnPoint;
+    private Transform _nextSpawnPoint;
     
 
     private void Awake()
@@ -86,6 +89,7 @@ public class ProjectilePattern : ScriptableObject
         }
 
         var spawnPoint = GetSpawnPoint(spawnPoints);
+        Instantiate(SpawnPointFireVFX, spawnPoint.position, Quaternion.LookRotation(spawnPoint.forward));
 
         var projObj = pool.Get(ProjectilePrefab.name);
         projObj.transform.position = spawnPoint.position;
@@ -106,9 +110,9 @@ public class ProjectilePattern : ScriptableObject
             direction = rotation * spawnPoint.forward;
             _currentSpreadAngleOffset += _spreadAngleOffset;
         }
-        
-        
-        proj.Rb.linearVelocity = direction * Speed;
+
+        var dirNoPitch = new Vector3(direction.x, 0f, direction.z).normalized;
+        proj.Rb.linearVelocity = dirNoPitch * Speed;
 
         var pitch = Random.Range(0.9f, 1.1f);
         AudioManager.Instance.PlaySound(proj.transform, SpawnSFX, true, false, SpawnVolume, pitch);
@@ -116,7 +120,7 @@ public class ProjectilePattern : ScriptableObject
         return projObj;
     }
 
-    private Transform GetSpawnPoint(List<Transform> spawnPoints)
+    private Transform GetSpawnPoint(List<Transform> spawnPoints, bool isSpawning = true)
     {
         Transform spawnPoint = null;
         if (SpawnPointSelection == BossSpawnPointSelection.Left)
@@ -159,8 +163,14 @@ public class ProjectilePattern : ScriptableObject
             }
         }
 
-        _lastUsedSpawnPoint = spawnPoint;
+        if (isSpawning) _lastUsedSpawnPoint = spawnPoint;
 
         return spawnPoint;
+    }
+
+    public void StartChargeVFX(List<Transform> spawnPoints)
+    {
+        var spawnPoint = GetSpawnPoint(spawnPoints, false);
+        Instantiate(SpawnPointChargeVFX, spawnPoint.position, Quaternion.LookRotation(spawnPoint.forward));
     }
 }

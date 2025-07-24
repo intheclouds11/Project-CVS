@@ -64,6 +64,7 @@ public class DasherProjectile : Projectile
     private IEnumerator DashCoroutine()
     {
         _isDashing = true;
+        tag = "Deflected";
 
         Rb.linearVelocity = Vector3.zero;
         _animator.SetTrigger("Alerted");
@@ -74,7 +75,8 @@ public class DasherProjectile : Projectile
         _abilityAudio = AudioManager.Instance.PlaySound(transform, _dashSFX, true, false, 1f, 1.1f);
 
         var dir = (_player.transform.position - transform.position).normalized;
-        Rb.linearVelocity = dir * _dashSpeed;
+        var dirNoPitch = new Vector3(dir.x, 0f, dir.z).normalized;
+        Rb.linearVelocity = dirNoPitch * _dashSpeed;
     }
 
     protected override void DamagePlayer(PlayerController playerHit, bool usingAbility)
@@ -88,7 +90,7 @@ public class DasherProjectile : Projectile
         _isDashing = false;
         if (_dashAlertAudio) _dashAlertAudio = null;
     }
-    
+
     private void OnDrawGizmosSelected()
     {
         var gizmosColor = Gizmos.color;
