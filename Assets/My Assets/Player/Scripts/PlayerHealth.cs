@@ -21,6 +21,8 @@ public class PlayerHealth : Health
     [SerializeField]
     private float _damagedSaturation = -40f;
 
+    public bool IsDamaged => !Mathf.Approximately(_vignette.intensity.value, _startingVignetteIntensity);
+
     private float _lastDamageTime;
     private bool _wasInvincible;
     private float _startingVignetteIntensity;

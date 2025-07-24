@@ -73,6 +73,7 @@ public class SawBlade : MonoBehaviour
     public bool IsReturning { get; private set; }
     public bool IsLongRangeAttack { get; private set; }
     public bool IsCritAttack { get; private set; }
+    public Vector3 DeflectDirection { get; private set; }
     /// bool: wasCritAttack
     public static event Action<bool> HitEnemy;
 
@@ -91,7 +92,6 @@ public class SawBlade : MonoBehaviour
     {
         _initialKnockbackAmount = DamageEnemyKnockback.KnockbackAmount;
         _impulseSource = GetComponent<CinemachineImpulseSource>();
-        _player = GameManager.Instance.Player1;
         _player.Health.Died += OnDied;
         _rb = GetComponent<Rigidbody>();
         _finalStartReturnTime = _longRangeReturnTime;
@@ -102,30 +102,7 @@ public class SawBlade : MonoBehaviour
     {
         ResetToDefaultState();
     }
-
-    private void OnEnable()
-    {
-        _spawnTime = Time.time;
-        Vector3 forceToAdd = transform.forward * _finalImpulseForce;
-        _rb.AddForce(forceToAdd, ForceMode.Impulse);
-
-        _trailRenderer.Clear();
-        if (IsCritAttack)
-        {
-            _trailRenderer.emitting = true;
-        }
-
-        if (IsLongRangeAttack)
-        {
-            PlayLoopAudio();
-        }
-        else
-        {
-            var pitch = Random.Range(0.9f, 1.1f);
-            AudioManager.Instance.PlaySound(transform, _swipeSFX, true, false, 0.8f, pitch);
-        }
-    }
-
+    
     private void Update()
     {
         if (IsLongRangeAttack)
@@ -152,6 +129,8 @@ public class SawBlade : MonoBehaviour
     {
         IsReturning = true;
         _rb.linearVelocity = Vector3.zero;
+        // pick random perpendicular direction
+        DeflectDirection = Vector3.Cross(Random.Range(0,2) == 0 ? Vector3.up : Vector3.down, DeflectDirection);
         if (IsLongRangeAttack)
         {
             _trailRenderer.emitting = true;
@@ -254,12 +233,33 @@ public class SawBlade : MonoBehaviour
         _finalStartReturnTime = IsCritAttack ? _critReturnTime : IsLongRangeAttack ? _longRangeReturnTime : _shortRangeReturnTime;
 
         _finalDamage = crit ? _critDamage : (int) Mathf.Clamp(_baseDamage * chargeAmount * 2f, _baseDamage * 0.5f, _baseDamage);
-
         // Debug.Log($"_finalDamage: {_finalDamage}");
 
+        if (!_player) _player = GetComponentInParent<PlayerController>();
         transform.parent = null;
         transform.position = spawnPoint.position;
         transform.rotation = spawnPoint.rotation;
+        DeflectDirection = transform.forward;
         gameObject.SetActive(true);
+        
+        _spawnTime = Time.time;
+        Vector3 forceToAdd = transform.forward * _finalImpulseForce;
+        _rb.AddForce(forceToAdd, ForceMode.Impulse);
+
+        _trailRenderer.Clear();
+        if (IsCritAttack)
+        {
+            _trailRenderer.emitting = true;
+        }
+
+        if (IsLongRangeAttack)
+        {
+            PlayLoopAudio();
+        }
+        else
+        {
+            var pitch = Random.Range(0.9f, 1.1f);
+            AudioManager.Instance.PlaySound(transform, _swipeSFX, true, false, 0.8f, pitch);
+        }
     }
 }

@@ -37,7 +37,10 @@ public class PauseMenu : MonoBehaviour
         IsPaused = false;
         gameObject.SetActive(false);
         InputManager.Instance.ToggleInputsAllowed(true);
-        AudioManager.Instance.AdjustMasterLowPass(22000f, 0.5f);
+        if (!GameManager.Instance.Player1.Health.IsDamaged)
+        {
+            AudioManager.Instance.AdjustMasterLowPass(22000f, 0.5f);
+        }
     }
 
     public void OnReturnToMainMenu()
