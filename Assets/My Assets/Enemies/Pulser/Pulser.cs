@@ -25,12 +25,24 @@ public class Pulser : BaseEnemy
     [SerializeField]
     private GameObject _pulseVFX;
     [SerializeField]
+    private MeshRenderer _telegraphIndicatorMesh;
+    [SerializeField]
+    private float _telegraphAlphaTarget = 1f;
+    [SerializeField]
     private Animator _lightAnimator;
     [SerializeField]
     private AudioClip _pulseHitSFX;
 
     private float _lastPulseCompleteTime;
-    private bool _isPulsing;
+    private Vector3 _scaleTarget;
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        _scaleTarget = Vector3.one * _pulseDamageRadius * 2;
+        _telegraphIndicatorMesh.transform.localScale = Vector3.zero;
+    }
 
 
     protected override void Update()
@@ -38,7 +50,7 @@ public class Pulser : BaseEnemy
         base.Update();
         _distToPlayer = GameManager.Instance.GetDistanceFromPlayer(transform);
 
-        if (!_aiFollower.canMove || !_player.Health.IsAlive()) return;
+        if (_usingAbility || !_aiFollower.canMove || !_player.Health.IsAlive()) return;
 
         if (!IsAggroed && _distToPlayer <= _agroRange)
         {
@@ -63,7 +75,7 @@ public class Pulser : BaseEnemy
     private IEnumerator PulseCoroutine()
     {
         _aiFollower.canMove = false;
-        _isPulsing = true;
+        _usingAbility = true;
         _pulseVFX.SetActive(false);
         _pulseVFX.SetActive(true);
         _lightAnimator.SetTrigger("Pulse");
@@ -71,6 +83,9 @@ public class Pulser : BaseEnemy
 
         if (_agroAudio) _agroAudio.Stop();
         _abilityStartAudio = AudioManager.Instance.PlaySound(transform, _abilityStartSFX, true, false, 0.7f);
+
+        if (_telegraphCoroutine != null) StopCoroutine(_telegraphCoroutine);
+        _telegraphCoroutine = StartCoroutine(TelegraphIndicatorCoroutine());
 
         yield return new WaitForSeconds(_pulseDelayDuration);
 
@@ -80,7 +95,7 @@ public class Pulser : BaseEnemy
         {
             if (_isInterruptable && IsGettingKnockedBack)
             {
-                _isPulsing = false;
+                _usingAbility = false;
                 _lastPulseCompleteTime = Time.time;
                 _pulseVFX.SetActive(false);
                 _abilityStartAudio.Stop();
@@ -100,7 +115,7 @@ public class Pulser : BaseEnemy
             yield return null;
         }
 
-        _isPulsing = false;
+        _usingAbility = false;
         _lastPulseCompleteTime = Time.time;
         _aiFollower.canMove = true;
         _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
@@ -124,10 +139,41 @@ public class Pulser : BaseEnemy
     protected override void OnDamageTaken(Vector3 knockbackDir, Knockback knockback)
     {
         base.OnDamageTaken(knockbackDir, knockback);
-        if (!_isPulsing)
+        if (!_usingAbility)
         {
             StartCoroutine(PulseCoroutine());
         }
+    }
+
+    private Coroutine _telegraphCoroutine;
+
+    private IEnumerator TelegraphIndicatorCoroutine()
+    {
+        _telegraphIndicatorMesh.gameObject.SetActive(true);
+
+        var startScale = _telegraphIndicatorMesh.transform.localScale;
+        var startTime = Time.time;
+        while (Time.time < startTime + _pulseDelayDuration)
+        {
+            _telegraphIndicatorMesh.transform.localScale = Vector3.MoveTowards(_telegraphIndicatorMesh.transform.localScale,
+                _scaleTarget, _scaleTarget.magnitude * Time.deltaTime / _pulseDelayDuration);
+            yield return null;
+        }
+
+
+        yield return new WaitForSeconds(_pulseDuration);
+
+        startTime = Time.time;
+        while (Time.time < startTime + _pulseDuration)
+        {
+            _telegraphIndicatorMesh.transform.localScale = Vector3.MoveTowards(_telegraphIndicatorMesh.transform.localScale,
+                startScale, _scaleTarget.magnitude * Time.deltaTime / _pulseDuration);
+
+            yield return null;
+        }
+
+        _telegraphIndicatorMesh.transform.localScale = startScale;
+        _telegraphIndicatorMesh.gameObject.SetActive(false);
     }
 
     private void OnDrawGizmosSelected()
