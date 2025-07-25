@@ -62,7 +62,7 @@ public abstract class BaseEnemy : MonoBehaviour
     protected Coroutine _knockbackCoroutine;
     protected Coroutine _damagedPlayerCoroutine;
     protected Coroutine _wanderCoroutine;
-    private readonly Collider[] _overlapColliders = new Collider[1];
+    private readonly Collider[] _overlapColliders = new Collider[5];
     protected AudioSource _patrolAudio;
     protected AudioSource _agroAudio;
     protected AudioSource _abilityStartAudio;
@@ -201,8 +201,13 @@ public abstract class BaseEnemy : MonoBehaviour
         if (overlapCount > 0)
         {
             // Debug.Log("Enemy overlapping other collider(s)");
-            overlapObj = _overlapColliders[0].gameObject;
-            return true;
+            var overlapList = _overlapColliders.ToList();
+            overlapList.Remove(_collider);
+            if (overlapList.Any(c => c && (!c.TryGetComponent(out BaseEnemy otherEnemy) || otherEnemy._distToPlayer < _distToPlayer)))
+            {
+                overlapObj = _overlapColliders[0].gameObject;
+                return true;
+            }
         }
 
         overlapObj = null;
@@ -214,7 +219,7 @@ public abstract class BaseEnemy : MonoBehaviour
         _aiFollower.canMove = false;
         IsGettingKnockedBack = true;
         var prevAnimatorSpeed = _animator.speed;
-        _animator.speed = 0f;
+        _animator.speed = 0.5f;
 
         _knockbackTween?.Kill();
         Vector3 targetPos = transform.position + dir * knockback.KnockbackAmount;
@@ -297,6 +302,7 @@ public abstract class BaseEnemy : MonoBehaviour
             _abilityStartAudio.Stop();
             _abilityStartAudio = null;
         }
+
         gameObject.SetActive(false);
     }
 
