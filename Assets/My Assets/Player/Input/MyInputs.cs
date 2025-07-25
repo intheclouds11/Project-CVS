@@ -209,15 +209,6 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Toggle Charge HUD"",
-                    ""type"": ""Button"",
-                    ""id"": ""7b1a8019-d583-4779-85ef-8de1448ad0f9"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""Toggle God Mode"",
                     ""type"": ""Button"",
                     ""id"": ""276d204b-8995-4bba-a535-327c15689e3f"",
@@ -561,28 +552,6 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""7e063a9d-34b7-417f-959b-d162239a1b0d"",
-                    ""path"": ""<Keyboard>/h"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Toggle Charge HUD"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""96736cb9-f439-4da9-b2f4-2210bfec91d3"",
-                    ""path"": ""<Gamepad>/leftShoulder"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Toggle Charge HUD"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""3db64ff8-e8d3-4b51-86cc-c1acef5c6883"",
                     ""path"": ""<Keyboard>/g"",
                     ""interactions"": """",
@@ -800,7 +769,6 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
         m_Player_ActivateExpressionDown = m_Player.FindAction("Activate Expression (Down)", throwIfNotFound: true);
         m_Player_ActivateExpressionLeft = m_Player.FindAction("Activate Expression (Left)", throwIfNotFound: true);
         m_Player_ActivateExpressionRight = m_Player.FindAction("Activate Expression (Right)", throwIfNotFound: true);
-        m_Player_ToggleChargeHUD = m_Player.FindAction("Toggle Charge HUD", throwIfNotFound: true);
         m_Player_ToggleGodMode = m_Player.FindAction("Toggle God Mode", throwIfNotFound: true);
         m_Player_ToggleEnemyAI = m_Player.FindAction("Toggle Enemy AI", throwIfNotFound: true);
         m_Player_IncreaseTimeScale = m_Player.FindAction("Increase TimeScale", throwIfNotFound: true);
@@ -904,7 +872,6 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_ActivateExpressionDown;
     private readonly InputAction m_Player_ActivateExpressionLeft;
     private readonly InputAction m_Player_ActivateExpressionRight;
-    private readonly InputAction m_Player_ToggleChargeHUD;
     private readonly InputAction m_Player_ToggleGodMode;
     private readonly InputAction m_Player_ToggleEnemyAI;
     private readonly InputAction m_Player_IncreaseTimeScale;
@@ -974,10 +941,6 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/ActivateExpressionRight".
         /// </summary>
         public InputAction @ActivateExpressionRight => m_Wrapper.m_Player_ActivateExpressionRight;
-        /// <summary>
-        /// Provides access to the underlying input action "Player/ToggleChargeHUD".
-        /// </summary>
-        public InputAction @ToggleChargeHUD => m_Wrapper.m_Player_ToggleChargeHUD;
         /// <summary>
         /// Provides access to the underlying input action "Player/ToggleGodMode".
         /// </summary>
@@ -1067,9 +1030,6 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
             @ActivateExpressionRight.started += instance.OnActivateExpressionRight;
             @ActivateExpressionRight.performed += instance.OnActivateExpressionRight;
             @ActivateExpressionRight.canceled += instance.OnActivateExpressionRight;
-            @ToggleChargeHUD.started += instance.OnToggleChargeHUD;
-            @ToggleChargeHUD.performed += instance.OnToggleChargeHUD;
-            @ToggleChargeHUD.canceled += instance.OnToggleChargeHUD;
             @ToggleGodMode.started += instance.OnToggleGodMode;
             @ToggleGodMode.performed += instance.OnToggleGodMode;
             @ToggleGodMode.canceled += instance.OnToggleGodMode;
@@ -1138,9 +1098,6 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
             @ActivateExpressionRight.started -= instance.OnActivateExpressionRight;
             @ActivateExpressionRight.performed -= instance.OnActivateExpressionRight;
             @ActivateExpressionRight.canceled -= instance.OnActivateExpressionRight;
-            @ToggleChargeHUD.started -= instance.OnToggleChargeHUD;
-            @ToggleChargeHUD.performed -= instance.OnToggleChargeHUD;
-            @ToggleChargeHUD.canceled -= instance.OnToggleChargeHUD;
             @ToggleGodMode.started -= instance.OnToggleGodMode;
             @ToggleGodMode.performed -= instance.OnToggleGodMode;
             @ToggleGodMode.canceled -= instance.OnToggleGodMode;
@@ -1412,13 +1369,6 @@ public partial class @MyInputs: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnActivateExpressionRight(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "Toggle Charge HUD" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnToggleChargeHUD(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "Toggle God Mode" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>

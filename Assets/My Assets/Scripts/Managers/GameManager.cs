@@ -49,9 +49,6 @@ public class GameManager : MonoBehaviour
                 EnemyAIToggled?.Invoke(EnemyAIEnabled);
                 Debug.Log($"[GameManager] EnemyAIEnabled: {EnemyAIEnabled}");
             }
-
-            if (InputManager.Instance.ToggleChargeHUDWasPressed)
-                Player1.PlayerAttack.ToggleChargeHUD();
         }
     }
 
