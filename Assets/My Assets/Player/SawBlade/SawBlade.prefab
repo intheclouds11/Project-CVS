@@ -590,6 +590,7 @@ MonoBehaviour:
   _returnedSFXVolume: 0.55
   _impactSFX: {fileID: 8300000, guid: 92aadb14cc314f54db316cc18b68fe36, type: 3}
   _impactSFXVolume: 0.45
+  _impactInvincibleEnemySFX: {fileID: 8300000, guid: 89c0c54bfba0f9f40ace1e71370afad4, type: 3}
   _impactVfx: {fileID: 9049631545069152736, guid: a5507d2beb31a874b93475d47a303386, type: 3}
 --- !u!54 &7434762892271647052
 Rigidbody:

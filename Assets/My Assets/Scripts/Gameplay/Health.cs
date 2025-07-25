@@ -14,6 +14,7 @@ public class Health : MonoBehaviour
     [SerializeField]
     protected int _maxHealth;
     public int GetMaxHealth => _maxHealth;
+    public bool Invincible;
     
     [Header("FX")]
     [SerializeField]
@@ -57,7 +58,7 @@ public class Health : MonoBehaviour
     {
         if (GameManager.Instance.CurrentState is GameManager.GameState.Victory
             or GameManager.GameState.AwaitingWave or GameManager.GameState.GameOver) return;
-        if (damage <= 0 || CurrentHealth <= 0) return;
+        if (Invincible || damage <= 0 || CurrentHealth <= 0) return;
 
         int newHealth = CurrentHealth - damage;
         if (GameManager.Instance.EnemyAIEnabled) CurrentHealth = newHealth;

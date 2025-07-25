@@ -68,6 +68,8 @@ public class SawBlade : MonoBehaviour
     [SerializeField]
     private float _impactSFXVolume = 0.45f;
     [SerializeField]
+    private AudioClip _impactInvincibleEnemySFX;
+    [SerializeField]
     private GameObject _impactVfx;
 
     public bool IsReturning { get; private set; }
@@ -80,6 +82,7 @@ public class SawBlade : MonoBehaviour
     private int _finalDamage;
     private float _finalImpulseForce;
     private float _finalStartReturnTime;
+    private float _timeInMotion;
     private AudioSource _loopAudio;
     private float _spawnTime;
     private Rigidbody _rb;
@@ -102,9 +105,10 @@ public class SawBlade : MonoBehaviour
     {
         ResetToDefaultState();
     }
-    
+
     private void Update()
     {
+        _timeInMotion += Time.deltaTime;
         if (IsLongRangeAttack)
         {
             _objToSpin.rotation *= Quaternion.AngleAxis(transform.eulerAngles.y + Time.deltaTime * 360, Vector3.up);
@@ -130,7 +134,7 @@ public class SawBlade : MonoBehaviour
         IsReturning = true;
         _rb.linearVelocity = Vector3.zero;
         // pick random perpendicular direction
-        DeflectDirection = Vector3.Cross(Random.Range(0,2) == 0 ? Vector3.up : Vector3.down, DeflectDirection);
+        DeflectDirection = Vector3.Cross(Random.Range(0, 2) == 0 ? Vector3.up : Vector3.down, DeflectDirection);
         if (IsLongRangeAttack)
         {
             _trailRenderer.emitting = true;
@@ -141,7 +145,7 @@ public class SawBlade : MonoBehaviour
     {
         if (_loopAudio) _loopAudio.Stop();
         var pitch = IsCritAttack ? 1.05f : 1f;
-        var volume = IsCritAttack ? 0.7f : 0.6f;
+        var volume = IsCritAttack ? 0.85f : 0.7f;
         _loopAudio = AudioManager.Instance.PlaySound(transform, _bladeSpinLoopSFX, true, true, volume, pitch);
     }
 
@@ -155,6 +159,7 @@ public class SawBlade : MonoBehaviour
         }
         else
         {
+            bool hitInvincible = true;
             var enemyHit = other.GetComponentInParent<BaseEnemy>();
             var bossHit = other.GetComponentInParent<FirstBossEncounter>();
             if (enemyHit || bossHit)
@@ -172,22 +177,24 @@ public class SawBlade : MonoBehaviour
                 {
                     DamageEnemyKnockback.KnockbackAmount = IsCritAttack ? _initialKnockbackAmount * 1.5f : _initialKnockbackAmount;
                     enemyHit.Health.TakeDamage(_finalDamage, knockbackDir, DamageEnemyKnockback);
+                    hitInvincible = enemyHit.Health.Invincible;
                 }
                 else
                 {
                     bossHit.Health.TakeDamage(_finalDamage, Vector3.zero, null);
+                    hitInvincible = bossHit.Health.Invincible;
                 }
 
                 HitEnemy?.Invoke(IsCritAttack);
             }
 
-            OnAfterHit();
+            OnAfterHit(hitInvincible, other);
         }
     }
 
     private void OnReturnedToPlayer()
     {
-        if (IsLongRangeAttack)
+        if (_timeInMotion >= 0.25f)
         {
             var pitch = IsCritAttack ? 1.25f : 1f;
             AudioManager.Instance.PlaySound(transform, _returnedSFX, true, false, _returnedSFXVolume, pitch);
@@ -200,6 +207,7 @@ public class SawBlade : MonoBehaviour
     {
         if (!_hasInitialized) return;
 
+        _timeInMotion = 0f;
         if (_loopAudio) _loopAudio.Stop();
         _trailRenderer.emitting = false;
         _rb.linearVelocity = Vector3.zero;
@@ -208,21 +216,30 @@ public class SawBlade : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    private void OnAfterHit()
+    private void OnAfterHit(bool hitInvincible, Collider hitCol)
     {
         ReturnToPlayer();
 
-        var pitch = IsCritAttack ? 1.15f : Random.Range(0.9f, 1.05f);
+        var pitch = IsCritAttack ? 1.3f : Random.Range(0.9f, 1.05f);
+        var volume = IsCritAttack ? _impactSFXVolume * 1.2f : _impactSFXVolume;
+        var impactClip = _impactSFX;
 
-        if (IsCritAttack)
+        if (hitInvincible)
         {
-            Instantiate(_impactVfx, transform.position, Quaternion.LookRotation(-transform.forward));
-            AudioManager.Instance.PlaySound(transform, _impactSFX, true, false, _impactSFXVolume * 1.2f, pitch);
+            if (!hitCol.GetComponentInParent<BaseEnemy>() && !hitCol.GetComponentInParent<FirstBossEncounter>())
+            {
+                var sfxHolder = hitCol.GetComponentInParent<ImpactSFXHolder>();
+                if (sfxHolder) impactClip = sfxHolder.ImpactSFX;
+            }
+            else
+            {
+                impactClip = _impactInvincibleEnemySFX;
+            }
         }
-        else
-        {
-            AudioManager.Instance.PlaySound(transform, _impactSFX, true, false, _impactSFXVolume, pitch);
-        }
+        
+        if (IsCritAttack) Instantiate(_impactVfx, transform.position, Quaternion.LookRotation(-transform.forward));
+
+        AudioManager.Instance.PlaySound(transform, impactClip, true, false, volume, pitch);
     }
 
     public void OnAttack(Transform spawnPoint, float chargeAmount, bool crit)
@@ -241,7 +258,7 @@ public class SawBlade : MonoBehaviour
         transform.rotation = spawnPoint.rotation;
         DeflectDirection = transform.forward;
         gameObject.SetActive(true);
-        
+
         _spawnTime = Time.time;
         Vector3 forceToAdd = transform.forward * _finalImpulseForce;
         _rb.AddForce(forceToAdd, ForceMode.Impulse);
