@@ -54,7 +54,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: PulseAttack_PointLight_Animated
+  m_Name: BossAOE_PointLight_Animated
   serializedVersion: 5
   m_AnimatorParameters: []
   m_AnimatorLayers:

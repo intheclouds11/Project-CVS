@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 995300729659215123}
   - component: {fileID: 995300729659215341}
   - component: {fileID: 995300729659215340}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Sphere_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.34000024, z: 0}
-  m_LocalScale: {x: 1.61, y: 1.61, z: 1.61}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 995300729845106294}
@@ -56,7 +56,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 0.5
+    scalar: 0
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -4918,7 +4918,7 @@ GameObject:
   m_Component:
   - component: {fileID: 995300729845106294}
   - component: {fileID: 995300729845106295}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: PulseAOE
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4979,13 +4979,13 @@ GameObject:
   m_Component:
   - component: {fileID: 995300729847453550}
   - component: {fileID: 995300729847453551}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: AnimatedVFX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &995300729847453550
 Transform:
   m_ObjectHideFlags: 0
@@ -4996,7 +4996,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.34000024, z: 0}
-  m_LocalScale: {x: 0.8000001, y: 0.8000001, z: 0.8000001}
+  m_LocalScale: {x: 1.7700001, y: 1.7700001, z: 1.7700001}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 995300730123644340}
@@ -5036,7 +5036,7 @@ GameObject:
   - component: {fileID: 995300730122169215}
   - component: {fileID: 995300730122169209}
   - component: {fileID: 995300730122169208}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Flare_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9878,7 +9878,7 @@ GameObject:
   - component: {fileID: 995300730123644340}
   - component: {fileID: 995300730123644342}
   - component: {fileID: 995300730123644341}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Flare_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14721,7 +14721,7 @@ GameObject:
   - component: {fileID: 995300730232836725}
   - component: {fileID: 995300730232836724}
   - component: {fileID: 995300730232836731}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Flare_05
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14738,8 +14738,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.34000024, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 995300729845106294}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -14751,7 +14751,7 @@ ParticleSystem:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 995300730232836729}
   serializedVersion: 8
-  lengthInSec: 1
+  lengthInSec: 2
   simulationSpeed: 1
   stopAction: 0
   cullingMode: 0
@@ -14766,7 +14766,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 0.5
+    scalar: 0
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -15740,8 +15740,8 @@ ParticleSystem:
           m_PreInfinity: 2
           m_PostInfinity: 2
           m_RotationOrder: 4
-      cycleCount: 1
-      repeatInterval: 0.01
+      cycleCount: 5
+      repeatInterval: 0.3
       probability: 1
   SizeModule:
     enabled: 1
@@ -19651,7 +19651,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 995300730438630683}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: ---------BuildupVFX---------
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19684,7 +19684,7 @@ GameObject:
   - component: {fileID: 995300730471189971}
   - component: {fileID: 995300730471189933}
   - component: {fileID: 995300730471189932}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Wave_05
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24606,7 +24606,7 @@ GameObject:
   - component: {fileID: 995300730520826047}
   - component: {fileID: 995300730520826046}
   - component: {fileID: 995300730520826045}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_PointLight_Animated
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24749,7 +24749,7 @@ GameObject:
   - component: {fileID: 995300730701682336}
   - component: {fileID: 995300730701682338}
   - component: {fileID: 995300730701682337}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Wave_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24766,7 +24766,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0.34000024, z: 0}
-  m_LocalScale: {x: 1.68, y: 1.68, z: 1.68}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 995300729845106294}
@@ -24794,7 +24794,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 0.15
+    scalar: 0
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -25768,8 +25768,8 @@ ParticleSystem:
           m_PreInfinity: 2
           m_PostInfinity: 2
           m_RotationOrder: 4
-      cycleCount: 1
-      repeatInterval: 0.01
+      cycleCount: 12
+      repeatInterval: 0.2
       probability: 1
   SizeModule:
     enabled: 0
@@ -29668,7 +29668,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 995300730748621661}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: ---------ExplosionVFX---------
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -29701,13 +29701,13 @@ GameObject:
   - component: {fileID: 995300730757409934}
   - component: {fileID: 995300730757409928}
   - component: {fileID: 995300730757409935}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Sparks_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &995300730757409934
 Transform:
   m_ObjectHideFlags: 0
@@ -29732,7 +29732,7 @@ ParticleSystem:
   m_GameObject: {fileID: 995300730757409933}
   serializedVersion: 8
   lengthInSec: 4
-  simulationSpeed: 2
+  simulationSpeed: 1.5
   stopAction: 0
   cullingMode: 0
   ringBufferMode: 0
@@ -34568,7 +34568,7 @@ GameObject:
   - component: {fileID: 995300730852091504}
   - component: {fileID: 995300730852091507}
   - component: {fileID: 995300730852091506}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Flare_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -39514,7 +39514,7 @@ GameObject:
   - component: {fileID: 995300730870211287}
   - component: {fileID: 995300730870211281}
   - component: {fileID: 995300730870211280}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Wave_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -39531,7 +39531,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0.34000024, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_LocalScale: {x: 1.8, y: 1.8, z: 1.8}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 995300729845106294}
@@ -39559,7 +39559,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 0.5
+    scalar: 0
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -44435,7 +44435,7 @@ GameObject:
   - component: {fileID: 995300731013673618}
   - component: {fileID: 995300731013673325}
   - component: {fileID: 995300731013673324}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Flare_04
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -44453,7 +44453,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.34000024, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 995300729845106294}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -44465,7 +44465,7 @@ ParticleSystem:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 995300731013673617}
   serializedVersion: 8
-  lengthInSec: 2
+  lengthInSec: 3
   simulationSpeed: 1
   stopAction: 0
   cullingMode: 0
@@ -44480,7 +44480,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 0.5
+    scalar: 0
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -44540,7 +44540,7 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 1.2
+      scalar: 3
       minScalar: 0.4
       maxCurve:
         serializedVersion: 2
@@ -45454,8 +45454,8 @@ ParticleSystem:
           m_PreInfinity: 2
           m_PostInfinity: 2
           m_RotationOrder: 4
-      cycleCount: 1
-      repeatInterval: 0.01
+      cycleCount: 3
+      repeatInterval: 0.35
       probability: 1
   SizeModule:
     enabled: 1
@@ -49360,7 +49360,7 @@ GameObject:
   - component: {fileID: 995300731056838302}
   - component: {fileID: 995300731056838296}
   - component: {fileID: 995300731056838303}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Cloud_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -54263,7 +54263,7 @@ GameObject:
   - component: {fileID: 995300731088147813}
   - component: {fileID: 995300731088147815}
   - component: {fileID: 995300731088147814}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Wave_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -54280,7 +54280,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.34000024, z: 0}
-  m_LocalScale: {x: 1.3999999, y: 1.3999999, z: 1.3999999}
+  m_LocalScale: {x: 1.7399999, y: 1.7399999, z: 1.7399999}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 995300729845106294}
@@ -54308,7 +54308,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 0.05
+    scalar: 0
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -54368,7 +54368,7 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 1.1425
+      scalar: 2
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -59114,13 +59114,13 @@ GameObject:
   - component: {fileID: 995300731515460677}
   - component: {fileID: 995300731515460679}
   - component: {fileID: 995300731515460678}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Sparks_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &995300731515460677
 Transform:
   m_ObjectHideFlags: 0
@@ -59131,7 +59131,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.34000024, z: 0}
-  m_LocalScale: {x: 3.8, y: 3.8, z: 3.8}
+  m_LocalScale: {x: 4.96, y: 4.96, z: 4.96}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 995300729845106294}
@@ -64030,7 +64030,7 @@ GameObject:
   - component: {fileID: 995300731518757796}
   - component: {fileID: 995300731518757798}
   - component: {fileID: 995300731518757797}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_WaveHeat_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -64047,7 +64047,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.5990912, z: 0}
-  m_LocalScale: {x: 2.25, y: 2.25, z: 2.25}
+  m_LocalScale: {x: 2.65, y: 2.65, z: 2.65}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 995300729845106294}
@@ -64060,7 +64060,7 @@ ParticleSystem:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 995300731518757803}
   serializedVersion: 8
-  lengthInSec: 1
+  lengthInSec: 2
   simulationSpeed: 1
   stopAction: 0
   cullingMode: 0
@@ -64075,7 +64075,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 0.5
+    scalar: 0
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -65049,8 +65049,8 @@ ParticleSystem:
           m_PreInfinity: 2
           m_PostInfinity: 2
           m_RotationOrder: 4
-      cycleCount: 1
-      repeatInterval: 0.01
+      cycleCount: 2
+      repeatInterval: 0.5
       probability: 1
   SizeModule:
     enabled: 1
@@ -68930,7 +68930,7 @@ GameObject:
   - component: {fileID: 995300731680351665}
   - component: {fileID: 995300731680351667}
   - component: {fileID: 995300731680351666}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Flare_06
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -68947,7 +68947,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.004, y: 0.34000024, z: -0.0048000007}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 995300729845106294}
@@ -68975,7 +68975,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 0.5
+    scalar: 0
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -73830,13 +73830,13 @@ GameObject:
   - component: {fileID: 995300731737578184}
   - component: {fileID: 995300731737578186}
   - component: {fileID: 995300731737578185}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FocusedExplosion_03_Sparks_02_reflected
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &995300731737578184
 Transform:
   m_ObjectHideFlags: 0
@@ -73846,7 +73846,7 @@ Transform:
   m_GameObject: {fileID: 995300731737578191}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.34000024, z: 0}
+  m_LocalPosition: {x: 0, y: 2.86, z: 0}
   m_LocalScale: {x: 2.03, y: 2.03, z: 2.03}
   m_ConstrainProportionsScale: 1
   m_Children: []
