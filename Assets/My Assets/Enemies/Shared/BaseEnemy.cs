@@ -254,7 +254,7 @@ public abstract class BaseEnemy : MonoBehaviour
                 _knockbackTween?.Kill();
                 AudioManager.Instance.PlaySound(enemyHit.transform, _hitByKnockbackSFX);
                 var knockBackDir = (enemyHit.transform.position - transform.position).normalized;
-                enemyHit.Health.TakeDamage(_baseDamage, knockBackDir, _damageEnemyKnockback);
+                enemyHit.Health.TakeDamage((int) (enemyHit.Health.GetMaxHealth * 0.25f), knockBackDir, _damageEnemyKnockback);
                 OnDamagedPlayer();
             }
         }

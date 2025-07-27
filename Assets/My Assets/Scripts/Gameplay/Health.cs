@@ -54,11 +54,17 @@ public class Health : MonoBehaviour
         return CurrentHealth > 0;
     }
 
-    public virtual void TakeDamage(int damage, Vector3 knockbackDir, Knockback knockback)
+    public virtual void TakeDamage(int damage, Vector3 knockbackDir, Knockback knockback, bool wasCritAttack = false)
     {
         if (GameManager.Instance.CurrentState is GameManager.GameState.Victory
             or GameManager.GameState.AwaitingWave or GameManager.GameState.GameOver) return;
-        if (Invincible || damage <= 0 || CurrentHealth <= 0) return;
+        if (damage <= 0 || CurrentHealth <= 0) return;
+
+        if (Invincible && !wasCritAttack)
+        {
+            OnDamaged(knockbackDir, knockback);
+            return;
+        }
 
         int newHealth = CurrentHealth - damage;
         if (GameManager.Instance.EnemyAIEnabled) CurrentHealth = newHealth;

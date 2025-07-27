@@ -77,7 +77,7 @@ public class PlayerHealth : Health
         _globalVolume.profile.TryGet(out _colorAdjustments);
     }
 
-    public override void TakeDamage(int damage, Vector3 knockbackDir, Knockback knockback)
+    public override void TakeDamage(int damage, Vector3 knockbackDir, Knockback knockback, bool wasCritAttack = false)
     {
         if (GameManager.Instance.CurrentState is GameManager.GameState.Victory
             or GameManager.GameState.AwaitingWave or GameManager.GameState.GameOver) return;

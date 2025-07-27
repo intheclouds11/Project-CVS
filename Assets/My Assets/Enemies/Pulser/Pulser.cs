@@ -87,6 +87,7 @@ public class Pulser : BaseEnemy
         if (_telegraphCoroutine != null) StopCoroutine(_telegraphCoroutine);
         _telegraphCoroutine = StartCoroutine(TelegraphIndicatorCoroutine());
 
+        Health.Invincible = true;
         yield return new WaitForSeconds(_pulseDelayDuration);
 
         var startTime = Time.time;
@@ -96,6 +97,7 @@ public class Pulser : BaseEnemy
             if (_isInterruptable && IsGettingKnockedBack)
             {
                 _usingAbility = false;
+                Health.Invincible = false;
                 _lastPulseCompleteTime = Time.time;
                 _pulseVFX.SetActive(false);
                 _abilityStartAudio.Stop();
@@ -118,6 +120,7 @@ public class Pulser : BaseEnemy
         _usingAbility = false;
         _lastPulseCompleteTime = Time.time;
         _aiFollower.canMove = true;
+        Health.Invincible = false;
         _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
     }
 

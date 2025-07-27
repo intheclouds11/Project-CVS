@@ -32,7 +32,7 @@ public class Dasher : BaseEnemy
     private float _lastDashTime;
     private bool _isDashing;
     private bool _useDashDamage;
-    
+
 
     protected override void Update()
     {
@@ -89,7 +89,6 @@ public class Dasher : BaseEnemy
     private IEnumerator DashCoroutine()
     {
         _isDashing = true;
-        _useDashDamage = true;
         _lastDashTime = Time.time;
         if (_aiFollower) _aiFollower.canMove = false;
         float pitch = Random.Range(1.1f, 1.3f);
@@ -104,15 +103,18 @@ public class Dasher : BaseEnemy
             {
                 _isDashing = false;
                 _lastDashTime = Time.time;
-                pitch = Random.Range(0.9f, 1.1f);
-                AudioManager.Instance.PlaySound(transform, _interruptedSFX, true, false, 0.9f, pitch);
+                // pitch = Random.Range(0.9f, 1.1f);
+                // AudioManager.Instance.PlaySound(transform, _interruptedSFX, true, false, 0.9f, pitch);
                 _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
                 yield break;
             }
 
             yield return null;
         }
-        
+
+        _useDashDamage = true;
+        Health.Invincible = true;
+
         bool blocked = !CanDashReachPlayer(out var preHitObj, true);
         if (!blocked)
         {
@@ -126,13 +128,13 @@ public class Dasher : BaseEnemy
             while (!blocked && startTime + _dashDuration >= Time.time)
             {
                 if (elapsedTime >= _dashDuration * 0.8f) _useDashDamage = false;
-                
+
                 if (_isInterruptable && IsGettingKnockedBack)
                 {
                     _isDashing = false;
+                    Health.Invincible = false;
                     _lastDashTime = Time.time;
-                    pitch = Random.Range(0.9f, 1.1f);
-                    AudioManager.Instance.PlaySound(transform, _interruptedSFX, true, false, 0.9f, pitch);
+                    _useDashDamage = false;
                     _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
                     yield break;
                 }
@@ -152,6 +154,8 @@ public class Dasher : BaseEnemy
         yield return new WaitForSeconds(_dashRecoveryDuration);
         _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
         _aiFollower.canMove = true;
+        Health.Invincible = false;
+        _useDashDamage = false;
         _isDashing = false;
     }
 

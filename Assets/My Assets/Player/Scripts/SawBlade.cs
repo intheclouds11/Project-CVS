@@ -175,14 +175,14 @@ public class SawBlade : MonoBehaviour
 
                 if (enemyHit)
                 {
-                    DamageEnemyKnockback.KnockbackAmount = IsCritAttack ? _initialKnockbackAmount * 1.5f : _initialKnockbackAmount;
-                    enemyHit.Health.TakeDamage(_finalDamage, knockbackDir, DamageEnemyKnockback);
                     hitInvincible = enemyHit.Health.Invincible;
+                    DamageEnemyKnockback.KnockbackAmount = IsCritAttack ? _initialKnockbackAmount * 1.5f : _initialKnockbackAmount;
+                    enemyHit.Health.TakeDamage(_finalDamage, knockbackDir, DamageEnemyKnockback, IsCritAttack);
                 }
                 else
                 {
-                    bossHit.Health.TakeDamage(_finalDamage, Vector3.zero, null);
                     hitInvincible = bossHit.Health.Invincible;
+                    bossHit.Health.TakeDamage(_finalDamage, Vector3.zero, null);
                 }
 
                 HitEnemy?.Invoke(IsCritAttack);
@@ -229,14 +229,19 @@ public class SawBlade : MonoBehaviour
             if (!hitCol.GetComponentInParent<BaseEnemy>() && !hitCol.GetComponentInParent<FirstBossEncounter>())
             {
                 var sfxHolder = hitCol.GetComponentInParent<ImpactSFXHolder>();
-                if (sfxHolder) impactClip = sfxHolder.ImpactSFX;
+                if (sfxHolder)
+                {
+                    impactClip = sfxHolder.ImpactSFX;
+                }
             }
             else
             {
+                InputManager.Instance.Vibrate(0.1f, 10f, 0.1f);
                 impactClip = _impactInvincibleEnemySFX;
+                volume *= 1.5f;
             }
         }
-        
+
         if (IsCritAttack) Instantiate(_impactVfx, transform.position, Quaternion.LookRotation(-transform.forward));
 
         AudioManager.Instance.PlaySound(transform, impactClip, true, false, volume, pitch);
