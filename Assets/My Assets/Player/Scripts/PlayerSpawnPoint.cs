@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 using NaughtyAttributes;
 #if UNITY_EDITOR
+using Unity.Cinemachine;
 using UnityEditor;
 #endif
 using UnityEngine;
@@ -82,6 +83,8 @@ public class PlayerSpawnPointEditor : Editor
         if (_wasDisabled && _playerSpawnPoint.enabled)
         {
             _wasDisabled = false;
+
+            FindAnyObjectByType<CinemachineCamera>().Target.TrackingTarget = _playerSpawnPoint.transform;
 
             var otherEnabledSpawnPoints = FindObjectsByType<PlayerSpawnPoint>(FindObjectsSortMode.None).ToList()
                 .Where(sp => sp != _playerSpawnPoint && sp.enabled);
