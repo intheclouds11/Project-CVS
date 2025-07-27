@@ -1650,7 +1650,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a013fc36b1bdee740b3d49bb95a16f7d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _phase2HealthRatio: 0.75
+  _phase2HealthRatio: 0.5
   _phase1ProjectilePatterns:
   - {fileID: 11400000, guid: ceadd8c04cd9c3744b5aa400fc4d802e, type: 2}
   - {fileID: 11400000, guid: 060dab990a6cbf041bbd62c6fdf2a5cc, type: 2}
@@ -1671,7 +1671,7 @@ MonoBehaviour:
     KnockbackDuration: 0.25
     StunDuration: 0.25
     KnockbackEasing: 17
-  _AOEDuration: 0.5
+  _AOEDuration: 2
   _AOEDamageRadius: 8
   _AOEZoneEnteredSFX: {fileID: 8300000, guid: baa42a3793a623b42bc15d843bdbfd13, type: 3}
   _AOEChargeVFX: {fileID: 0}

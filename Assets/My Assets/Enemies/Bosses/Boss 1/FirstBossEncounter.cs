@@ -17,6 +17,8 @@ public class FirstBossEncounter : MonoBehaviour
     [SerializeField]
     private List<ProjectilePattern> _phase1ProjectilePatterns;
     [SerializeField]
+    private List<ProjectilePattern> _phase2ProjectilePatterns;
+    [SerializeField]
     private List<Transform> _projectileSpawnPoints;
 
     [Header("AOE Settings")]
@@ -167,7 +169,7 @@ public class FirstBossEncounter : MonoBehaviour
     private void Update()
     {
         if (_phaseTransitioning) return;
-        
+
         _distToPlayer = GameManager.Instance.GetDistanceFromPlayer(transform);
 
         if (_projectileCoroutine == null)
@@ -178,7 +180,7 @@ public class FirstBossEncounter : MonoBehaviour
                 return;
             }
 
-            _projectileCoroutine = StartCoroutine(ProjectilesCoroutine(SelectRandomPattern(1)));
+            _projectileCoroutine = StartCoroutine(ProjectilesCoroutine(SelectRandomPattern(_hasEnteredPhase2 ? 2 : 1)));
         }
     }
 
@@ -191,8 +193,7 @@ public class FirstBossEncounter : MonoBehaviour
 
         if (phase == 2)
         {
-            Debug.LogWarning($"Phase {phase} does not exist yet");
-            return null;
+            return _phase2ProjectilePatterns[Random.Range(0, _phase2ProjectilePatterns.Count)];
         }
 
         Debug.LogWarning($"Phase {phase} not implemented");
@@ -205,11 +206,11 @@ public class FirstBossEncounter : MonoBehaviour
 
         while (_currentPattern)
         {
-            _projectileChargeAudio = AudioManager.Instance.PlaySound(transform, _currentPattern.ChargeSFX, true, false,
+            var spawnPoint = _currentPattern.GetSpawnPoint(_projectileSpawnPoints, false);
+            _projectileChargeAudio = AudioManager.Instance.PlaySound(spawnPoint, _currentPattern.ChargeSFX, true, false,
                 _currentPattern.ChargeVolume, _currentPattern.ChargePitch);
-
-            _currentPattern.StartChargeVFX(_projectileSpawnPoints);
-
+            Instantiate(_currentPattern.SpawnPointChargeVFX, spawnPoint.position, Quaternion.LookRotation(spawnPoint.forward));
+            
             yield return new WaitForSeconds(_currentPattern.StartDelay);
 
             _projectileChargeAudio.Stop();
@@ -244,7 +245,7 @@ public class FirstBossEncounter : MonoBehaviour
     private IEnumerator AOECoroutine()
     {
         AudioManager.Instance.PlaySound(transform, _AOEZoneEnteredSFX, true, false, 1f, 0.7f);
-        
+
         yield return new WaitForSeconds(_AOEStartDelay);
 
         _AOETelegraphCoroutine = StartCoroutine(AOETelegraphCoroutine());
@@ -260,6 +261,7 @@ public class FirstBossEncounter : MonoBehaviour
             _AOEAttackVFX.SetActive(false);
             _AOEAttackVFX.SetActive(true);
         }
+
         _animator.SetBool("IsPerformingAOE", true);
         _AOEChargeAudio.Stop();
         _AOEAttackAudio = AudioManager.Instance.PlaySoundLoop(transform, _AOEAttackSFX, false, _AOEAttackVolume);
@@ -303,7 +305,7 @@ public class FirstBossEncounter : MonoBehaviour
                 _AOETelegraphScaleTarget, _AOETelegraphScaleTarget.magnitude * Time.deltaTime / _AOEStartDelay);
             yield return null;
         }
-        
+
         // startTime = Time.time;
         // while (Time.time < startTime + _AOEDuration)
         // {
@@ -336,6 +338,8 @@ public class FirstBossEncounter : MonoBehaviour
             if (!_hasEnteredPhase2)
             {
                 _hasEnteredPhase2 = true;
+                _AOEStartDelay /= 2f;
+                _postAOEDelay /= 2f;
                 StartCoroutine(PhaseTransition());
                 return;
             }
@@ -361,6 +365,7 @@ public class FirstBossEncounter : MonoBehaviour
         {
             StopCoroutine(_projectileCoroutine);
             _projectileCoroutine = null;
+            _currentPattern.Init();
             _currentPattern = null;
         }
 

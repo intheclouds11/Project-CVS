@@ -120,7 +120,7 @@ public class ProjectilePattern : ScriptableObject
         return projObj;
     }
 
-    private Transform GetSpawnPoint(List<Transform> spawnPoints, bool isSpawning = true)
+    public Transform GetSpawnPoint(List<Transform> spawnPoints, bool isSpawning = true)
     {
         Transform spawnPoint = null;
         if (SpawnPointSelection == BossSpawnPointSelection.Left)
@@ -166,11 +166,5 @@ public class ProjectilePattern : ScriptableObject
         if (isSpawning) _lastUsedSpawnPoint = spawnPoint;
 
         return spawnPoint;
-    }
-
-    public void StartChargeVFX(List<Transform> spawnPoints)
-    {
-        var spawnPoint = GetSpawnPoint(spawnPoints, false);
-        Instantiate(SpawnPointChargeVFX, spawnPoint.position, Quaternion.LookRotation(spawnPoint.forward));
     }
 }
