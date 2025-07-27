@@ -520,7 +520,7 @@ MonoBehaviour:
   _dashSpeed: 20
   _dashStartDelay: 0.5
   _dashAlertSFX: {fileID: 8300000, guid: baa42a3793a623b42bc15d843bdbfd13, type: 3}
-  _dashSFX: {fileID: 8300000, guid: b6d3f0aac49764654879e55ed401c6f2, type: 3}
+  _dashSFX: {fileID: 8300000, guid: 9944f403a6e20a048a9577959a29613c, type: 3}
 --- !u!95 &349698787356689574
 Animator:
   serializedVersion: 7

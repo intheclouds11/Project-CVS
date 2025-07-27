@@ -26,8 +26,6 @@ public class PulserProjectile : Projectile
     private GameObject _pulseVFX;
     [SerializeField]
     private MeshRenderer _telegraphIndicatorMesh;
-    [SerializeField]
-    private float _telegraphAlphaTarget = 1f;
 
     private bool _isPulsing;
     private readonly Collider[] _overlapColliders = new Collider[1];

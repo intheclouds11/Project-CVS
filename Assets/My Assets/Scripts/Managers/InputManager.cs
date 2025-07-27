@@ -45,7 +45,6 @@ public class InputManager : MonoBehaviour
     public bool ActivateExpressionRightWasPressed { get; private set; }
 
     // Dev tools
-    public bool ToggleChargeHUDWasPressed { get; private set; }
     public bool ToggleGodModeWasPressed { get; private set; }
     public bool ToggleEnemyAIWasPressed { get; private set; }
     public bool ToggleMusicWasPressed { get; private set; }
@@ -146,7 +145,6 @@ public class InputManager : MonoBehaviour
 
         if (Debug.isDebugBuild)
         {
-            ToggleChargeHUDWasPressed = _inputs.Player.ToggleChargeHUD.WasPerformedThisFrame();
             ToggleGodModeWasPressed = _inputs.Player.ToggleGodMode.WasPerformedThisFrame();
             ToggleEnemyAIWasPressed = _inputs.Player.ToggleEnemyAI.WasPerformedThisFrame();
             ToggleMusicWasPressed = _inputs.Player.ToggleMusic.WasPerformedThisFrame();
