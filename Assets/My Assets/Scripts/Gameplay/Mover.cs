@@ -10,6 +10,8 @@ public class Mover : MonoBehaviour
     private float _moveDuration = 1f;
     [SerializeField]
     private AudioClip _moveSFX;
+    [SerializeField]
+    private float _moveSFXVolume = 0.7f;
 
     private bool _startMoving;
     private AudioSource _moveAudio;
@@ -34,7 +36,7 @@ public class Mover : MonoBehaviour
     public void StartMoving()
     {
         _startMoving = true;
-        _moveAudio = AudioManager.Instance.PlaySound(transform, _moveSFX);
+        _moveAudio = AudioManager.Instance.PlaySound(transform, _moveSFX, true, false, _moveSFXVolume);
         _distToMove = Vector3.Distance(transform.localPosition, _moveToPositionLocal);
     }
 }

@@ -7,10 +7,15 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.SceneManagement;
+using Random = UnityEngine.Random;
 
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance;
+    [SerializeField]
+    private AudioClip _invincibleImpactSFX;
+    [SerializeField]
+    private float _invincibleImpactVolume = 1f;
     [field: SerializeField]
     public AudioSource MusicAudioSource { get; private set; }
     [SerializeField]
@@ -78,7 +83,7 @@ public class AudioManager : MonoBehaviour
     /// </summary>
     /// <returns></returns>
     public AudioSource PlaySound(Transform tr, AudioClip clip, bool follow = true, bool loop = false, float volume = 1f,
-        float pitch = 1f)
+        float pitch = 1f, float spatialBlend = 1f)
     {
         if (!clip)
         {
@@ -109,6 +114,7 @@ public class AudioManager : MonoBehaviour
         audioSource.loop = loop;
         audioSource.volume = volume;
         audioSource.pitch = pitch;
+        audioSource.spatialBlend = spatialBlend;
         audioSource.transform.position = tr.position;
         if (follow) audioSource.gameObject.GetComponent<Follower>().SetTarget(tr);
         audioSource.clip = clip;
@@ -143,6 +149,12 @@ public class AudioManager : MonoBehaviour
         audioSource.clip = clip;
         audioSource.Play();
         return audioSource;
+    }
+
+    public void PlayInvincibleImpact(Transform t)
+    {
+        var pitch = Random.Range(0.9f, 1.1f);
+        PlaySound(t, _invincibleImpactSFX, true, false, _invincibleImpactVolume, pitch);
     }
 
     public float GetMusicGroupGain()
@@ -222,5 +234,54 @@ public class AudioManager : MonoBehaviour
 
         _audioMixer.SetFloat("MasterLowpassCutoffFreq", desiredFreq);
         _masterLowPassCoroutine = null;
+    }
+
+    public void StartNewMusic(AudioClip newClip, float volume)
+    {
+        if (MusicAudioSource.clip == newClip) return;
+        MusicAudioSource.clip = newClip;
+        MusicAudioSource.volume = volume;
+        if (newClip) MusicAudioSource.Play();
+    }
+
+    private Coroutine _transitionMusicCoroutine;
+
+    public void TransitionMusic(AudioClip newClip, float volume, float fadeOutDuration, float fadeInDuration)
+    {
+        if (_transitionMusicCoroutine != null) StopCoroutine(_transitionMusicCoroutine);
+        _transitionMusicCoroutine = StartCoroutine(TransitionMusicCoroutine(newClip, volume, fadeOutDuration, fadeInDuration));
+    }
+
+    private IEnumerator TransitionMusicCoroutine(AudioClip newClip, float volume, float fadeOutDuration, float fadeInDuration)
+    {
+        if (fadeOutDuration > 0 && MusicAudioSource.isPlaying)
+        {
+            var startVolume = MusicAudioSource.volume;
+            while (MusicAudioSource.volume > 0)
+            {
+                MusicAudioSource.volume -= startVolume * Time.deltaTime / fadeOutDuration;
+                yield return null;
+            }
+
+            MusicAudioSource.volume = 0f;
+        }
+
+        MusicAudioSource.clip = newClip;
+        if (newClip)
+        {
+            MusicAudioSource.Play();
+            if (fadeInDuration > 0)
+            {
+                while (MusicAudioSource.volume < volume)
+                {
+                    MusicAudioSource.volume += Time.deltaTime / fadeInDuration;
+                    yield return null;
+                }
+            }
+
+            MusicAudioSource.volume = volume;
+        }
+
+        _transitionMusicCoroutine = null;
     }
 }

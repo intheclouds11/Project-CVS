@@ -68,8 +68,6 @@ public class SawBlade : MonoBehaviour
     [SerializeField]
     private float _impactSFXVolume = 0.45f;
     [SerializeField]
-    private AudioClip _impactInvincibleEnemySFX;
-    [SerializeField]
     private GameObject _impactVfx;
 
     public bool IsReturning { get; private set; }
@@ -237,14 +235,16 @@ public class SawBlade : MonoBehaviour
             else
             {
                 InputManager.Instance.Vibrate(0.1f, 10f, 0.1f);
-                impactClip = _impactInvincibleEnemySFX;
-                volume *= 1.5f;
+                impactClip = null;
             }
         }
 
         if (IsCritAttack) Instantiate(_impactVfx, transform.position, Quaternion.LookRotation(-transform.forward));
 
-        AudioManager.Instance.PlaySound(transform, impactClip, true, false, volume, pitch);
+        if (impactClip)
+        {
+            AudioManager.Instance.PlaySound(transform, impactClip, true, false, volume, pitch);
+        }
     }
 
     public void OnAttack(Transform spawnPoint, float chargeAmount, bool crit)

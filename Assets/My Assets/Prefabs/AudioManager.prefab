@@ -47,6 +47,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ef722e4d06be714b898b4f267634be3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _invincibleImpactSFX: {fileID: 8300000, guid: 89c0c54bfba0f9f40ace1e71370afad4, type: 3}
+  _invincibleImpactVolume: 1
   <MusicAudioSource>k__BackingField: {fileID: 466134533223976539}
   _audioMixer: {fileID: 24100000, guid: 65a840c8697f32f4a9ce8dfc88c76154, type: 2}
   _SFXParent: {fileID: 19484168244998874}

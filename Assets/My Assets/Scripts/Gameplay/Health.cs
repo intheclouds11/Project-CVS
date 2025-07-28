@@ -33,6 +33,8 @@ public class Health : MonoBehaviour
     [FormerlySerializedAs("_diedVfx")]
     [SerializeField]
     protected GameObject _diedVFX;
+    [SerializeField]
+    protected float _diedVFXDelay;
     
     public int CurrentHealth
     {
@@ -81,7 +83,11 @@ public class Health : MonoBehaviour
 
     protected virtual void OnDamaged(Vector3 knockbackDir, Knockback knockback)
     {
-        if (_damagedSFX)
+        if (Invincible)
+        {
+            AudioManager.Instance.PlayInvincibleImpact(transform);
+        }
+        else if (_damagedSFX)
         {
             float pitch = Random.Range(0.9f, 1f);
             AudioManager.Instance.PlaySound(transform, _damagedSFX, true, false, _damagedSFXVolume, pitch);
@@ -95,10 +101,15 @@ public class Health : MonoBehaviour
         AudioManager.Instance.PlaySound(transform, _diedSFX, true, false, _diedSFXVolume, _diedSFXPitch);
         if (_diedVFX)
         {
-            Instantiate(_diedVFX, transform.position, transform.rotation);
+            Invoke(nameof(StartDeathVFX), _diedVFXDelay);
         }
 
         Died?.Invoke(gameObject);
+    }
+
+    private void StartDeathVFX()
+    {
+        Instantiate(_diedVFX, transform.position, transform.rotation);
     }
 
     public void OnRespawn()
