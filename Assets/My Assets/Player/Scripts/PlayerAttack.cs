@@ -264,6 +264,7 @@ public class PlayerAttack : MonoBehaviour
 
     public void ThrowSawBlade()
     {
+        if (!_player.Health.IsAlive()) return;
         _sawBlade.OnAttack(SawBladeSpawnPoint, _lastChargeAmount, _wasCritAttack);
     }
 

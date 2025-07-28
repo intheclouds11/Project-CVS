@@ -20,6 +20,8 @@ public class PlayerHealth : Health
     private float _damagedLowPassAdjustDuration = 2;
     [SerializeField]
     private float _damagedSaturation = -40f;
+    [SerializeField]
+    private float _damagedAberration = 1f;
 
     public bool IsDamaged => !Mathf.Approximately(_vignette.intensity.value, _startingVignetteIntensity);
 
@@ -27,9 +29,11 @@ public class PlayerHealth : Health
     private bool _wasInvincible;
     private float _startingVignetteIntensity;
     private float _startingSaturation;
+    private float _startingChromaticAberration;
     private Volume _globalVolume;
     private Vignette _vignette;
     private ColorAdjustments _colorAdjustments;
+    private ChromaticAberration _chromaticAberration;
     private PlayerController _player;
 
 
@@ -40,9 +44,10 @@ public class PlayerHealth : Health
         _globalVolume = FindAnyObjectByType<Volume>();
         _globalVolume.profile.TryGet(out _vignette);
         _globalVolume.profile.TryGet(out _colorAdjustments);
+        _globalVolume.profile.TryGet(out _chromaticAberration);
         _startingVignetteIntensity = _vignette.intensity.value;
         _startingSaturation = _colorAdjustments.saturation.value;
-        // todo: possibly also zoom in while player injured
+        _startingChromaticAberration = _chromaticAberration.intensity.value;
     }
 
     private void OnEnable()
@@ -64,7 +69,11 @@ public class PlayerHealth : Health
         else if (_wasInvincible)
         {
             _wasInvincible = false;
-            if (IsAlive()) _player.FadeMeshRenderers(true, 0.1f);
+            if (IsAlive())
+            {
+                _player.FadeMeshRenderers(true, 0.1f);
+                _player.TogglePlayerTriggerCollider(true);
+            }
         }
     }
 
@@ -75,6 +84,7 @@ public class PlayerHealth : Health
         _globalVolume = FindAnyObjectByType<Volume>();
         _globalVolume.profile.TryGet(out _vignette);
         _globalVolume.profile.TryGet(out _colorAdjustments);
+        _globalVolume.profile.TryGet(out _chromaticAberration);
     }
 
     public override void TakeDamage(int damage, Vector3 knockbackDir, Knockback knockback, bool wasCritAttack = false)
@@ -106,9 +116,11 @@ public class PlayerHealth : Health
     {
         base.OnDamaged(knockbackDir, knockback);
         _player.FlashMeshRenderers(_invincibilityDuration, _invincibilityFlashRate);
+        _player.TogglePlayerTriggerCollider(false);
 
         _vignette.intensity.value = _damagedVignetteIntensity;
         _colorAdjustments.saturation.value = _damagedSaturation;
+        _chromaticAberration.intensity.value = _damagedAberration;
     }
 
     public void RecoverHP(int amount)
@@ -119,6 +131,7 @@ public class PlayerHealth : Health
         CurrentHealth = newHealth > _maxHealth ? _maxHealth : newHealth;
         _vignette.intensity.value = _startingVignetteIntensity;
         _colorAdjustments.saturation.value = _startingSaturation;
+        _chromaticAberration.intensity.value = _startingChromaticAberration;
 
         AudioManager.Instance.AdjustMasterLowPass(22000f, _damagedLowPassAdjustDuration);
         AudioManager.Instance.PlaySound(transform, _recoverHealthSFX, true, false, _damagedSFXVolume);
@@ -126,6 +139,6 @@ public class PlayerHealth : Health
 
     public bool IsInvincible()
     {
-        return _lastDamageTime + _invincibilityDuration >= Time.time;
+        return _lastDamageTime + _invincibilityDuration >= Time.time || Invincible;
     }
 }

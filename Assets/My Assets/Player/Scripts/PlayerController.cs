@@ -82,6 +82,7 @@ public class PlayerController : MonoBehaviour
     private InputManager _inputManager;
     private CinemachineCamera _virtualCamera;
     private PlayerAnimator _playerAnimator;
+    private Collider _triggerCollider;
     private List<SkinnedMeshRenderer> _skinnedMeshRenderers;
     public List<Material> _transparentMaterials;
     public List<Material> _originalMaterials;
@@ -98,6 +99,7 @@ public class PlayerController : MonoBehaviour
         PlayerCharges = GetComponent<PlayerChargesManager>();
         PlayerAttack = GetComponent<PlayerAttack>();
         PlayerAttack.Attacked += OnPlayerAttack;
+        _triggerCollider = GetComponent<Collider>();
 
         _skinnedMeshRenderers = _playerModel.GetComponentsInChildren<SkinnedMeshRenderer>().ToList();
     }
@@ -121,6 +123,7 @@ public class PlayerController : MonoBehaviour
         if (_virtualCamera)
         {
             _virtualCamera.Follow = LookAt;
+            CinemachineImpulseManager.Instance.Clear();
         }
     }
 
@@ -360,6 +363,7 @@ public class PlayerController : MonoBehaviour
     {
         _dashBufferTimer = 0f;
         CharacterController.enabled = false;
+        TogglePlayerTriggerCollider(false);
         PlayerAttack.OnDied();
         _playerAnimator.SetSpeed(0f);
         _playerAnimator.SetDiedTrigger();
@@ -382,6 +386,12 @@ public class PlayerController : MonoBehaviour
         PlayerCharges.OnRespawn();
         AudioManager.Instance.OnPlayerRespawned();
         CharacterController.enabled = true;
+        TogglePlayerTriggerCollider(true);
+    }
+
+    public void TogglePlayerTriggerCollider(bool toggle)
+    {
+        _triggerCollider.enabled = toggle;
     }
 
     public void ResetCamera()
