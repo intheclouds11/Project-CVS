@@ -72,7 +72,7 @@ public class Projectile : MonoBehaviour
     {
         if (Vector3.Distance(transform.position, _player.transform.position) > 30)
         {
-            ReturnToPool();
+            ReturnToPool(false, false);
         }
     }
 
@@ -87,9 +87,12 @@ public class Projectile : MonoBehaviour
         }
     }
 
-    public void ReturnToPool(bool deflected = false)
+    protected void ReturnToPool(bool deflected, bool playImpactSFX)
     {
-        AudioManager.Instance.PlaySound(transform, _impactSFX, true, false, 1f, 1f);
+        if (playImpactSFX)
+        {
+            AudioManager.Instance.PlaySound(transform, _impactSFX, true, false, 1f, 1f);
+        }
 
         var particleDirection = (FindAnyObjectByType<FirstBossEncounter>().transform.position - transform.position).normalized;
         particleDirection = deflected ? -particleDirection : particleDirection;
@@ -135,14 +138,17 @@ public class Projectile : MonoBehaviour
         }
         else
         {
+            bool hitInvincible;
             var playerHit = other.GetComponent<PlayerController>();
             if (playerHit)
             {
+                hitInvincible = playerHit.Health.IsInvincible();
                 DamagePlayer(playerHit, false);
+                ReturnToPool(false, hitInvincible);
             }
             else if (other.gameObject.layer != LayerMask.NameToLayer("Enemy"))
             {
-                ReturnToPool();
+                ReturnToPool(false, true);
             }
             else if (CompareTag("Deflected"))
             {
@@ -153,8 +159,9 @@ public class Projectile : MonoBehaviour
 
                 if (enemyHit)
                 {
+                    hitInvincible = enemyHit.Health.Invincible;
                     enemyHit.Health.TakeDamage(deflectedDamage, Vector3.zero, null);
-                    ReturnToPool(true);
+                    ReturnToPool(true, hitInvincible);
                 }
                 else if (projHit)
                 {
@@ -168,8 +175,9 @@ public class Projectile : MonoBehaviour
                 }
                 else if (bossHit)
                 {
+                    hitInvincible = bossHit.Health.Invincible;
                     bossHit.Health.TakeDamage(deflectedDamage, Vector3.zero, null);
-                    ReturnToPool(true);
+                    ReturnToPool(true, hitInvincible);
                 }
             }
         }
@@ -179,7 +187,6 @@ public class Projectile : MonoBehaviour
     {
         var knockBackDir = (playerHit.transform.position - transform.position).normalized;
         playerHit.Health.TakeDamage(usingAbility ? 2 : _baseDamage, knockBackDir, _knockback);
-        ReturnToPool();
     }
 
     protected virtual void OnPlayerSpawned(PlayerController player)

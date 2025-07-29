@@ -65,6 +65,8 @@ public class FirstBossEncounter : MonoBehaviour
 
     [Header("General FX")]
     [SerializeField]
+    private AudioClip _introSFX;
+    [SerializeField]
     private List<AudioClip> _hitSFX;
     [SerializeField]
     private AudioClip _hurtSFX;
@@ -75,6 +77,8 @@ public class FirstBossEncounter : MonoBehaviour
     private float _hurtShakeVelocity = 0.2f;
     [SerializeField]
     private float _hurtShakeDuration = 2f;
+    [SerializeField]
+    private AudioClip _deathImpactSFX;
 
     [Header("Phase Transition")]
     [SerializeField]
@@ -113,7 +117,6 @@ public class FirstBossEncounter : MonoBehaviour
     private AudioSource _projectileCooldownAudio;
     private AudioSource _AOEChargeAudio;
     private AudioSource _AOEAttackAudio;
-    private AudioSource _hurtAudio;
     private Coroutine _AOECoroutine;
     private Coroutine _AOETelegraphCoroutine;
     private Coroutine _projectileCoroutine;
@@ -149,7 +152,13 @@ public class FirstBossEncounter : MonoBehaviour
 
     public void EnteredBossZone()
     {
+        _animator.enabled = true;
+    }
+
+    public void StartFight()
+    {
         enabled = true;
+        Health.Invincible = false;
         if (Application.isEditor)
         {
             _phase1HealthBar.transform.parent.gameObject.SetActive(true);
@@ -166,22 +175,25 @@ public class FirstBossEncounter : MonoBehaviour
         _projectileCoroutine = StartCoroutine(ProjectilesCoroutine(_phase1ProjectilePatterns[0]));
     }
 
+    public void IntroRoar()
+    {
+        AudioManager.Instance.PlaySound(transform, _introSFX);
+        _impulseSource.ImpulseDefinition.ImpulseDuration = 1.5f;
+        _impulseSource.GenerateImpulseWithVelocity(new Vector3(0f, _transitionShakeVelocity, 0f));
+    }
+
     private void Update()
     {
         if (_phaseTransitioning) return;
 
         _distToPlayer = GameManager.Instance.GetDistanceFromPlayer(transform);
 
-        if (_projectileCoroutine == null)
+        if (_AOECoroutine == null && _distToPlayer <= _AOEAgroRadius)
         {
-            if (_AOECoroutine == null && _distToPlayer <= _AOEAgroRadius)
-            {
-                _AOECoroutine = StartCoroutine(AOECoroutine());
-                return;
-            }
-
-            _projectileCoroutine = StartCoroutine(ProjectilesCoroutine(SelectRandomPattern(_hasEnteredPhase2 ? 2 : 1)));
+            _AOECoroutine = StartCoroutine(AOECoroutine());
         }
+        
+        _projectileCoroutine ??= StartCoroutine(ProjectilesCoroutine(SelectRandomPattern(_hasEnteredPhase2 ? 2 : 1)));
     }
 
     private ProjectilePattern SelectRandomPattern(int phase)
@@ -206,11 +218,13 @@ public class FirstBossEncounter : MonoBehaviour
 
         while (_currentPattern)
         {
+            _currentPattern.Init();
+
             var spawnPoint = _currentPattern.GetSpawnPoint(_projectileSpawnPoints, false);
             _projectileChargeAudio = AudioManager.Instance.PlaySound(spawnPoint, _currentPattern.ChargeSFX, true, false,
                 _currentPattern.ChargeVolume, _currentPattern.ChargePitch);
             Instantiate(_currentPattern.SpawnPointChargeVFX, spawnPoint.position, Quaternion.LookRotation(spawnPoint.forward));
-            
+
             yield return new WaitForSeconds(_currentPattern.StartDelay);
 
             _projectileChargeAudio.Stop();
@@ -223,8 +237,6 @@ public class FirstBossEncounter : MonoBehaviour
                 _currentPattern.Spawn(_multiProjectilePool, _projectileSpawnPoints);
                 yield return new WaitForSeconds(_currentPattern.TimeBetweenShots);
             }
-
-            _currentPattern.Init();
 
             if (!_currentPattern.FollowupPattern)
             {
@@ -254,6 +266,8 @@ public class FirstBossEncounter : MonoBehaviour
         _AOEChargeAudio = AudioManager.Instance.PlaySoundLoop(transform, _AOEChargeSFX, false, _AOEChargeVolume);
 
         yield return new WaitForSeconds(_AOEChargeDuration);
+
+        Health.Invincible = true;
 
         if (_AOEChargeVFX) _AOEChargeVFX.SetActive(false);
         if (_AOEAttackVFX)
@@ -285,6 +299,7 @@ public class FirstBossEncounter : MonoBehaviour
             yield return null;
         }
 
+        Health.Invincible = false;
         _animator.SetBool("IsPerformingAOE", false);
         _AOEAttackAudio.Stop();
 
@@ -306,15 +321,6 @@ public class FirstBossEncounter : MonoBehaviour
             yield return null;
         }
 
-        // startTime = Time.time;
-        // while (Time.time < startTime + _AOEDuration)
-        // {
-        //     _telegraphIndicatorMesh.transform.localScale = Vector3.MoveTowards(_telegraphIndicatorMesh.transform.localScale,
-        //         startScale, _AOETelegraphScaleTarget.magnitude * Time.deltaTime / _AOEDuration);
-        //
-        //     yield return null;
-        // }
-
         _telegraphIndicatorMesh.transform.localScale = startScale;
         _telegraphIndicatorMesh.gameObject.SetActive(false);
         _AOETelegraphCoroutine = null;
@@ -322,9 +328,11 @@ public class FirstBossEncounter : MonoBehaviour
 
     private void OnDamageTaken(Vector3 arg1, Knockback arg2)
     {
+        if (Health.Invincible) return;
+        
         var pitch = Random.Range(0.9f, 1.1f);
         AudioManager.Instance.PlaySound(transform, _hitSFX[Random.Range(0, _hitSFX.Count)], true, false, 1f, pitch);
-
+        
         _phase1RemainingHealth = (int) (Health.CurrentHealth - Health.GetMaxHealth * _phase2HealthRatio);
         if (_phase1RemainingHealth > 0)
         {
@@ -345,13 +353,12 @@ public class FirstBossEncounter : MonoBehaviour
             }
         }
 
-        if (_prevHurtSFXHealth - Health.CurrentHealth >= _playHurtSFXHealthInterval)
+        if (_AOECoroutine == null && _prevHurtSFXHealth - Health.CurrentHealth >= _playHurtSFXHealthInterval)
         {
-            if (!_hurtAudio || !_hurtAudio.isPlaying)
-                _hurtAudio = AudioManager.Instance.PlaySound(transform, _hurtSFX, true, false, 1f, 1f);
+            AudioManager.Instance.PlaySound(transform, _hurtSFX, true, false, 1f, 1f);
             _impulseSource.ImpulseDefinition.ImpulseDuration = _hurtShakeDuration;
             _impulseSource.GenerateImpulseWithVelocity(new Vector3(0f, _hurtShakeVelocity, 0f));
-
+            _animator.SetTrigger("Hurt");
             _prevHurtSFXHealth = Health.CurrentHealth;
         }
     }
@@ -403,6 +410,9 @@ public class FirstBossEncounter : MonoBehaviour
         _AOEAttackAudio?.Stop();
         _projectileChargeAudio?.Stop();
         _projectileCooldownAudio?.Stop();
+        AudioManager.Instance.PlaySound(transform, _deathImpactSFX, true, false, 1f, 1f, 0f);
+        AudioManager.Instance.TransitionMusic(null, 0f, 4f, 0f);
+        _animator.SetTrigger("Death");
         _phase1HealthBar.transform.parent.gameObject.SetActive(false);
     }
 

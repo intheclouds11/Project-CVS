@@ -62,25 +62,25 @@ public class PulserProjectile : Projectile
         while (true)
         {
             var overlapCount = Physics.OverlapSphereNonAlloc(transform.position, _pulseDamageRadius, _overlapColliders, _layersToHit);
-            if (overlapCount > 0 && (_overlapColliders[0].CompareTag("Player") || _overlapColliders[0].CompareTag("Boss")))
+            if (overlapCount > 0)
             {
-                var playerHit = _overlapColliders[0].GetComponentInParent<PlayerController>();
-                var bossHit = _overlapColliders[0].GetComponentInParent<FirstBossEncounter>();
-
-                if (playerHit && !playerHit.Health.IsInvincible() && !playerHit.IsDashing)
+                if (_overlapColliders[0].CompareTag("Player"))
                 {
-                    var knockBackDir = (playerHit.transform.position - transform.position).normalized;
-                    playerHit.Health.TakeDamage(2, knockBackDir, _knockback);
-                    AudioManager.Instance.PlaySound(playerHit.transform, _pulseHitSFX, true, false, 0.9f);
+                    var playerHit = _overlapColliders[0].GetComponentInParent<PlayerController>();
+                    if (!playerHit.Health.IsInvincible() && !playerHit.IsDashing)
+                    {
+                        var knockBackDir = (playerHit.transform.position - transform.position).normalized;
+                        playerHit.Health.TakeDamage(2, knockBackDir, _knockback);
+                        AudioManager.Instance.PlaySound(playerHit.transform, _pulseHitSFX, true, false, 0.9f);
+                    }
                 }
-                else if (CompareTag("Deflected") && bossHit)
+                else if (CompareTag("Deflected") && _overlapColliders[0].CompareTag("Boss"))
                 {
+                    var bossHit = _overlapColliders[0].GetComponentInParent<FirstBossEncounter>();
+                    var hitInvincible = bossHit.Health.Invincible;
                     bossHit.Health.TakeDamage(_deflectedPulseDamage, Vector3.zero, null);
-                    ReturnToPool(true);
+                    ReturnToPool(true, hitInvincible);
                 }
-
-                _abilityEnabled = false;
-                yield break;
             }
 
             yield return null;

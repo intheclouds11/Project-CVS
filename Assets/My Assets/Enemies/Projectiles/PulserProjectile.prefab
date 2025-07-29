@@ -76,7 +76,6 @@ MonoBehaviour:
   _lightAnimator: {fileID: 5355254765522729867}
   _pulseVFX: {fileID: 4368820096391031138}
   _telegraphIndicatorMesh: {fileID: 2748257417948893106}
-  _telegraphAlphaTarget: 1
 --- !u!95 &8084813659914369787
 Animator:
   serializedVersion: 7
