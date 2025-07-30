@@ -285,8 +285,8 @@ public class FirstBossEncounter : MonoBehaviour
         {
             if (_player.Health.IsAlive() && !_player.IsDashing && _distToPlayer <= _AOEDamageRadius)
             {
-                var knockBackDir = (_player.transform.position - transform.position).normalized;
-                _player.Health.TakeDamage(_AOEDamage, knockBackDir, _AOEKnockback);
+                _AOEKnockback.Direction = (_player.transform.position - transform.position).normalized;
+                _player.Health.TakeDamage(_AOEDamage, _AOEKnockback);
             }
 
             if (Time.time >= _lastImpulseTime + _AOEImpulseRate)
@@ -326,7 +326,7 @@ public class FirstBossEncounter : MonoBehaviour
         _AOETelegraphCoroutine = null;
     }
 
-    private void OnDamageTaken(Vector3 arg1, Knockback arg2)
+    private void OnDamageTaken(Knockback knockback)
     {
         if (Health.Invincible) return;
         
@@ -402,8 +402,10 @@ public class FirstBossEncounter : MonoBehaviour
         _phaseTransitioning = false;
     }
 
-    private void OnDied(GameObject obj)
+    private void OnDied(Knockback knockback)
     {
+        enabled = false;
+        _bodyMesh.GetComponent<Collider>().enabled = false;
         if (_projectileCoroutine != null) StopCoroutine(_projectileCoroutine);
         if (_AOECoroutine != null) StopCoroutine(_AOECoroutine);
         _AOEChargeAudio?.Stop();

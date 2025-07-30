@@ -9,10 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 177895640724673161}
-  - component: {fileID: 5042053217452618217}
   - component: {fileID: 3946188407373498745}
+  - component: {fileID: 5042053217452618217}
   m_Layer: 0
-  m_Name: Waves
+  m_Name: WaveAudio
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -33,6 +33,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3946188407373498745
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 187438262417043649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdd9653437f4716469be200cddecaa24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxOffset: 0
+  _minOffset: 0
+  _fadeIn: 1
+  _fadeInDuration: 2
+  _fadeInVolumeTarget: 0.5
 --- !u!82 &5042053217452618217
 AudioSource:
   m_ObjectHideFlags: 0
@@ -43,10 +60,10 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: -7131891681490372012, guid: 65a840c8697f32f4a9ce8dfc88c76154, type: 2}
-  m_audioClip: {fileID: 8300000, guid: 00602df6a72d35447b94e3a7a389ce0a, type: 3}
-  m_Resource: {fileID: 8300000, guid: 00602df6a72d35447b94e3a7a389ce0a, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 85a182e05b521b9448bb3b45b03ae433, type: 3}
+  m_Resource: {fileID: 8300000, guid: 85a182e05b521b9448bb3b45b03ae433, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.4
+  m_Volume: 0.571
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -55,7 +72,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 35
+  MaxDistance: 23.02
   Pan2D: 0
   rolloffMode: 2
   BypassEffects: 0
@@ -114,7 +131,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.23888889
+      value: 0.3888889
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -139,18 +156,3 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &3946188407373498745
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 187438262417043649}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cdd9653437f4716469be200cddecaa24, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _audioSource: {fileID: 0}
-  _maxOffset: 0
-  _minOffset: 0

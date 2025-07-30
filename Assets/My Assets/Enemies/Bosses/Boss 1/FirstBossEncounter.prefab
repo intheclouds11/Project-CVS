@@ -721,6 +721,7 @@ MonoBehaviour:
   _moveToPositionLocal: {x: -16.07, y: 0.24, z: -17.49}
   _moveDuration: 2
   _moveSFX: {fileID: 8300000, guid: 1756d20027f85b446ac95b415fdce173, type: 3}
+  _moveSFXVolume: 0.7
 --- !u!33 &8412534426808471587
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -1900,10 +1901,11 @@ MonoBehaviour:
   _AOEDamage: 2
   _AOEKnockback:
     ApplyKnockback: 1
-    KnockbackAmount: 40
+    KnockbackAmount: 4
     KnockbackDuration: 0.25
     StunDuration: 0.25
     KnockbackEasing: 17
+    Direction: {x: 0, y: 0, z: 0}
   _AOEDuration: 2
   _AOEDamageRadius: 8
   _AOEZoneEnteredSFX: {fileID: 8300000, guid: baa42a3793a623b42bc15d843bdbfd13, type: 3}
@@ -1918,7 +1920,6 @@ MonoBehaviour:
   _AOEImpulseDuration: 1
   _AOEImpulseRate: 0.8
   _introSFX: {fileID: 8300000, guid: 87c30b2c7484b9b44be5583031727d55, type: 3}
-  bossCam: {fileID: 5171324670542936366}
   _hitSFX:
   - {fileID: 8300000, guid: dea91fa50ba70214c840e81777163b74, type: 3}
   - {fileID: 8300000, guid: 3ca199b19bf793243a5e2c0da27ebdd6, type: 3}
@@ -1950,7 +1951,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _currentHealth: 0
   _maxHealth: 5000
-  Invincible: 0
+  Invincible: 1
   _damagedSFX: {fileID: 0}
   _damagedSFXVolume: 0.8
   _recoverHealthSFX: {fileID: 0}
