@@ -160,7 +160,7 @@ public class Projectile : MonoBehaviour
                 if (enemyHit)
                 {
                     hitInvincible = enemyHit.Health.Invincible;
-                    enemyHit.Health.TakeDamage(deflectedDamage, Vector3.zero, null);
+                    enemyHit.Health.TakeDamage(deflectedDamage, null);
                     ReturnToPool(true, hitInvincible);
                 }
                 else if (projHit)
@@ -176,7 +176,7 @@ public class Projectile : MonoBehaviour
                 else if (bossHit)
                 {
                     hitInvincible = bossHit.Health.Invincible;
-                    bossHit.Health.TakeDamage(deflectedDamage, Vector3.zero, null);
+                    bossHit.Health.TakeDamage(deflectedDamage, null);
                     ReturnToPool(true, hitInvincible);
                 }
             }
@@ -185,8 +185,8 @@ public class Projectile : MonoBehaviour
 
     protected virtual void DamagePlayer(PlayerController playerHit, bool usingAbility)
     {
-        var knockBackDir = (playerHit.transform.position - transform.position).normalized;
-        playerHit.Health.TakeDamage(usingAbility ? 2 : _baseDamage, knockBackDir, _knockback);
+        _knockback.Direction = (playerHit.transform.position - transform.position).normalized;
+        playerHit.Health.TakeDamage(usingAbility ? 2 : _baseDamage, _knockback);
     }
 
     protected virtual void OnPlayerSpawned(PlayerController player)

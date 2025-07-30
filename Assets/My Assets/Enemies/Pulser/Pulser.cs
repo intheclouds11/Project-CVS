@@ -38,6 +38,8 @@ public class Pulser : BaseEnemy
     private float _lastPulseCompleteTime;
     private Vector3 _scaleTarget;
     private AudioSource _pulseAttackAudio;
+    private Coroutine _pulseCoroutine;
+
 
     protected override void Awake()
     {
@@ -57,7 +59,7 @@ public class Pulser : BaseEnemy
 
         if (_distToPlayer <= _pulseTriggerDistance && Time.time >= _lastPulseCompleteTime + _pulseCooldownDuration)
         {
-            StartCoroutine(PulseCoroutine());
+            _pulseCoroutine = StartCoroutine(PulseCoroutine());
         }
     }
 
@@ -101,8 +103,8 @@ public class Pulser : BaseEnemy
             if (_player.Health.IsAlive() && !_player.Health.IsInvincible() && !_player.IsDashing &&
                 _distToPlayer <= _pulseDamageRadius)
             {
-                var knockBackDir = (_player.transform.position - transform.position).normalized;
-                _player.Health.TakeDamage(_pulseDamage, knockBackDir, _damagePlayerKnockback);
+                _damagePlayerKnockback.Direction = (_player.transform.position - transform.position).normalized;
+                _player.Health.TakeDamage(_pulseDamage, _damagePlayerKnockback);
                 AudioManager.Instance.PlaySound(_player.transform, _pulseHitSFX, true, false, 0.9f);
                 OnDamagedPlayer();
             }
@@ -121,24 +123,15 @@ public class Pulser : BaseEnemy
     protected override void OnTriggerEnter(Collider other)
     {
         base.OnTriggerEnter(other);
-        if (other.gameObject.CompareTag("Player"))
+        if (enabled && other.gameObject.CompareTag("Player"))
         {
             var playerHit = other.GetComponent<PlayerController>();
             if (playerHit)
             {
-                var knockBackDir = (playerHit.transform.position - transform.position).normalized;
-                playerHit.Health.TakeDamage(_baseDamage, knockBackDir, _damagePlayerKnockback);
+                _damagePlayerKnockback.Direction = (playerHit.transform.position - transform.position).normalized;
+                playerHit.Health.TakeDamage(_baseDamage, _damagePlayerKnockback);
                 OnDamagedPlayer();
             }
-        }
-    }
-
-    protected override void OnDamageTaken(Vector3 knockbackDir, Knockback knockback)
-    {
-        base.OnDamageTaken(knockbackDir, knockback);
-        if (!_usingAbility)
-        {
-            StartCoroutine(PulseCoroutine());
         }
     }
 
@@ -173,11 +166,22 @@ public class Pulser : BaseEnemy
         _telegraphIndicatorMesh.gameObject.SetActive(false);
     }
 
-    private void OnDrawGizmosSelected()
+    protected override void OnDied(Knockback knockback)
     {
+        base.OnDied(knockback);
+        if (_pulseCoroutine != null)
+        {
+            StopCoroutine(_pulseCoroutine);
+            _pulseVFX.SetActive(false);
+        }
+
+        if (_telegraphCoroutine != null) StopCoroutine(_telegraphCoroutine);
+    }
+
+    protected override void OnDrawGizmosSelected()
+    {
+        base.OnDrawGizmosSelected();
         var gizmosColor = Gizmos.color;
-        Gizmos.color = Color.white;
-        GizmosExtensions.DrawWireCircle(transform.position, _aggroRange);
         Gizmos.color = Color.yellow;
         GizmosExtensions.DrawWireCircle(transform.position, _pulseTriggerDistance);
         Gizmos.color = Color.red;

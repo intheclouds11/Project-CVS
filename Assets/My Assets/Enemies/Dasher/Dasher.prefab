@@ -52,8 +52,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6f6b3bdce688a04fbbdf8612d2c5eef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _wander: 0
-  _wanderRadius: 2
+  _wander: 1
+  _wanderRadius: 1
   _wanderRecoveryMaxDuration: 6
   _aggroRange: 7
   _alertDuration: 0.5
@@ -66,16 +66,18 @@ MonoBehaviour:
   _baseDamage: 1
   _damagePlayerKnockback:
     ApplyKnockback: 1
-    KnockbackAmount: 10
+    KnockbackAmount: 1
     KnockbackDuration: 0.25
     StunDuration: 0.25
     KnockbackEasing: 0
+    Direction: {x: 0, y: 0, z: 0}
   _damageEnemyKnockback:
     ApplyKnockback: 1
     KnockbackAmount: 1.5
     KnockbackDuration: 0.25
     StunDuration: 0.25
     KnockbackEasing: 6
+    Direction: {x: 0, y: 0, z: 0}
   _patrolSFX: {fileID: 8300000, guid: 8ba6493c6bbf4374cbee78f819a4a9d1, type: 3}
   _alertedSFX: {fileID: 8300000, guid: baa42a3793a623b42bc15d843bdbfd13, type: 3}
   _aggroSFX: {fileID: 8300000, guid: 9f7aa5ccf137dd040a14777f4acd51a1, type: 3}
@@ -426,6 +428,7 @@ GameObject:
   - component: {fileID: 4179917420607630649}
   - component: {fileID: 2615365224268007411}
   - component: {fileID: 2605901332690343405}
+  - component: {fileID: 2059070655785107129}
   m_Layer: 11
   m_Name: Body
   m_TagString: Untagged
@@ -521,9 +524,36 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 0
   serializedVersion: 5
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: 23263e90cb3de4546951088789e60e85, type: 2}
+--- !u!54 &2059070655785107129
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4795005575658005601}
+  serializedVersion: 4
+  m_Mass: 5
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &5197495410920218886
 GameObject:
   m_ObjectHideFlags: 0
@@ -536,6 +566,7 @@ GameObject:
   - component: {fileID: 4806905760433655018}
   - component: {fileID: 4710659263694308771}
   - component: {fileID: 632431539045125836}
+  - component: {fileID: 8391457778038516107}
   m_Layer: 11
   m_Name: Torus_Low
   m_TagString: Untagged
@@ -632,9 +663,36 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 0
   serializedVersion: 5
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
-  m_Mesh: {fileID: 4300000, guid: cc205010dff982e4ba4b8bfdf8864f8b, type: 2}
+  m_Mesh: {fileID: 4300000, guid: b1b8a566bb3415d439f1c64056e62887, type: 2}
+--- !u!54 &8391457778038516107
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5197495410920218886}
+  serializedVersion: 4
+  m_Mass: 3
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &6657639189504052790
 GameObject:
   m_ObjectHideFlags: 0
@@ -749,6 +807,7 @@ GameObject:
   - component: {fileID: 5717153642992258544}
   - component: {fileID: 7537898096208183642}
   - component: {fileID: 9075307826066139105}
+  - component: {fileID: 2421204922465390120}
   m_Layer: 11
   m_Name: Torus_Top
   m_TagString: Untagged
@@ -843,9 +902,36 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 0
   serializedVersion: 5
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: b1b8a566bb3415d439f1c64056e62887, type: 2}
+--- !u!54 &2421204922465390120
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6721308434544011368}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &8047315494904501463
 GameObject:
   m_ObjectHideFlags: 0
@@ -858,6 +944,7 @@ GameObject:
   - component: {fileID: 8765089127702865214}
   - component: {fileID: 8665367342980873524}
   - component: {fileID: 1274926463732072960}
+  - component: {fileID: 369675688972290495}
   m_Layer: 11
   m_Name: Torus_Mid
   m_TagString: Untagged
@@ -952,9 +1039,36 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 0
   serializedVersion: 5
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
-  m_Mesh: {fileID: 4300000, guid: d2a8c66086af71f4b85bd69f39a2b741, type: 2}
+  m_Mesh: {fileID: 4300000, guid: b1b8a566bb3415d439f1c64056e62887, type: 2}
+--- !u!54 &369675688972290495
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8047315494904501463}
+  serializedVersion: 4
+  m_Mass: 2
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &8558992194282641287
 GameObject:
   m_ObjectHideFlags: 0

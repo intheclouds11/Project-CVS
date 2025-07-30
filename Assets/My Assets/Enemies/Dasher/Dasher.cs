@@ -30,6 +30,7 @@ public class Dasher : BaseEnemy
     private float _lastDashTime;
     private bool _applyDashDamage;
     private AudioSource _dashingAudio;
+    private Coroutine _dashCoroutine;
 
 
     protected override void Update()
@@ -43,7 +44,7 @@ public class Dasher : BaseEnemy
         {
             if (CanDashReachPlayer(out var hitObj))
             {
-                StartCoroutine(DashCoroutine());
+                _dashCoroutine = StartCoroutine(DashCoroutine());
             }
         }
     }
@@ -73,7 +74,7 @@ public class Dasher : BaseEnemy
     private IEnumerator DashCoroutine()
     {
         _usingAbility = true;
-        if (_aiFollower) _aiFollower.canMove = false;
+        _aiFollower.canMove = false;
         float pitch = Random.Range(1.1f, 1.3f);
         if (_aggroAudio) _aggroAudio.Stop();
         _abilityStartAudio = AudioManager.Instance.PlaySound(transform, _abilityStartSFX, true, false, 0.55f, pitch);
@@ -96,6 +97,7 @@ public class Dasher : BaseEnemy
         _applyDashDamage = true;
         Health.Invincible = true;
         _abilityStartAudio.Stop();
+        bool interrupted = false;
 
         bool blocked = !CanDashReachPlayer(out var preHitObj, true);
         if (!blocked)
@@ -108,17 +110,12 @@ public class Dasher : BaseEnemy
             var targetPos = _player.transform.position + dir * 4f;
             float elapsedTime = 0f;
 
-            while (!blocked && startTime + _dashDuration >= Time.time)
+            while (!blocked && !interrupted && startTime + _dashDuration >= Time.time)
             {
                 if (_isInterruptable && IsGettingKnockedBack)
                 {
-                    _animator.SetBool("IsDashing", false);
-                    _usingAbility = false;
-                    Health.Invincible = false;
-                    _lastDashTime = Time.time;
-                    _applyDashDamage = false;
-                    _aggroAudio = AudioManager.Instance.PlaySoundLoop(transform, _aggroSFX, true, 1f, _aggroPitch);
-                    yield break;
+                    interrupted = true;
+                    continue;
                 }
 
                 if (elapsedTime >= _dashDuration * 0.8f)
@@ -133,16 +130,31 @@ public class Dasher : BaseEnemy
                 if (blocked)
                 {
                     Debug.Log($"Enemy ran into: {hitObj.name}", hitObj);
+                    _animator.SetBool("IsDashing", false);
+                    _dashingAudio.Stop();
                 }
 
                 elapsedTime += Time.deltaTime;
                 yield return null;
             }
         }
+        else
+        {
+            _animator.SetTrigger("CancelWindup");
+            _dashingAudio.Stop();
+        }
 
-        yield return new WaitForSeconds(_dashRecoveryDuration);
+        if (interrupted)
+        {
+            _animator.SetBool("IsDashing", false);
+        }
+        else
+        {
+            yield return new WaitForSeconds(_dashRecoveryDuration);
+            _aiFollower.canMove = true;
+        }
+
         _aggroAudio = AudioManager.Instance.PlaySoundLoop(transform, _aggroSFX, true, 1f, _aggroPitch);
-        _aiFollower.canMove = true;
         Health.Invincible = false;
         _applyDashDamage = false;
         _lastDashTime = Time.time;
@@ -152,29 +164,29 @@ public class Dasher : BaseEnemy
     protected override void OnTriggerEnter(Collider other)
     {
         base.OnTriggerEnter(other);
-        if (other.gameObject.CompareTag("Player"))
+        if (enabled && other.gameObject.CompareTag("Player"))
         {
             var playerHit = other.GetComponent<PlayerController>();
             if (playerHit)
             {
-                var knockBackDir = (playerHit.transform.position - transform.position).normalized;
                 var damage = _applyDashDamage ? _dashDamage : _baseDamage;
-                playerHit.Health.TakeDamage(damage, knockBackDir, _damagePlayerKnockback);
+                _damagePlayerKnockback.Direction = (playerHit.transform.position - transform.position).normalized;
+                playerHit.Health.TakeDamage(damage, _damagePlayerKnockback);
                 OnDamagedPlayer();
             }
         }
     }
 
-    protected override void OnDied(GameObject obj)
+    protected override void OnDied(Knockback knockback)
     {
-        base.OnDied(obj);
+        base.OnDied(knockback);
+        if (_dashCoroutine != null) StopCoroutine(_dashCoroutine);
     }
 
-    private void OnDrawGizmosSelected()
+    protected override void OnDrawGizmosSelected()
     {
+        base.OnDrawGizmosSelected();
         var gizmosColor = Gizmos.color;
-        Gizmos.color = Color.white;
-        GizmosExtensions.DrawWireCircle(transform.position, _aggroRange);
         Gizmos.color = Color.yellow;
         GizmosExtensions.DrawWireCircle(transform.position, _dashTriggerDistance);
         Gizmos.color = gizmosColor;

@@ -69,8 +69,8 @@ public class PulserProjectile : Projectile
                     var playerHit = _overlapColliders[0].GetComponentInParent<PlayerController>();
                     if (!playerHit.Health.IsInvincible() && !playerHit.IsDashing)
                     {
-                        var knockBackDir = (playerHit.transform.position - transform.position).normalized;
-                        playerHit.Health.TakeDamage(2, knockBackDir, _knockback);
+                        _knockback.Direction = (playerHit.transform.position - transform.position).normalized;
+                        playerHit.Health.TakeDamage(2, _knockback);
                         AudioManager.Instance.PlaySound(playerHit.transform, _pulseHitSFX, true, false, 0.9f);
                     }
                 }
@@ -78,7 +78,7 @@ public class PulserProjectile : Projectile
                 {
                     var bossHit = _overlapColliders[0].GetComponentInParent<FirstBossEncounter>();
                     var hitInvincible = bossHit.Health.Invincible;
-                    bossHit.Health.TakeDamage(_deflectedPulseDamage, Vector3.zero, null);
+                    bossHit.Health.TakeDamage(_deflectedPulseDamage, null);
                     ReturnToPool(true, hitInvincible);
                 }
             }
