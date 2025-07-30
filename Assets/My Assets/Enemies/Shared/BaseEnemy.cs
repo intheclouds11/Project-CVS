@@ -21,10 +21,11 @@ public abstract class BaseEnemy : MonoBehaviour
     private Transform _targetWanderPointHolder; // Empty GameObject used by AIDestinationSetter
 
     [SerializeField]
-    protected float _agroRange = 5f;
-    [FormerlySerializedAs("_moveSpeed")]
+    protected float _aggroRange = 5f;
     [SerializeField]
-    protected float _agroSpeed = 3.5f;
+    protected float _alertDuration = 0.5f;
+    [SerializeField]
+    protected float _aggroSpeed = 3.5f;
     [SerializeField]
     protected float _attackCooldownDuration = 0.25f;
     [SerializeField]
@@ -45,11 +46,17 @@ public abstract class BaseEnemy : MonoBehaviour
     [SerializeField]
     protected AudioClip _patrolSFX;
     [SerializeField]
-    protected AudioClip _agroSFX;
+    protected AudioClip _alertedSFX;
+    [SerializeField]
+    protected AudioClip _aggroSFX;
     [SerializeField]
     protected AudioClip _abilityStartSFX;
     [SerializeField]
     protected AudioClip _hitByKnockbackSFX;
+    [SerializeField]
+    protected GameObject _sleepBubble;
+    [SerializeField]
+    protected GameObject _alertIcon;
 
     public Health Health { get; protected set; }
     public bool IsAggroed { get; protected set; }
@@ -58,13 +65,15 @@ public abstract class BaseEnemy : MonoBehaviour
     public bool IsGettingKnockedBack { get; private set; }
     protected float _distToPlayer;
     protected bool _usingAbility;
-    protected float _agroPitch;
+    protected float _aggroPitch;
     protected Coroutine _knockbackCoroutine;
     protected Coroutine _damagedPlayerCoroutine;
     protected Coroutine _wanderCoroutine;
+    protected Coroutine _startAggroCoroutine;
     private readonly Collider[] _overlapColliders = new Collider[5];
     protected AudioSource _patrolAudio;
-    protected AudioSource _agroAudio;
+    protected AudioSource _alertedAudio;
+    protected AudioSource _aggroAudio;
     protected AudioSource _abilityStartAudio;
     protected PlayerController _player;
     protected FollowerEntity _aiFollower;
@@ -108,8 +117,10 @@ public abstract class BaseEnemy : MonoBehaviour
         t.transform.position = transform.position;
         _targetWanderPointHolder = t.transform;
         _destinationSetter.target = _targetWanderPointHolder;
-
-        _agroPitch = Random.Range(0.9f, 1.1f);
+        _sleepBubble.SetActive(!_wander);
+        
+        _aggroPitch = Random.Range(0.9f, 1.1f);
+        _alertIcon.SetActive(false);
     }
 
     private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
@@ -145,8 +156,16 @@ public abstract class BaseEnemy : MonoBehaviour
 
     protected virtual void Update()
     {
-        if (_wander && !IsAggroed)
+        _distToPlayer = GameManager.Instance.GetDistanceFromPlayer(transform);
+        
+        if (!IsAggroed && _wander)
         {
+            if (_distToPlayer <= _aggroRange && _startAggroCoroutine == null)
+            {
+                _animator.SetTrigger("Alerted");
+                _startAggroCoroutine = StartCoroutine(StartAggroCoroutine());
+            }
+
             if (_wanderCoroutine == null && _aiFollower.reachedDestination)
             {
                 _wanderCoroutine = StartCoroutine(SetWanderDestination());
@@ -185,16 +204,6 @@ public abstract class BaseEnemy : MonoBehaviour
         _wanderCoroutine = null;
     }
 
-    private void OnEnemyAIToggled(bool toggle)
-    {
-        _aiFollower.canMove = toggle;
-    }
-
-    protected virtual void OnPlayerSpawned(PlayerController player)
-    {
-        _player = player;
-    }
-
     protected bool IsOverlappingBlockedLayer(Vector3 p1, Vector3 p2, out GameObject overlapObj)
     {
         var overlapCount = Physics.OverlapCapsuleNonAlloc(p1, p2, _aiFollower.radius * 1.2f, _overlapColliders, _blockedLayers);
@@ -218,6 +227,8 @@ public abstract class BaseEnemy : MonoBehaviour
     {
         _aiFollower.canMove = false;
         IsGettingKnockedBack = true;
+        _animator.SetTrigger("HitReact");
+
         var prevAnimatorSpeed = _animator.speed;
         _animator.speed = 0.5f;
 
@@ -278,7 +289,16 @@ public abstract class BaseEnemy : MonoBehaviour
 
     protected virtual void OnDamageTaken(Vector3 knockbackDir, Knockback knockback)
     {
-        IsAggroed = true;
+        if (!IsAggroed && GameManager.Instance.EnemyAIEnabled)
+        {
+            if (_startAggroCoroutine != null)
+            {
+                StopCoroutine(_startAggroCoroutine);
+                _startAggroCoroutine = null;
+            }
+
+            Aggro();
+        }
 
         if (knockback == null || !knockback.ApplyKnockback || knockbackDir == Vector3.zero || knockback.KnockbackAmount <= 0) return;
 
@@ -294,6 +314,39 @@ public abstract class BaseEnemy : MonoBehaviour
         }
     }
 
+    protected IEnumerator StartAggroCoroutine()
+    {
+        _sleepBubble.SetActive(false);
+        _alertedAudio = AudioManager.Instance.PlaySound(transform, _alertedSFX, true, false, 0.55f);
+        _alertIcon.SetActive(true);
+        yield return new WaitForSeconds(_alertDuration);
+        Aggro();
+
+        _startAggroCoroutine = null;
+    }
+
+    protected void Aggro()
+    {
+        if (_alertedAudio)
+        {
+            _alertedAudio.Stop();
+            _alertedAudio = null;
+        }
+
+        _destinationSetter.target = _player.transform;
+        _destinationSetter.enabled = true;
+        _aiFollower.maxSpeed = _aggroSpeed;
+        _aiFollower.canMove = true;
+
+        _patrol.enabled = false;
+        if (_patrolAudio) _patrolAudio.Stop();
+        _patrolAudio = null;
+        _aggroAudio = AudioManager.Instance.PlaySoundLoop(transform, _aggroSFX, true, 1f, _aggroPitch);
+        _sleepBubble.SetActive(false);
+        _alertIcon.SetActive(false);
+        IsAggroed = true;
+    }
+
     protected virtual void OnDied(GameObject obj)
     {
         ClearLoopingAudio();
@@ -305,13 +358,23 @@ public abstract class BaseEnemy : MonoBehaviour
 
         gameObject.SetActive(false);
     }
+    
+    private void OnEnemyAIToggled(bool toggle)
+    {
+        _aiFollower.canMove = toggle;
+    }
+
+    protected virtual void OnPlayerSpawned(PlayerController player)
+    {
+        _player = player;
+    }
 
     private void ClearLoopingAudio()
     {
-        if (_agroAudio)
+        if (_aggroAudio)
         {
-            _agroAudio.Stop();
-            _agroAudio = null;
+            _aggroAudio.Stop();
+            _aggroAudio = null;
         }
 
         if (_patrolAudio)

@@ -15,47 +15,31 @@ public class Dasher : BaseEnemy
     [SerializeField]
     private float _dashTriggerDistance = 2.5f;
     [SerializeField]
+    private float _dashStartDelay = 0.5f;
+    [SerializeField]
     private float _dashSpeed = 6f;
     [SerializeField]
     private float _dashDuration = 0.5f;
-    [SerializeField]
-    private float _dashDelayDuration = 1f;
     [SerializeField]
     private float _dashRecoveryDuration = 0.35f;
     [SerializeField]
     private float _dashCooldownDuration = 1.5f;
     [SerializeField]
     private AudioClip _dashingSFX;
-    [SerializeField]
-    private AudioClip _interruptedSFX;
 
     private float _lastDashTime;
-    private bool _isDashing;
-    private bool _useDashDamage;
+    private bool _applyDashDamage;
+    private AudioSource _dashingAudio;
 
 
     protected override void Update()
     {
         base.Update();
-        _distToPlayer = GameManager.Instance.GetDistanceFromPlayer(transform);
 
-        if (!_aiFollower.canMove || !_player.Health.IsAlive()) return;
+        if (!IsAggroed || !GameManager.Instance.EnemyAIEnabled || _usingAbility || !_aiFollower.canMove ||
+            !_player.Health.IsAlive()) return;
 
-        if (!IsAggroed && _distToPlayer <= _agroRange)
-        {
-            IsAggroed = true;
-            _lastDashTime = Time.time;
-            _destinationSetter.target = _player.transform;
-            _destinationSetter.enabled = true;
-            _aiFollower.maxSpeed = _agroSpeed;
-            _aiFollower.canMove = true;
-
-            _patrol.enabled = false;
-            if (_patrolAudio) _patrolAudio.Stop();
-            _patrolAudio = null;
-            _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
-        }
-        else if (_distToPlayer <= _dashTriggerDistance && Time.time >= _lastDashTime + _dashCooldownDuration)
+        if (_distToPlayer <= _dashTriggerDistance && Time.time >= _lastDashTime + _dashCooldownDuration)
         {
             if (CanDashReachPlayer(out var hitObj))
             {
@@ -88,37 +72,36 @@ public class Dasher : BaseEnemy
 
     private IEnumerator DashCoroutine()
     {
-        _isDashing = true;
-        _lastDashTime = Time.time;
+        _usingAbility = true;
         if (_aiFollower) _aiFollower.canMove = false;
         float pitch = Random.Range(1.1f, 1.3f);
-        if (_agroAudio) _agroAudio.Stop();
+        if (_aggroAudio) _aggroAudio.Stop();
         _abilityStartAudio = AudioManager.Instance.PlaySound(transform, _abilityStartSFX, true, false, 0.55f, pitch);
-        _animator.SetTrigger("Alerted");
+        _animator.SetTrigger("DashWindup");
 
         var startTime = Time.time;
-        while (startTime + _dashDelayDuration >= Time.time)
+        while (startTime + _dashStartDelay >= Time.time)
         {
             if (_isInterruptable && IsGettingKnockedBack)
             {
-                _isDashing = false;
+                _usingAbility = false;
                 _lastDashTime = Time.time;
-                // pitch = Random.Range(0.9f, 1.1f);
-                // AudioManager.Instance.PlaySound(transform, _interruptedSFX, true, false, 0.9f, pitch);
-                _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
+                _aggroAudio = AudioManager.Instance.PlaySoundLoop(transform, _aggroSFX, true, 1f, _aggroPitch);
                 yield break;
             }
 
             yield return null;
         }
 
-        _useDashDamage = true;
+        _applyDashDamage = true;
         Health.Invincible = true;
+        _abilityStartAudio.Stop();
 
         bool blocked = !CanDashReachPlayer(out var preHitObj, true);
         if (!blocked)
         {
-            AudioManager.Instance.PlaySound(transform, _dashingSFX, true, false, 0.6f, pitch);
+            _animator.SetBool("IsDashing", true);
+            _dashingAudio = AudioManager.Instance.PlaySound(transform, _dashingSFX, true, false, 0.6f, pitch);
 
             startTime = Time.time;
             var dir = (_player.transform.position - transform.position).normalized;
@@ -127,16 +110,22 @@ public class Dasher : BaseEnemy
 
             while (!blocked && startTime + _dashDuration >= Time.time)
             {
-                if (elapsedTime >= _dashDuration * 0.8f) _useDashDamage = false;
-
                 if (_isInterruptable && IsGettingKnockedBack)
                 {
-                    _isDashing = false;
+                    _animator.SetBool("IsDashing", false);
+                    _usingAbility = false;
                     Health.Invincible = false;
                     _lastDashTime = Time.time;
-                    _useDashDamage = false;
-                    _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
+                    _applyDashDamage = false;
+                    _aggroAudio = AudioManager.Instance.PlaySoundLoop(transform, _aggroSFX, true, 1f, _aggroPitch);
                     yield break;
+                }
+
+                if (elapsedTime >= _dashDuration * 0.8f)
+                {
+                    _animator.SetBool("IsDashing", false);
+                    _applyDashDamage = false;
+                    Health.Invincible = false;
                 }
 
                 transform.position = Vector3.Lerp(transform.position, targetPos, _dashSpeed * Time.deltaTime);
@@ -152,11 +141,12 @@ public class Dasher : BaseEnemy
         }
 
         yield return new WaitForSeconds(_dashRecoveryDuration);
-        _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
+        _aggroAudio = AudioManager.Instance.PlaySoundLoop(transform, _aggroSFX, true, 1f, _aggroPitch);
         _aiFollower.canMove = true;
         Health.Invincible = false;
-        _useDashDamage = false;
-        _isDashing = false;
+        _applyDashDamage = false;
+        _lastDashTime = Time.time;
+        _usingAbility = false;
     }
 
     protected override void OnTriggerEnter(Collider other)
@@ -168,7 +158,7 @@ public class Dasher : BaseEnemy
             if (playerHit)
             {
                 var knockBackDir = (playerHit.transform.position - transform.position).normalized;
-                var damage = _useDashDamage ? _dashDamage : _baseDamage;
+                var damage = _applyDashDamage ? _dashDamage : _baseDamage;
                 playerHit.Health.TakeDamage(damage, knockBackDir, _damagePlayerKnockback);
                 OnDamagedPlayer();
             }
@@ -184,7 +174,7 @@ public class Dasher : BaseEnemy
     {
         var gizmosColor = Gizmos.color;
         Gizmos.color = Color.white;
-        GizmosExtensions.DrawWireCircle(transform.position, _agroRange);
+        GizmosExtensions.DrawWireCircle(transform.position, _aggroRange);
         Gizmos.color = Color.yellow;
         GizmosExtensions.DrawWireCircle(transform.position, _dashTriggerDistance);
         Gizmos.color = gizmosColor;

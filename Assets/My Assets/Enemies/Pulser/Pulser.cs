@@ -31,10 +31,13 @@ public class Pulser : BaseEnemy
     [SerializeField]
     private Animator _lightAnimator;
     [SerializeField]
+    private AudioClip _pulseAttackSFX;
+    [SerializeField]
     private AudioClip _pulseHitSFX;
 
     private float _lastPulseCompleteTime;
     private Vector3 _scaleTarget;
+    private AudioSource _pulseAttackAudio;
 
     protected override void Awake()
     {
@@ -48,25 +51,11 @@ public class Pulser : BaseEnemy
     protected override void Update()
     {
         base.Update();
-        _distToPlayer = GameManager.Instance.GetDistanceFromPlayer(transform);
 
-        if (_usingAbility || !_aiFollower.canMove || !_player.Health.IsAlive()) return;
+        if (!IsAggroed || !GameManager.Instance.EnemyAIEnabled || _usingAbility || !_aiFollower.canMove ||
+            !_player.Health.IsAlive()) return;
 
-        if (!IsAggroed && _distToPlayer <= _agroRange)
-        {
-            IsAggroed = true;
-            // _lastPulseCompleteTime = Time.time;
-            _destinationSetter.target = _player.transform;
-            _destinationSetter.enabled = true;
-            _aiFollower.maxSpeed = _agroSpeed;
-            _aiFollower.canMove = true;
-
-            _patrol.enabled = false;
-            if (_patrolAudio) _patrolAudio.Stop();
-            _patrolAudio = null;
-            _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
-        }
-        else if (_distToPlayer <= _pulseTriggerDistance && Time.time >= _lastPulseCompleteTime + _pulseCooldownDuration)
+        if (_distToPlayer <= _pulseTriggerDistance && Time.time >= _lastPulseCompleteTime + _pulseCooldownDuration)
         {
             StartCoroutine(PulseCoroutine());
         }
@@ -75,20 +64,24 @@ public class Pulser : BaseEnemy
     private IEnumerator PulseCoroutine()
     {
         _aiFollower.canMove = false;
+        Health.Invincible = true;
         _usingAbility = true;
         _pulseVFX.SetActive(false);
         _pulseVFX.SetActive(true);
         _lightAnimator.SetTrigger("Pulse");
-        _animator.SetTrigger("Alerted");
+        _animator.SetTrigger("PulseWindup");
 
-        if (_agroAudio) _agroAudio.Stop();
+        if (_aggroAudio) _aggroAudio.Stop();
         _abilityStartAudio = AudioManager.Instance.PlaySound(transform, _abilityStartSFX, true, false, 0.7f);
 
         if (_telegraphCoroutine != null) StopCoroutine(_telegraphCoroutine);
         _telegraphCoroutine = StartCoroutine(TelegraphIndicatorCoroutine());
 
-        Health.Invincible = true;
         yield return new WaitForSeconds(_pulseDelayDuration);
+
+        _animator.SetBool("IsPulsing", true);
+        _abilityStartAudio.Stop();
+        _pulseAttackAudio = AudioManager.Instance.PlaySound(transform, _pulseAttackSFX, true, false, 0.7f);
 
         var startTime = Time.time;
 
@@ -96,12 +89,12 @@ public class Pulser : BaseEnemy
         {
             if (_isInterruptable && IsGettingKnockedBack)
             {
+                _animator.SetBool("IsPulsing", false);
                 _usingAbility = false;
                 Health.Invincible = false;
                 _lastPulseCompleteTime = Time.time;
                 _pulseVFX.SetActive(false);
-                _abilityStartAudio.Stop();
-                _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
+                _aggroAudio = AudioManager.Instance.PlaySoundLoop(transform, _aggroSFX, true, 1f, _aggroPitch);
                 yield break;
             }
 
@@ -117,11 +110,12 @@ public class Pulser : BaseEnemy
             yield return null;
         }
 
+        _animator.SetBool("IsPulsing", false);
         _usingAbility = false;
         _lastPulseCompleteTime = Time.time;
         _aiFollower.canMove = true;
         Health.Invincible = false;
-        _agroAudio = AudioManager.Instance.PlaySoundLoop(transform, _agroSFX, true, 1f, _agroPitch);
+        _aggroAudio = AudioManager.Instance.PlaySoundLoop(transform, _aggroSFX, true, 1f, _aggroPitch);
     }
 
     protected override void OnTriggerEnter(Collider other)
@@ -164,7 +158,7 @@ public class Pulser : BaseEnemy
         }
 
 
-        yield return new WaitForSeconds(_pulseDuration);
+        // yield return new WaitForSeconds(_pulseDuration);
 
         startTime = Time.time;
         while (Time.time < startTime + _pulseDuration)
@@ -183,7 +177,7 @@ public class Pulser : BaseEnemy
     {
         var gizmosColor = Gizmos.color;
         Gizmos.color = Color.white;
-        GizmosExtensions.DrawWireCircle(transform.position, _agroRange);
+        GizmosExtensions.DrawWireCircle(transform.position, _aggroRange);
         Gizmos.color = Color.yellow;
         GizmosExtensions.DrawWireCircle(transform.position, _pulseTriggerDistance);
         Gizmos.color = Color.red;
