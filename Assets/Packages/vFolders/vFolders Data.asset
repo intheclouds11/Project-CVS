@@ -26,6 +26,7 @@ MonoBehaviour:
     - 90cfb36f2f10db34fa78d58033a68b44
     - 1e15d09ebfc631c429466735f164b80d
     - 566feb29e61a3b8499ace6a3196844f4
+    - 3d1b66fe40c674049996c169e9018b04
     values:
     - iconNameOrGuid: AudioSource Icon
       colorIndex: 0
@@ -73,6 +74,10 @@ MonoBehaviour:
       isColorRecursive: 1
     - iconNameOrGuid: 
       colorIndex: 4
+      isIconRecursive: 0
+      isColorRecursive: 1
+    - iconNameOrGuid: 
+      colorIndex: 5
       isIconRecursive: 0
       isColorRecursive: 1
   bookmarks:
