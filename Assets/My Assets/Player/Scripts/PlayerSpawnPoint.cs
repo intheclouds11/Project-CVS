@@ -7,7 +7,6 @@ using Unity.Cinemachine;
 using UnityEditor;
 #endif
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class PlayerSpawnPoint : MonoBehaviour
 {
@@ -16,13 +15,6 @@ public class PlayerSpawnPoint : MonoBehaviour
     [SerializeField]
     private Animator _animator;
 
-    private AudioSource _spawnAudio;
-
-
-    public void PlaySpawnAudio()
-    {
-        _spawnAudio.Play();
-    }
 
     public void Activate(bool reachedCheckpoint)
     {
@@ -58,6 +50,7 @@ public class PlayerSpawnPointEditor : Editor
     private void OnEnable()
     {
         _playerSpawnPoint = target as PlayerSpawnPoint;
+        _playerSpawnPoint.enabled = _playerSpawnPoint.name.Contains("Start");
         _wasDisabled = !_playerSpawnPoint.enabled;
 
         var notAUniqueName = FindObjectsByType<PlayerSpawnPoint>(FindObjectsSortMode.None).ToList()
@@ -80,23 +73,10 @@ public class PlayerSpawnPointEditor : Editor
             Debug.Log($"Saved SpawnPointName: {_playerSpawnPoint.name}");
         }
 
-        if (_wasDisabled && _playerSpawnPoint.enabled)
+        if (_wasDisabled && _playerSpawnPoint.enabled && !_playerSpawnPoint.name.Contains("Start"))
         {
-            _wasDisabled = false;
-
-            FindAnyObjectByType<CinemachineCamera>().Target.TrackingTarget = _playerSpawnPoint.transform;
-
-            var otherEnabledSpawnPoints = FindObjectsByType<PlayerSpawnPoint>(FindObjectsSortMode.None).ToList()
-                .Where(sp => sp != _playerSpawnPoint && sp.enabled);
-            foreach (var otherSpawnPoint in otherEnabledSpawnPoints)
-            {
-                otherSpawnPoint.enabled = false;
-                Debug.Log($"Disabled {otherSpawnPoint.name}", otherSpawnPoint);
-            }
-        }
-        else if (!_wasDisabled && !_playerSpawnPoint.enabled)
-        {
-            _wasDisabled = true;
+            _playerSpawnPoint.enabled = false;
+            Debug.Log("[PlayerSpawnPoint] Only PlayerSpawnPoint (Start) can be enabled.");
         }
     }
 }
