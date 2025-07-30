@@ -14,6 +14,12 @@ public class SettingsMenu : MonoBehaviour
     [SerializeField]
     private Slider _sfxVolumeSlider;
     [SerializeField]
+    private Button _lowQualityButton;
+    [SerializeField]
+    private Button _mediumQualityButton;
+    [SerializeField]
+    private Button _highQualityButton;
+    [SerializeField]
     private Toggle _fullscreenToggle;
 
     private bool _wasFullscreen;
@@ -37,11 +43,6 @@ public class SettingsMenu : MonoBehaviour
         _sfxVolumeSlider.onValueChanged.AddListener(OnSFXSliderChanged);
         _fullscreenToggle.onValueChanged.AddListener(FullscreenToggled);
 
-        if (PlayerPrefs.HasKey("Fullscreen"))
-        {
-            Screen.fullScreen = PlayerPrefs.GetInt("Fullscreen") == 1;
-        }
-
         _wasFullscreen = Screen.fullScreen;
     }
 
@@ -64,12 +65,25 @@ public class SettingsMenu : MonoBehaviour
         UIManager.Instance.ExitSettingsMenu(true);
     }
 
+    public void Button_SetHighQuality()
+    {
+        SettingsManager.SetQualitySetting(ITCQualitySetting.High);
+    }
+
+    public void Button_SetMediumQuality()
+    {
+        SettingsManager.SetQualitySetting(ITCQualitySetting.Medium);
+    }
+
+    public void Button_SetLowQuality()
+    {
+        SettingsManager.SetQualitySetting(ITCQualitySetting.Low);
+    }
+
     public void OnExitSettings()
     {
+        SettingsManager.SaveAudioPreferences(_musicVolumeSlider.value, _ambienceVolumeSlider.value, _sfxVolumeSlider.value);
         gameObject.SetActive(false);
-        PlayerPrefs.SetFloat("MusicVolume", _musicVolumeSlider.value);
-        PlayerPrefs.SetFloat("AmbienceVolume", _ambienceVolumeSlider.value);
-        PlayerPrefs.SetFloat("SFXVolume", _sfxVolumeSlider.value);
     }
 
     private void FullscreenToggled(bool toggle)

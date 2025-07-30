@@ -41,11 +41,6 @@ public class AudioManager : MonoBehaviour
         InitialMusicVolume = MusicAudioSource.volume;
     }
 
-    private void Start()
-    {
-        LoadAudioPreferences();
-    }
-
     private void Update()
     {
         if (InputManager.Instance.ToggleMusicWasPressed)
@@ -61,16 +56,6 @@ public class AudioManager : MonoBehaviour
                 PlayerPrefs.SetFloat("MusicVolume", 0f);
             }
         }
-    }
-
-    private void LoadAudioPreferences()
-    {
-        if (PlayerPrefs.HasKey("MusicVolume"))
-            SetMusicGroupGain(MyExtensions.VolumeToPerceptualDecibels(PlayerPrefs.GetFloat("MusicVolume")));
-        if (PlayerPrefs.HasKey("AmbienceVolume"))
-            SetAmbienceGroupGain(MyExtensions.VolumeToPerceptualDecibels(PlayerPrefs.GetFloat("AmbienceVolume")));
-        if (PlayerPrefs.HasKey("SFXVolume"))
-            SetSFXGroupGain(MyExtensions.VolumeToPerceptualDecibels(PlayerPrefs.GetFloat("SFXVolume")));
     }
 
     public void OnPlayerRespawned()

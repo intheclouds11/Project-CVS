@@ -39,4 +39,34 @@ public static class MyExtensions
         float db = 20f * Mathf.Log10(gain);
         return db;
     }
+    
+    public static Vector3 GetVector(this ITCAxis axis)
+    {
+        if (axis == ITCAxis.X)
+        {
+            return Vector3.right;
+        }
+
+        if (axis == ITCAxis.Y)
+        {
+            return Vector3.up;
+        }
+
+        if (axis == ITCAxis.Z)
+        {
+            return Vector3.forward;
+        }
+
+        if (axis == ITCAxis.NegX)
+        {
+            return -Vector3.right;
+        }
+
+        if (axis == ITCAxis.NegY)
+        {
+            return -Vector3.up;
+        }
+
+        return -Vector3.forward;
+    }
 }
