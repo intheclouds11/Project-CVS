@@ -1,25 +1,7 @@
 using System;
-using System.Collections;
-using DG.Tweening;
 using Unity.Cinemachine;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
-
-[Serializable]
-public class Knockback
-{
-    [SerializeField]
-    public bool ApplyKnockback = true;
-    [SerializeField]
-    public float KnockbackAmount = 1f;
-    [SerializeField]
-    public float KnockbackDuration = 0.25f;
-    [SerializeField]
-    public float StunDuration = 0.25f;
-    [SerializeField]
-    public Ease KnockbackEasing = Ease.InExpo;
-}
 
 public class SawBlade : MonoBehaviour
 {
@@ -99,7 +81,7 @@ public class SawBlade : MonoBehaviour
         _hasInitialized = true;
     }
 
-    private void OnDied(GameObject obj)
+    private void OnDied(Knockback knockback)
     {
         ResetToDefaultState();
     }
@@ -175,12 +157,13 @@ public class SawBlade : MonoBehaviour
                 {
                     hitInvincible = enemyHit.Health.Invincible;
                     DamageEnemyKnockback.KnockbackAmount = IsCritAttack ? _initialKnockbackAmount * 1.5f : _initialKnockbackAmount;
-                    enemyHit.Health.TakeDamage(_finalDamage, knockbackDir, DamageEnemyKnockback, IsCritAttack);
+                    DamageEnemyKnockback.Direction = knockbackDir;
+                    enemyHit.Health.TakeDamage(_finalDamage, DamageEnemyKnockback, IsCritAttack);
                 }
                 else
                 {
                     hitInvincible = bossHit.Health.Invincible;
-                    bossHit.Health.TakeDamage(_finalDamage, Vector3.zero, null);
+                    bossHit.Health.TakeDamage(_finalDamage, null);
                 }
 
                 HitEnemy?.Invoke(IsCritAttack);
@@ -230,6 +213,10 @@ public class SawBlade : MonoBehaviour
                 if (sfxHolder)
                 {
                     impactClip = sfxHolder.ImpactSFX;
+                }
+                else
+                {
+                    AudioManager.Instance.PlayInvincibleImpact(transform);
                 }
             }
             else

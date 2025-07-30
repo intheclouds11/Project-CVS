@@ -158,7 +158,7 @@ public class PlayerChargesManager : MonoBehaviour
         mr.material.color = endColor;
     }
 
-    public void OnDied(GameObject obj)
+    public void OnDied(Knockback knockback)
     {
         enabled = false;
         foreach (var charge in _charges)

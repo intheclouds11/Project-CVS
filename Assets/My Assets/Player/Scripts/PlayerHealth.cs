@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -8,6 +9,12 @@ using UnityEngine.Serialization;
 public class PlayerHealth : Health
 {
     [Header("Player Health")]
+    [SerializeField]
+    private float _autoHealDelay = 2f;
+    [SerializeField]
+    private float _autoRecoverHPVisualsDuration = 3f;
+    [SerializeField]
+    private float _recoverHPVisualsDuration = 1f;
     [SerializeField]
     private float _invincibilityDuration = 0.5f;
     [SerializeField]
@@ -35,6 +42,8 @@ public class PlayerHealth : Health
     private ColorAdjustments _colorAdjustments;
     private ChromaticAberration _chromaticAberration;
     private PlayerController _player;
+    private Coroutine _autoHealCoroutine;
+    private Coroutine _healthFXCoroutine;
 
 
     protected override void Awake()
@@ -62,6 +71,14 @@ public class PlayerHealth : Health
 
     private void Update()
     {
+        if (_autoHealCoroutine != null) return;
+
+        if (CurrentHealth < _maxHealth && !IsInvincible() && !EnemyManager.Instance.AnyAggroedEnemies())
+        {
+            _autoHealCoroutine = StartCoroutine(AutoHealCoroutine());
+            return;
+        }
+
         if (IsInvincible())
         {
             _wasInvincible = true;
@@ -77,6 +94,13 @@ public class PlayerHealth : Health
         }
     }
 
+    private IEnumerator AutoHealCoroutine()
+    {
+        yield return new WaitForSeconds(_autoHealDelay);
+        RecoverHP(1, true);
+        _autoHealCoroutine = null;
+    }
+
     // todo: better way to retain reference to scene Volume?
     private void OnSceneLoaded(Scene loadedScene, LoadSceneMode arg1)
     {
@@ -87,7 +111,7 @@ public class PlayerHealth : Health
         _globalVolume.profile.TryGet(out _chromaticAberration);
     }
 
-    public override void TakeDamage(int damage, Vector3 knockbackDir, Knockback knockback, bool wasCritAttack = false)
+    public override void TakeDamage(int damage, Knockback knockback, bool wasCritAttack = false)
     {
         if (GameManager.Instance.CurrentState is GameManager.GameState.Victory
             or GameManager.GameState.AwaitingWave or GameManager.GameState.GameOver) return;
@@ -102,39 +126,67 @@ public class PlayerHealth : Health
 
         if (CurrentHealth > 0)
         {
-            OnDamaged(knockbackDir, knockback);
+            OnDamaged(knockback);
         }
         else
         {
-            OnDied();
+            OnDied(knockback);
         }
 
         _lastDamageTime = Time.time;
     }
 
-    protected override void OnDamaged(Vector3 knockbackDir, Knockback knockback)
+    protected override void OnDamaged(Knockback knockback)
     {
-        base.OnDamaged(knockbackDir, knockback);
+        base.OnDamaged(knockback);
         _player.FlashMeshRenderers(_invincibilityDuration, _invincibilityFlashRate);
         _player.TogglePlayerTriggerCollider(false);
 
-        _vignette.intensity.value = _damagedVignetteIntensity;
-        _colorAdjustments.saturation.value = _damagedSaturation;
-        _chromaticAberration.intensity.value = _damagedAberration;
+        if (_healthFXCoroutine != null) StopCoroutine(_healthFXCoroutine);
+        StartCoroutine(HealthFXCoroutine(false));
     }
 
-    public void RecoverHP(int amount)
+    private IEnumerator HealthFXCoroutine(bool recoveredHP, bool wasAutoHeal = false)
     {
-        if (Mathf.Approximately(_vignette.intensity.value, _startingVignetteIntensity)) return;
+        var targetVignette = recoveredHP ? _startingVignetteIntensity : _damagedVignetteIntensity;
+        var targetSaturation = recoveredHP ? _startingSaturation : _damagedSaturation;
+        var targetAberration = recoveredHP ? _startingChromaticAberration : _damagedAberration;
+        var timeElapsed = 0f;
+        var duration = wasAutoHeal ? _autoRecoverHPVisualsDuration : _recoverHPVisualsDuration;
+
+        while (timeElapsed < duration)
+        {
+            timeElapsed += Time.deltaTime;
+            _vignette.intensity.value = Mathf.Lerp(_vignette.intensity.value, targetVignette, timeElapsed / duration);
+            _colorAdjustments.saturation.value = Mathf.Lerp(_colorAdjustments.saturation.value, targetSaturation,
+                timeElapsed / duration);
+            _chromaticAberration.intensity.value = Mathf.Lerp(_chromaticAberration.intensity.value, targetAberration,
+                timeElapsed / duration);
+            yield return null;
+        }
+
+        _vignette.intensity.value = targetVignette;
+        _colorAdjustments.saturation.value = targetSaturation;
+        _chromaticAberration.intensity.value = targetAberration;
+
+        _healthFXCoroutine = null;
+    }
+
+    public void RecoverHP(int amount, bool wasAutoHeal = false)
+    {
+        if (CurrentHealth >= _maxHealth) return;
+
+        if (_healthFXCoroutine != null) StopCoroutine(_healthFXCoroutine);
+        StartCoroutine(HealthFXCoroutine(true, wasAutoHeal));
 
         var newHealth = CurrentHealth + amount;
         CurrentHealth = newHealth > _maxHealth ? _maxHealth : newHealth;
-        _vignette.intensity.value = _startingVignetteIntensity;
-        _colorAdjustments.saturation.value = _startingSaturation;
-        _chromaticAberration.intensity.value = _startingChromaticAberration;
 
         AudioManager.Instance.AdjustMasterLowPass(22000f, _damagedLowPassAdjustDuration);
-        AudioManager.Instance.PlaySound(transform, _recoverHealthSFX, true, false, _damagedSFXVolume);
+        if (!wasAutoHeal)
+        {
+            AudioManager.Instance.PlaySound(transform, _recoverHealthSFX, true, false, _damagedSFXVolume);
+        }
     }
 
     public bool IsInvincible()

@@ -80,6 +80,8 @@ public class InputManager : MonoBehaviour
     private IEnumerator GiveControlCoroutine()
     {
         yield return new WaitForSeconds(_inputsEnabledDelay);
+        
+        GameManager.Instance.Player1.OnPlayerGivenControl();
 
         WaitingToGivePlayerControl = false;
 
@@ -131,6 +133,10 @@ public class InputManager : MonoBehaviour
             AttackWasReleased = PrevAttackHeld && Direction.magnitude <= AimReleaseThreshold;
             RespawnWasPressed = InteractWasPressed;
             GamepadEastButtonWasPressed = _inputs.UI.Back.WasPerformedThisFrame();
+            ActivateExpressionUpWasPressed = _inputs.Player.ActivateExpressionUp.WasPerformedThisFrame();
+            ActivateExpressionDownWasPressed = _inputs.Player.ActivateExpressionDown.WasPerformedThisFrame();
+            ActivateExpressionLeftWasPressed = _inputs.Player.ActivateExpressionLeft.WasPerformedThisFrame();
+            ActivateExpressionRightWasPressed = _inputs.Player.ActivateExpressionRight.WasPerformedThisFrame();
         }
         else
         {
@@ -162,6 +168,11 @@ public class InputManager : MonoBehaviour
     public bool IsMovementActive()
     {
         return Translation.magnitude >= MovementDeadzone;
+    }
+
+    public Vector3 GetTranslation()
+    {
+        return Translation.magnitude > MovementDeadzone ? new Vector3(Translation.x, 0f, Translation.y) : Vector3.zero;
     }
 
     public void Vibrate(float lowFreq, float highFreq, float duration)

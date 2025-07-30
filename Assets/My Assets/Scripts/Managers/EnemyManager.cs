@@ -9,7 +9,7 @@ public class EnemyManager : MonoBehaviour
     public static EnemyManager Instance;
     public static event Action AllEnemiesCleared;
 
-    private List<BaseEnemy> _activeEnemies = new();
+    public List<BaseEnemy> _activeEnemies { get; private set; } = new();
 
 
     private void Awake()
@@ -22,7 +22,6 @@ public class EnemyManager : MonoBehaviour
         if (!_activeEnemies.Contains(enemy))
         {
             _activeEnemies.Add(enemy);
-            enemy.Health.Died += OnEnemyDied;
         }
     }
 
@@ -31,37 +30,16 @@ public class EnemyManager : MonoBehaviour
         if (_activeEnemies.Contains(enemy))
         {
             _activeEnemies.Remove(enemy);
-            enemy.Health.Died -= OnEnemyDied;
         }
     }
 
     public void DeregisterAllEnemies()
     {
-        foreach (var activeEnemy in _activeEnemies)
-        {
-            activeEnemy.Health.Died -= OnEnemyDied;
-        }
-
         _activeEnemies.Clear();
     }
 
-    private void OnEnemyDied(GameObject deadEnemy)
+    public bool AnyAggroedEnemies()
     {
-        bool clearedAllEnemies = true;
-        foreach (var enemy in _activeEnemies)
-        {
-            if (enemy.Health.IsAlive())
-            {
-                clearedAllEnemies = false;
-                break;
-            }
-        }
-
-        DeregisterEnemy(deadEnemy.GetComponent<BaseEnemy>());
-
-        if (clearedAllEnemies)
-        {
-            AllEnemiesCleared?.Invoke();
-        }
+        return _activeEnemies.Any(activeEnemy => activeEnemy.IsAggroed);
     }
 }

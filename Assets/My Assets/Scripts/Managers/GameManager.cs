@@ -108,7 +108,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void OnPlayerDied(GameObject deadObj)
+    private void OnPlayerDied(Knockback knockback)
     {
         CurrentState = GameState.GameOver;
         UIManager.Instance.ToggleRespawnScreen(true);

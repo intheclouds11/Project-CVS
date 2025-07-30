@@ -9,7 +9,7 @@ public static class MyExtensions
         p1 = centerWorldPos + Vector3.up * cylinderLength;
         p2 = centerWorldPos - Vector3.up * cylinderLength;
     }
-    
+
     public static float PerceptualDecibelsToVolume(float dbValue, float minDb = -80f)
     {
         dbValue = Mathf.Clamp(dbValue, minDb, 0f);
@@ -24,7 +24,7 @@ public static class MyExtensions
         float volume = Mathf.InverseLerp(minGain, 1f, gain);
         return volume;
     }
-    
+
     public static float VolumeToPerceptualDecibels(float volume, float minDb = -80f)
     {
         volume = Mathf.Clamp01(volume);
@@ -39,7 +39,12 @@ public static class MyExtensions
         float db = 20f * Mathf.Log10(gain);
         return db;
     }
-    
+
+    public static Vector3 RemovePitch(this Vector3 direction)
+    {
+        return new Vector3(direction.x, 0f, direction.z).normalized;
+    }
+
     public static Vector3 GetVector(this ITCAxis axis)
     {
         if (axis == ITCAxis.X)

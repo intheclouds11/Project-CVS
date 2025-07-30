@@ -106,6 +106,8 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
+        // _playerAnimator.SetSpawning(true, false);
+        
         if (!gameObject.scene.name.Equals("DontDestroyOnLoad"))
         {
             Debug.LogError($"Player is a scene object in scene: {gameObject.scene.name}");
@@ -145,7 +147,7 @@ public class PlayerController : MonoBehaviour
 
     private void CheckInputs()
     {
-        _movementVector = new Vector3(_inputManager.Translation.x, 0f, _inputManager.Translation.y);
+        _movementVector = InputManager.Instance.GetTranslation();
 
         if (_inputManager.DashWasPressed && PlayerCharges.IsChargeAvailable())
         {
@@ -226,7 +228,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (PlayerAttack.State == PlayerAttack.AttackState.Idle)
+        if (PlayerAttack.State == PlayerAttack.AttackState.Idle && !_applyingKnockback)
         {
             if (_inputManager.IsMovementActive() && !_inputManager.AttackHeld)
             {
@@ -323,24 +325,28 @@ public class PlayerController : MonoBehaviour
         _lastAttackTime = Time.time;
         if (!attackKnockback.ApplyKnockback) return;
 
+        attackKnockback.Direction = -RotationTransform.forward;
         if (_knockbackCoroutine != null) StopCoroutine(_knockbackCoroutine);
-        Vector3 knockbackDir = -RotationTransform.forward;
-        _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(knockbackDir, attackKnockback));
+        _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(attackKnockback));
     }
 
-    private IEnumerator KnockbackCoroutine(Vector3 dir, Knockback knockback)
+    private IEnumerator KnockbackCoroutine(Knockback knockback)
     {
-        // Debug.Log($"Start Knockback. Amount: {knockbackAmount}, Dir: {dir}, Duration: {knockbackDuration}");
         _applyingKnockback = true;
 
-        while (_knockbackTimeElapsed < knockback.KnockbackDuration && Health.IsAlive())
+        while (_knockbackTimeElapsed < knockback.KnockbackDuration)
         {
             var t = _knockbackTimeElapsed / knockback.KnockbackDuration;
             var curveValue = _knockBackCurve.Evaluate(t);
-            var move = dir * (curveValue * knockback.KnockbackAmount * Time.deltaTime);
+            var move = knockback.Direction.RemovePitch() * (curveValue * knockback.KnockbackAmount * Time.deltaTime);
             CharacterController.Move(move);
             _knockbackTimeElapsed += Time.deltaTime;
             yield return null;
+        }
+
+        if (!Health.IsAlive())
+        {
+            CharacterController.enabled = false;
         }
 
         _knockbackTimeElapsed = 0f;
@@ -348,36 +354,46 @@ public class PlayerController : MonoBehaviour
         _knockbackCoroutine = null;
     }
 
-    private void OnDamageTaken(Vector3 knockbackDir, Knockback damagedKnockback)
+    private void OnDamageTaken(Knockback damagedKnockback)
     {
-        _playerAnimator.SetSpeed(0f);
-        //todo: damage knockback animation
-
-        if (damagedKnockback == null || knockbackDir == Vector3.zero || damagedKnockback.KnockbackAmount <= 0) return;
+        if (damagedKnockback == null || damagedKnockback.Direction == Vector3.zero || damagedKnockback.KnockbackAmount <= 0) return;
+        
+        if (Health.IsAlive())
+        {
+            _playerAnimator.SetHitReactTrigger();
+        }
 
         if (_knockbackCoroutine != null) StopCoroutine(_knockbackCoroutine);
-        _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(knockbackDir, damagedKnockback));
+        _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(damagedKnockback));
     }
 
-    private void OnDied(GameObject deadObj)
+    private void OnDied(Knockback knockback)
     {
         _dashBufferTimer = 0f;
-        CharacterController.enabled = false;
+        if (_knockbackCoroutine == null)
+        {
+            CharacterController.enabled = false;
+        }
+
         TogglePlayerTriggerCollider(false);
         PlayerAttack.OnDied();
-        _playerAnimator.SetSpeed(0f);
-        _playerAnimator.SetDiedTrigger();
+        _playerAnimator.SetDeathTrigger();
         StartCoroutine(DiedCoroutine());
     }
 
     private IEnumerator DiedCoroutine()
     {
         yield return new WaitForSeconds(_deathDelay);
-        FadeMeshRenderers(false, 0.25f);
+        FadeMeshRenderers(false, 1f);
     }
 
     public void Respawn(PlayerSpawnPoint spawnPoint)
     {
+        _playerAnimator.Animator.Rebind();
+        _playerAnimator.Animator.Update(0f);
+        
+        // _playerAnimator.SetSpawning(true, false);
+        
         transform.position = spawnPoint.transform.position;
         RotationTransform.rotation = spawnPoint.transform.rotation;
         FadeMeshRenderers(true, 0.5f);
@@ -387,6 +403,11 @@ public class PlayerController : MonoBehaviour
         AudioManager.Instance.OnPlayerRespawned();
         CharacterController.enabled = true;
         TogglePlayerTriggerCollider(true);
+    }
+
+    public void OnPlayerGivenControl()
+    {
+        // _playerAnimator.SetSpawning(false, false);
     }
 
     public void TogglePlayerTriggerCollider(bool toggle)

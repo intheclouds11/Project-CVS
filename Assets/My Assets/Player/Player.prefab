@@ -5731,7 +5731,7 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: -0.005470991
-      value: 1.0894318
+      value: 11.089432
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -5739,14 +5739,14 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 0.2141135
-      value: 0.45867544
+      time: 0.20779637
+      value: 3.913559
       inSlope: Infinity
-      outSlope: -0.88875633
+      outSlope: -19.425268
       tangentMode: 1
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.1496399
+      outWeight: 0.08162194
     - serializedVersion: 3
       time: 0.80279356
       value: 0.20764402
@@ -5808,12 +5808,13 @@ MonoBehaviour:
   _attackRate: 0.4
   _attackKnockback:
     ApplyKnockback: 1
-    KnockbackAmount: 1
+    KnockbackAmount: 0.1
     KnockbackDuration: 0.2
     StunDuration: 0.25
     KnockbackEasing: 17
-  _playerBasicKnockbackAmount: -1.5
-  _playerCritKnockbackAmount: -5
+    Direction: {x: 0, y: 0, z: 0}
+  _playerBasicKnockbackAmount: -0.15
+  _playerCritKnockbackAmount: -0.5
   _critChargeTime: 0.4
   _critGraceTime: 0.05
   _sawBlade: {fileID: 5854928001078484491}
@@ -5847,6 +5848,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _currentHealth: 0
   _maxHealth: 2
+  Invincible: 0
   _damagedSFX: {fileID: 8300000, guid: 2ed2f6512ba88044b8ec7b2f9e049cfd, type: 3}
   _damagedSFXVolume: 0.8
   _recoverHealthSFX: {fileID: 8300000, guid: 9a4f2950b30176443afcc3f35a409d6c, type: 3}
@@ -5854,12 +5856,14 @@ MonoBehaviour:
   _diedSFXVolume: 0.65
   _diedSFXPitch: 1
   _diedVFX: {fileID: 9049631545069152736, guid: e2d4687b86076744fbdd2aa6777e932f, type: 3}
+  _diedVFXDelay: 0
   _invincibilityDuration: 0.75
   _invincibilityFlashRate: 20
   _damagedVignetteIntensity: 0.45
   _damagedLowPassFreq: 3000
   _damagedLowPassAdjustDuration: 2
   _damagedSaturation: -40
+  _damagedAberration: 1
 --- !u!114 &4469519121344481290
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7868,7 +7872,15 @@ Animator:
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
-  m_WarningMessage: 
+  m_WarningMessage: "\nBinding warning: Some generic clip(s) animate transforms that
+    are already bound by a Humanoid avatar. These transforms can only be changed
+    by Humanoid clips.\n\tTransform 'mixamorig:Hips'\n\tTransform 'mixamorig:LeftFoot'\n\tTransform
+    'mixamorig:LeftHandThumb2'\n\tTransform 'mixamorig:LeftHandIndex1'\n\tTransform
+    'mixamorig:LeftHandPinky2'\n\tTransform 'mixamorig:RightHandRing2'\n\tTransform
+    'mixamorig:Spine1'\n\tTransform 'mixamorig:LeftToeBase'\n\tTransform 'mixamorig:LeftHandThumb3'\n\tTransform
+    'mixamorig:RightArm'\n\tand more ...\n\tFrom animation clip 'Silly Dancing'\n\tFrom
+    animation clip 'Salsa Dancing'\n\tFrom animation clip 'Hip Hop Dancing'\n\tFrom
+    animation clip 'Hurricane Kick'"
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0

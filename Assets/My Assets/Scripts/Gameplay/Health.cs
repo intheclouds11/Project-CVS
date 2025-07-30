@@ -42,8 +42,8 @@ public class Health : MonoBehaviour
         protected set => _currentHealth = value;
     }
 
-    public event Action<Vector3, Knockback> DamageTaken;
-    public event Action<GameObject> Died;
+    public event Action<Knockback> DamageTaken;
+    public event Action<Knockback> Died;
 
 
     protected virtual void Awake()
@@ -56,7 +56,7 @@ public class Health : MonoBehaviour
         return CurrentHealth > 0;
     }
 
-    public virtual void TakeDamage(int damage, Vector3 knockbackDir, Knockback knockback, bool wasCritAttack = false)
+    public virtual void TakeDamage(int damage, Knockback knockback, bool wasCritAttack = false)
     {
         if (GameManager.Instance.CurrentState is GameManager.GameState.Victory
             or GameManager.GameState.AwaitingWave or GameManager.GameState.GameOver) return;
@@ -64,7 +64,7 @@ public class Health : MonoBehaviour
 
         if (Invincible && !wasCritAttack)
         {
-            OnDamaged(knockbackDir, knockback);
+            OnDamaged(knockback);
             return;
         }
 
@@ -73,15 +73,15 @@ public class Health : MonoBehaviour
 
         if (CurrentHealth > 0)
         {
-            OnDamaged(knockbackDir, knockback);
+            OnDamaged(knockback);
         }
         else
         {
-            OnDied();
+            OnDied(knockback);
         }
     }
 
-    protected virtual void OnDamaged(Vector3 knockbackDir, Knockback knockback)
+    protected virtual void OnDamaged(Knockback knockback)
     {
         if (Invincible)
         {
@@ -92,11 +92,11 @@ public class Health : MonoBehaviour
             float pitch = Random.Range(0.9f, 1f);
             AudioManager.Instance.PlaySound(transform, _damagedSFX, true, false, _damagedSFXVolume, pitch);
         }
-
-        DamageTaken?.Invoke(knockbackDir, knockback);
+        
+        DamageTaken?.Invoke(knockback);
     }
 
-    protected virtual void OnDied()
+    protected virtual void OnDied( Knockback knockback)
     {
         AudioManager.Instance.PlaySound(transform, _diedSFX, true, false, _diedSFXVolume, _diedSFXPitch);
         if (_diedVFX)
@@ -104,7 +104,8 @@ public class Health : MonoBehaviour
             Invoke(nameof(StartDeathVFX), _diedVFXDelay);
         }
 
-        Died?.Invoke(gameObject);
+        DamageTaken?.Invoke(knockback);
+        Died?.Invoke(knockback);
     }
 
     private void StartDeathVFX()
